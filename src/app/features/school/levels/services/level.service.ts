@@ -1,0 +1,3 @@
+import {inject,Injectable} from '@angular/core';import {HttpClient} from '@angular/common/http';import {Observable} from 'rxjs';import {API_CONFIG} from '../../../../core/api.config';import {Level,LevelRequest} from '../models/level.model';
+@Injectable({providedIn:'root'}) export class LevelService{private http=inject(HttpClient);private url=`${API_CONFIG.baseUrl}/levels`;getAll():Observable<Level[]>{return this.http.get<Level[]>(this.url)} create(r:LevelRequest){return this.http.post<Level>(this.url,r)} update(id:number,r:LevelRequest){return this.http.put<Level>(`${this.url}/${id}`,r)}
+}

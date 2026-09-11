@@ -1,0 +1,29 @@
+<div class="finance-page">
+  <div class="page-head"><div><div class="eyebrow">Finance</div><h1>Paiements & Caisse</h1><div class="muted">Suivi des créances, encaissements, familles, retards et caisse.</div></div><div class="field" style="max-width:260px"><label>Année scolaire</label><select [(ngModel)]="schoolYearId" (ngModelChange)="loadDashboard()">@for(y of schoolYears();track y.id){<option [ngValue]="y.id">{{y.label}}</option>}</select></div></div>
+  @if(error()){<div class="alert alert-error">{{error()}}</div>}
+  @if(dashboard();as d){
+    <div class="grid-4">
+      <div class="stat"><div class="muted">Total facturé</div><div class="value">{{d.totalCharged|number:'1.2-2'}}</div></div>
+      <div class="stat"><div class="muted">Total encaissé</div><div class="value success-text">{{d.totalCollected|number:'1.2-2'}}</div></div>
+      <div class="stat"><div class="muted">Reste à recouvrer</div><div class="value">{{d.totalRemaining|number:'1.2-2'}}</div></div>
+      <div class="stat"><div class="muted">Montant en retard</div><div class="value danger-text">{{d.overdueAmount|number:'1.2-2'}}</div><div class="sub">{{d.overdueChargeCount}} créance(s)</div></div>
+    </div>
+    <div class="grid-4">
+      <div class="stat"><div class="muted">À payer</div><div class="value">{{d.dueChargeCount}}</div></div>
+      <div class="stat"><div class="muted">Paiements partiels</div><div class="value">{{d.partiallyPaidChargeCount}}</div></div>
+      <div class="stat"><div class="muted">Créances payées</div><div class="value">{{d.paidChargeCount}}</div></div>
+      <div class="stat"><div class="muted">Avoirs disponibles</div><div class="value">{{d.availableFamilyCredit|number:'1.2-2'}}</div></div>
+    </div>
+  }
+  <div class="grid-3">
+    <a class="card quick-card" routerLink="/finance/situations"><i class="bi bi-people"></i><h2>Situation familles</h2><div class="muted">Payé, reste à payer, retards et détail par enfant.</div></a>
+    <a class="card quick-card" routerLink="/finance/overdue"><i class="bi bi-exclamation-triangle"></i><h2>Impayés & retards</h2><div class="muted">Suivre les échéances dépassées et les restes dus.</div></a>
+    <a class="card quick-card" routerLink="/finance/installments"><i class="bi bi-calendar2-plus"></i><h2>Mensualités</h2><div class="muted">Générer les échéanciers de scolarité depuis les tarifs.</div></a>
+    <a class="card quick-card" routerLink="/finance/charges"><i class="bi bi-receipt"></i><h2>Créances</h2><div class="muted">Consulter les frais dus par dossier ou scolarisation.</div></a>
+    <a class="card quick-card" routerLink="/finance/payments"><i class="bi bi-cash-coin"></i><h2>Paiements</h2><div class="muted">Encaisser, ventiler et consulter les règlements.</div></a>
+    <a class="card quick-card" routerLink="/finance/cash"><i class="bi bi-safe2"></i><h2>Caisse</h2><div class="muted">Session active, mouvements et historique des sessions.</div></a>
+    <a class="card quick-card" routerLink="/finance/tariffs"><i class="bi bi-tags"></i><h2>Tarifs</h2><div class="muted">Grilles tarifaires par année, niveau, classe ou campus.</div></a>
+    <a class="card quick-card" routerLink="/finance/credits"><i class="bi bi-wallet2"></i><h2>Avoirs familles</h2><div class="muted">Consulter et utiliser les trop-perçus disponibles.</div></a>
+    <a class="card quick-card" routerLink="/finance/settings"><i class="bi bi-sliders"></i><h2>Paramétrage</h2><div class="muted">Modes de paiement et référentiels Finance.</div></a>
+  </div>
+</div>

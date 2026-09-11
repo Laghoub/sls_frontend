@@ -1,0 +1,1 @@
+export interface Level{id:number;cycleId:number;cycleName?:string;code:string;name:string;displayOrder:number;active:boolean} export type LevelRequest=Omit<Level,'id'|'cycleName'>;

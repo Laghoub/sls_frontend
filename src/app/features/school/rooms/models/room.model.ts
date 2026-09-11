@@ -1,0 +1,1 @@
+export interface Room{id:number;campusId:number;campusName?:string;code:string;name:string;capacity?:number|null;roomType?:string|null;active:boolean} export type RoomRequest=Omit<Room,'id'|'campusName'>;

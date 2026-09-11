@@ -1,0 +1,18 @@
+<div class="finance-page">
+  <div class="page-head"><div><div class="eyebrow">Familles</div><h1>Avoirs familles</h1><div class="muted">Consulter les trop-perçus et les utiliser sur une créance encore due.</div></div></div>
+  @if(error()){<div class="alert alert-error">{{error()}}</div>}@if(success()){<div class="alert alert-success">{{success()}}</div>}
+  <div class="card"><div class="toolbar"><div class="field"><label>Année scolaire</label><select [(ngModel)]="schoolYearId" (ngModelChange)="loadSituation()">@for(y of schoolYears();track y.id){<option [ngValue]="y.id">{{y.label}}</option>}</select></div><div class="field"><label>Responsable</label><input [(ngModel)]="search" (keyup.enter)="searchGuardians()" placeholder="Nom, prénom, téléphone..."></div><button class="btn btn-soft" (click)="searchGuardians()">Rechercher</button></div>
+  @if(guardians().length){<div class="search-results">@for(g of guardians();track g.id){<div class="search-row"><div><div class="name">{{g.person?.lastName}} {{g.person?.firstName}}</div><div class="sub">{{g.person?.phone}} · {{g.person?.email}}</div></div><button class="btn btn-soft" (click)="choose(g)">Choisir</button></div>}</div>}
+  @if(selected();as g){<div class="alert alert-success" style="margin-top:12px">Responsable : <b>{{g.person?.lastName}} {{g.person?.firstName}}</b>@if(situation();as st){ · Avoir disponible famille : <b>{{st.availableCredit|number:'1.2-2'}}</b>}</div>}</div>
+
+  <div class="card"><div class="table-wrap"><table class="data-table"><thead><tr><th>Créé le</th><th>Montant initial</th><th>Reste</th><th>Statut</th><th></th></tr></thead><tbody>
+  @for(x of items();track x.id){<tr><td>{{x.createdAt|date:'dd/MM/yyyy HH:mm'}}</td><td>{{x.initialAmount|number:'1.2-2'}}</td><td class="money">{{x.remainingAmount|number:'1.2-2'}}</td><td><span class="badge {{x.status}}">{{x.status}}</span></td><td>@if(x.remainingAmount>0){<button class="btn btn-primary" (click)="openApply(x)">Utiliser</button>}</td></tr>}
+  @if(!items().length){<tr><td colspan="5"><div class="empty">{{selected()?'Aucun avoir disponible.':'Sélectionnez un responsable.'}}</div></td></tr>}</tbody></table></div>
+  <div class="pagination"><span class="muted">{{total()}} avoir(s)</span><div class="actions"><button class="page-btn" (click)="prev()" [disabled]="page()===0">Précédent</button><button class="page-btn" (click)="next()" [disabled]="page()+1>=pages()">Suivant</button></div></div></div>
+
+  @if(applyModal()){<div class="modal-backdrop"><div class="modal"><h2>Utiliser l'avoir</h2>@if(selectedCredit();as c){<div class="alert alert-success">Disponible sur cet avoir : <b>{{c.remainingAmount|number:'1.2-2'}}</b></div>}
+  <div class="field"><label>Créance à régler *</label><select [(ngModel)]="chargeId"><option [ngValue]="null">Sélectionner...</option>@for(c of outstandingCharges();track c.chargeId){<option [ngValue]="c.chargeId">#{{c.chargeId}} · {{c.label}} · reste {{c.remainingAmount|number:'1.2-2'}}</option>}</select></div>
+  <div class="field" style="margin-top:12px"><label>Montant à appliquer *</label><input type="number" min="0.01" step="0.01" [(ngModel)]="applyAmount"></div>
+  @if(usages().length){<h3>Utilisations précédentes</h3>@for(u of usages();track u.id){<div class="search-row"><span>Créance #{{u.studentChargeId}}</span><b>{{u.amount|number:'1.2-2'}}</b></div>}}
+  <div class="actions" style="margin-top:16px"><button class="btn btn-soft" (click)="applyModal.set(false)">Annuler</button><button class="btn btn-primary" (click)="apply()" [disabled]="!chargeId||applyAmount<=0">Appliquer</button></div></div></div>}
+</div>

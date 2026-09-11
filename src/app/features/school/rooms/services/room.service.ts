@@ -1,0 +1,3 @@
+import {inject,Injectable} from '@angular/core';import {HttpClient} from '@angular/common/http';import {Observable} from 'rxjs';import {API_CONFIG} from '../../../../core/api.config';import {Room,RoomRequest} from '../models/room.model';
+@Injectable({providedIn:'root'}) export class RoomService{private http=inject(HttpClient);private url=`${API_CONFIG.baseUrl}/rooms`;getAll():Observable<Room[]>{return this.http.get<Room[]>(this.url)} create(r:RoomRequest){return this.http.post<Room>(this.url,r)} update(id:number,r:RoomRequest){return this.http.put<Room>(`${this.url}/${id}`,r)}
+}

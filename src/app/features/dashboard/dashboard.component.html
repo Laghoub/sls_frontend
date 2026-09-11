@@ -1,0 +1,648 @@
+<div class="dashboard">
+
+  <!-- =========================
+       EN-TÊTE
+  ========================== -->
+
+  <section class="dashboard-header">
+
+    <div>
+
+      <span class="dashboard-eyebrow">
+        Vue d'ensemble
+      </span>
+
+      <h1>
+        Bonjour,
+        {{ currentUser()?.username || 'Administrateur' }}
+      </h1>
+
+      <p>
+        Bienvenue dans votre espace de gestion scolaire.
+      </p>
+
+    </div>
+
+
+    <div class="school-year-box">
+
+      <span>
+        Année scolaire
+      </span>
+
+      <div class="school-year-value">
+
+        <i class="bi bi-calendar3"></i>
+
+        @if (loading()) {
+
+          <strong>
+            Chargement...
+          </strong>
+
+        } @else if (currentSchoolYear()) {
+
+          <strong>
+            {{ currentSchoolYear()?.label }}
+          </strong>
+
+        } @else {
+
+          <strong>
+            À définir
+          </strong>
+
+        }
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       STATISTIQUES
+  ========================== -->
+
+  <section class="stats-grid">
+
+    <!-- ÉLÈVES -->
+
+    <article class="stat-card">
+
+      <div class="stat-icon blue">
+        <i class="bi bi-mortarboard"></i>
+      </div>
+
+      <div class="stat-content">
+
+        <span>
+          Élèves
+        </span>
+
+       <strong>
+  {{ studentCount() ?? '—' }}
+</strong>
+
+<span>
+  Élèves enregistrés
+</span>
+
+      </div>
+
+    </article>
+
+
+    <!-- CLASSES -->
+
+    <article class="stat-card">
+
+      <div class="stat-icon indigo">
+        <i class="bi bi-people"></i>
+      </div>
+
+      <div class="stat-content">
+
+        <span>
+          Classes
+        </span>
+
+        <strong>
+          @if (loading()) {
+            ...
+          } @else {
+            {{ classCount() }}
+          }
+        </strong>
+
+        <small>
+          Classes enregistrées
+        </small>
+
+      </div>
+
+    </article>
+
+
+    <!-- CAMPUS -->
+
+    <article class="stat-card">
+
+      <div class="stat-icon cyan">
+        <i class="bi bi-building"></i>
+      </div>
+
+      <div class="stat-content">
+
+        <span>
+          Campus
+        </span>
+
+        <strong>
+          @if (loading()) {
+            ...
+          } @else {
+            {{ campusCount() }}
+          }
+        </strong>
+
+        <small>
+          Structures actives
+        </small>
+
+      </div>
+
+    </article>
+
+
+    <!-- ENSEIGNANTS -->
+
+    <article class="stat-card">
+
+      <div class="stat-icon amber">
+        <i class="bi bi-person-badge"></i>
+      </div>
+
+      <div class="stat-content">
+
+        <span>
+          Enseignants
+        </span>
+
+        <strong>
+          —
+        </strong>
+
+        <small>
+          Données à venir
+        </small>
+
+      </div>
+
+    </article>
+
+  </section>
+
+
+  <!-- =========================
+       CONTENU PRINCIPAL
+  ========================== -->
+
+  <section class="dashboard-grid">
+
+
+    <!-- =========================
+         ACCÈS RAPIDES
+    ========================== -->
+
+    <article class="dashboard-card quick-access-card">
+
+      <header class="card-header">
+
+        <div>
+
+          <span class="card-eyebrow">
+            Navigation
+          </span>
+
+          <h2>
+            Accès rapides
+          </h2>
+
+        </div>
+
+        <div class="header-icon">
+          <i class="bi bi-lightning-charge"></i>
+        </div>
+
+      </header>
+
+
+      <div class="quick-access-grid">
+
+        @if (hasPermission('ANNEE_SCOLAIRE_CONSULTER')) {
+
+          <a
+            routerLink="/school/school-years"
+            class="quick-access-item"
+          >
+
+            <div class="quick-icon">
+              <i class="bi bi-calendar3"></i>
+            </div>
+
+            <div>
+
+              <strong>
+                Années scolaires
+              </strong>
+
+              <span>
+                Gérer les années scolaires
+              </span>
+
+            </div>
+
+            <i class="bi bi-chevron-right arrow"></i>
+
+          </a>
+
+        }
+
+
+        @if (hasPermission('CLASSE_CONSULTER')) {
+
+          <a
+            routerLink="/school/classes"
+            class="quick-access-item"
+          >
+
+            <div class="quick-icon">
+              <i class="bi bi-people"></i>
+            </div>
+
+            <div>
+
+              <strong>
+                Classes
+              </strong>
+
+              <span>
+                Consulter les classes
+              </span>
+
+            </div>
+
+            <i class="bi bi-chevron-right arrow"></i>
+
+          </a>
+
+        }
+
+
+        @if (hasPermission('SALLE_CONSULTER')) {
+
+          <a
+            routerLink="/school/rooms"
+            class="quick-access-item"
+          >
+
+            <div class="quick-icon">
+              <i class="bi bi-door-open"></i>
+            </div>
+
+            <div>
+
+              <strong>
+                Salles
+              </strong>
+
+              <span>
+                Gérer les salles
+              </span>
+
+            </div>
+
+            <i class="bi bi-chevron-right arrow"></i>
+
+          </a>
+
+        }
+
+
+        @if (hasPermission('CRENEAU_CONSULTER')) {
+
+          <a
+            routerLink="/school/time-slots"
+            class="quick-access-item"
+          >
+
+            <div class="quick-icon">
+              <i class="bi bi-clock"></i>
+            </div>
+
+            <div>
+
+              <strong>
+                Créneaux
+              </strong>
+
+              <span>
+                Organiser les horaires
+              </span>
+
+            </div>
+
+            <i class="bi bi-chevron-right arrow"></i>
+
+          </a>
+
+        }
+
+
+        @if (hasPermission('CAMPUS_CONSULTER')) {
+
+          <a
+            routerLink="/school/campuses"
+            class="quick-access-item"
+          >
+
+            <div class="quick-icon">
+              <i class="bi bi-building"></i>
+            </div>
+
+            <div>
+
+              <strong>
+                Campus
+              </strong>
+
+              <span>
+                Structures de l'établissement
+              </span>
+
+            </div>
+
+            <i class="bi bi-chevron-right arrow"></i>
+
+          </a>
+
+        }
+
+
+        @if (hasPermission('CALENDRIER_SCOLAIRE_CONSULTER')) {
+
+          <a
+            routerLink="/school/calendar"
+            class="quick-access-item"
+          >
+
+            <div class="quick-icon">
+              <i class="bi bi-calendar-event"></i>
+            </div>
+
+            <div>
+
+              <strong>
+                Calendrier
+              </strong>
+
+              <span>
+                Exceptions et événements
+              </span>
+
+            </div>
+
+            <i class="bi bi-chevron-right arrow"></i>
+
+          </a>
+
+        }
+
+      </div>
+
+    </article>
+
+
+    <!-- =========================
+         ACTIVITÉ / CALENDRIER
+    ========================== -->
+
+    <article class="dashboard-card activity-card">
+
+      <header class="card-header">
+
+        <div>
+
+          <span class="card-eyebrow">
+            Calendrier scolaire
+          </span>
+
+          <h2>
+            Activité
+          </h2>
+
+        </div>
+
+        <div class="header-icon">
+          <i class="bi bi-calendar-check"></i>
+        </div>
+
+      </header>
+
+
+      @if (loading()) {
+
+        <div class="empty-state">
+
+          <div class="empty-icon">
+            <i class="bi bi-arrow-clockwise"></i>
+          </div>
+
+          <strong>
+            Chargement...
+          </strong>
+
+          <p>
+            Récupération du calendrier scolaire.
+          </p>
+
+        </div>
+
+      } @else if (calendarEvents().length === 0) {
+
+        <div class="empty-state">
+
+          <div class="empty-icon">
+            <i class="bi bi-calendar2-week"></i>
+          </div>
+
+          <strong>
+            Aucun événement affiché
+          </strong>
+
+          <p>
+            Aucune exception du calendrier scolaire
+            n'est actuellement enregistrée.
+          </p>
+
+        </div>
+
+      } @else {
+
+        <div class="activity-list">
+
+          @for (event of calendarEvents(); track event.id) {
+
+            <div class="activity-item">
+
+              <div class="activity-date">
+
+                <strong>
+                  {{ event.exceptionDate | date:'dd' }}
+                </strong>
+
+                <span>
+                  {{ event.exceptionDate | date:'MMM' }}
+                </span>
+
+              </div>
+
+
+              <div class="activity-info">
+
+                <div class="activity-title">
+
+                  <strong>
+                    {{ event.label }}
+                  </strong>
+
+                  <span class="activity-type">
+                    {{ formatExceptionType(event.exceptionType) }}
+                  </span>
+
+                </div>
+
+
+                <span class="activity-full-date">
+
+                  <i class="bi bi-calendar3"></i>
+
+                  {{ event.exceptionDate | date:'dd/MM/yyyy' }}
+
+                </span>
+
+
+                @if (event.description) {
+
+                  <p>
+                    {{ event.description }}
+                  </p>
+
+                }
+
+              </div>
+
+            </div>
+
+          }
+
+        </div>
+
+      }
+
+    </article>
+
+  </section>
+
+
+  <!-- =========================
+       STRUCTURE SCOLAIRE
+  ========================== -->
+
+  <section class="dashboard-card structure-card">
+
+    <header class="card-header">
+
+      <div>
+
+        <span class="card-eyebrow">
+          Configuration
+        </span>
+
+        <h2>
+          Structure scolaire
+        </h2>
+
+      </div>
+
+      <div class="header-icon">
+        <i class="bi bi-diagram-3"></i>
+      </div>
+
+    </header>
+
+
+    <div class="structure-grid">
+
+      @if (hasPermission('CYCLE_CONSULTER')) {
+
+        <a
+          routerLink="/school/cycles"
+          class="structure-item"
+        >
+
+          <i class="bi bi-diagram-3"></i>
+
+          <div>
+            <strong>Cycles</strong>
+            <span>Organisation pédagogique</span>
+          </div>
+
+        </a>
+
+      }
+
+
+      @if (hasPermission('NIVEAU_CONSULTER')) {
+
+        <a
+          routerLink="/school/levels"
+          class="structure-item"
+        >
+
+          <i class="bi bi-layers"></i>
+
+          <div>
+            <strong>Niveaux</strong>
+            <span>Niveaux par cycle</span>
+          </div>
+
+        </a>
+
+      }
+
+
+      @if (hasPermission('CAMPUS_CONSULTER')) {
+
+        <a
+          routerLink="/school/campuses"
+          class="structure-item"
+        >
+
+          <i class="bi bi-buildings"></i>
+
+          <div>
+            <strong>Campus</strong>
+            <span>Sites de l'établissement</span>
+          </div>
+
+        </a>
+
+      }
+
+
+      @if (hasPermission('SALLE_CONSULTER')) {
+
+        <a
+          routerLink="/school/rooms"
+          class="structure-item"
+        >
+
+          <i class="bi bi-door-open"></i>
+
+          <div>
+            <strong>Salles</strong>
+            <span>Salles et capacités</span>
+          </div>
+
+        </a>
+
+      }
+
+    </div>
+
+  </section>
+
+</div>

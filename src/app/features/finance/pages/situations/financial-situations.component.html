@@ -1,0 +1,37 @@
+<div class="finance-page">
+  <div class="page-head">
+    <div><div class="eyebrow">Suivi financier</div><h1>Situation famille</h1><div class="muted">Vue consolidée des créances, règlements, retards et avoirs d'une famille.</div></div>
+  </div>
+  @if(error()){<div class="alert alert-error">{{error()}}</div>}
+  <div class="card">
+    <div class="toolbar">
+      <div class="field"><label>Année scolaire</label><select [(ngModel)]="schoolYearId" (ngModelChange)="load()">@for(y of schoolYears();track y.id){<option [ngValue]="y.id">{{y.label}}</option>}</select></div>
+      <div class="field"><label>Responsable</label><input [(ngModel)]="search" (keyup.enter)="searchGuardians()" placeholder="Nom, prénom, téléphone..."></div>
+      <button class="btn btn-soft" (click)="searchGuardians()"><i class="bi bi-search"></i>Rechercher</button>
+    </div>
+    @if(guardians().length){<div class="search-results">@for(g of guardians();track g.id){<div class="search-row"><div><div class="name">{{g.person?.lastName}} {{g.person?.firstName}}</div><div class="sub">{{g.person?.phone || '—'}} · {{g.person?.email || '—'}}</div></div><button class="btn btn-soft" (click)="chooseGuardian(g)">Voir la situation</button></div>}</div>}
+  </div>
+
+  @if(loading()){<div class="card"><div class="empty">Chargement de la situation...</div></div>}
+  @if(situation();as s){
+    <div class="grid-4">
+      <div class="stat"><div class="muted">Facturé</div><div class="value">{{s.totalCharged|number:'1.2-2'}}</div></div>
+      <div class="stat"><div class="muted">Payé</div><div class="value success-text">{{s.totalPaid|number:'1.2-2'}}</div></div>
+      <div class="stat"><div class="muted">Reste</div><div class="value">{{s.totalRemaining|number:'1.2-2'}}</div></div>
+      <div class="stat"><div class="muted">En retard</div><div class="value danger-text">{{s.overdueAmount|number:'1.2-2'}}</div><div class="sub">Avoir disponible : {{s.availableCredit|number:'1.2-2'}}</div></div>
+    </div>
+
+    <div class="card"><h2 class="section-title">{{s.lastName}} {{s.firstName}}</h2><div class="muted">{{s.phone || '—'}} · {{s.email || '—'}}</div></div>
+
+    @for(st of s.students;track st.studentId){
+      <div class="card">
+        <div class="page-head"><div><div class="eyebrow">{{st.studentNumber}}</div><h2>{{st.lastName}} {{st.firstName}}</h2></div><div class="actions"><span class="badge">Reste {{st.totalRemaining|number:'1.2-2'}}</span>@if(st.overdueAmount>0){<span class="badge CANCELLED">Retard {{st.overdueAmount|number:'1.2-2'}}</span>}</div></div>
+        <div class="table-wrap"><table class="data-table"><thead><tr><th>Frais</th><th>Échéance</th><th>Montant</th><th>Payé</th><th>Reste</th><th>Statut</th></tr></thead><tbody>
+          @for(c of st.charges;track c.chargeId){<tr><td><div class="name">{{c.label}}</div><div class="sub">{{c.feeTypeName}}</div></td><td>{{c.dueDate ? (c.dueDate|date:'dd/MM/yyyy') : '—'}}</td><td>{{c.finalAmount|number:'1.2-2'}}</td><td>{{c.paidAmount|number:'1.2-2'}}</td><td class="money" [class.danger-text]="c.overdue">{{c.remainingAmount|number:'1.2-2'}}</td><td><span class="badge {{c.status}}">{{statusLabel(c.status)}}</span></td></tr>}
+          @if(!st.charges.length){<tr><td colspan="6"><div class="empty">Aucune créance pour cet élève.</div></td></tr>}
+        </tbody></table></div>
+      </div>
+    }
+    @if(!s.students.length){<div class="card"><div class="empty">Aucun élève rattaché avec une situation financière sur cette année.</div></div>}
+  }
+</div>

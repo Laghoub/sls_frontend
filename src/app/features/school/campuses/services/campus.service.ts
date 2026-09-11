@@ -1,0 +1,3 @@
+import {inject,Injectable} from '@angular/core';import {HttpClient} from '@angular/common/http';import {Observable} from 'rxjs';import {API_CONFIG} from '../../../../core/api.config';import {Campus,CampusRequest} from '../models/campus.model';
+@Injectable({providedIn:'root'}) export class CampusService{private http=inject(HttpClient);private url=`${API_CONFIG.baseUrl}/campuses`;getAll():Observable<Campus[]>{return this.http.get<Campus[]>(this.url)} create(r:CampusRequest){return this.http.post<Campus>(this.url,r)} update(id:number,r:CampusRequest){return this.http.put<Campus>(`${this.url}/${id}`,r)}
+}

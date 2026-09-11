@@ -1,0 +1,1 @@
+export interface Campus{id:number;code:string;name:string;address?:string|null;phone?:string|null;active:boolean} export type CampusRequest=Omit<Campus,'id'>;

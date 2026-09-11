@@ -1,0 +1,1838 @@
+<div class="reg-page">
+
+  @if (detail(); as d) {
+
+    <!-- ===================================================== -->
+    <!-- EN-TÊTE -->
+    <!-- ===================================================== -->
+
+    <div class="page-head">
+
+      <div>
+
+        <div class="eyebrow">
+          Dossier #{{ d.registration.id }}
+        </div>
+
+        <h1>
+          {{ d.registration.studentLastName }}
+          {{ d.registration.studentFirstName }}
+        </h1>
+
+        <div class="muted">
+
+          {{ d.registration.studentNumber }}
+
+          · Responsable principal :
+
+          {{ d.registration.guardianLastName }}
+          {{ d.registration.guardianFirstName }}
+
+        </div>
+
+      </div>
+
+      <div class="actions">
+
+        <span
+          class="badge {{ d.registration.status }}"
+        >
+          {{ label(d.registration.status) }}
+        </span>
+
+        <a
+          class="btn btn-soft"
+          routerLink="/registration"
+        >
+          <i class="bi bi-arrow-left"></i>
+          Retour
+        </a>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- MESSAGES -->
+    <!-- ===================================================== -->
+
+    @if (error()) {
+
+      <div class="alert alert-error">
+        {{ error() }}
+      </div>
+
+    }
+
+    @if (success()) {
+
+      <div class="alert alert-success">
+        {{ success() }}
+      </div>
+
+    }
+
+
+    <!-- ===================================================== -->
+    <!-- ONGLETS -->
+    <!-- ===================================================== -->
+
+    <div class="tabs">
+
+      <button
+        class="tab"
+        [class.active]="tab() === 'overview'"
+        (click)="setTab('overview')"
+      >
+        Vue générale
+      </button>
+
+      <button
+        class="tab"
+        [class.active]="tab() === 'info'"
+        (click)="setTab('info')"
+      >
+        Inscription
+      </button>
+
+      <button
+        class="tab"
+        [class.active]="tab() === 'guardians'"
+        (click)="setTab('guardians')"
+      >
+        Responsables
+      </button>
+
+      <button
+        class="tab"
+        [class.active]="tab() === 'family'"
+        (click)="setTab('family')"
+      >
+        Famille
+      </button>
+
+      <button
+        class="tab"
+        [class.active]="tab() === 'medical'"
+        (click)="setTab('medical')"
+      >
+        Médical
+      </button>
+
+      <button
+        class="tab"
+        [class.active]="tab() === 'pickups'"
+        (click)="setTab('pickups')"
+      >
+        Sorties autorisées
+      </button>
+
+      <button
+        class="tab"
+        [class.active]="tab() === 'documents'"
+        (click)="setTab('documents')"
+      >
+        Pièces
+      </button>
+
+      <button
+        class="tab"
+        [class.active]="tab() === 'consents'"
+        (click)="setTab('consents')"
+      >
+        Consentements
+      </button>
+
+      <button
+        class="tab"
+        [class.active]="tab() === 'enrollment'"
+        (click)="setTab('enrollment')"
+      >
+        Scolarisation
+      </button>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- VUE GÉNÉRALE -->
+    <!-- ===================================================== -->
+
+    @if (tab() === 'overview') {
+
+      <div class="grid-2">
+
+        <div class="card">
+
+          <h2 class="section-title">
+            Workflow du dossier
+          </h2>
+
+          <div class="actions">
+
+            @if (
+              d.registration.status === 'PRE_INSCRIPTION'
+              && auth.hasPermission('INSCRIPTION_MODIFIER')
+            ) {
+
+              <button
+                class="btn btn-primary"
+                [disabled]="busy()"
+                (click)="submit()"
+              >
+                Envoyer au paiement
+              </button>
+
+            }
+
+
+            @if (
+              d.registration.status === 'EN_ATTENTE_PAIEMENT'
+              && auth.hasPermission('INSCRIPTION_PAIEMENT_CONFIRMER')
+            ) {
+
+              <button
+                class="btn btn-success"
+                [disabled]="busy()"
+                (click)="paid()"
+              >
+                Confirmer paiement (test)
+              </button>
+
+            }
+
+
+            @if (
+              d.registration.status === 'PAYE_A_COMPLETER'
+              && auth.hasPermission('INSCRIPTION_COMPLETER')
+            ) {
+
+              <button
+                class="btn btn-primary"
+                [disabled]="busy()"
+                (click)="start()"
+              >
+                Commencer le complément
+              </button>
+
+            }
+
+
+            @if (
+              d.registration.status === 'EN_COURS'
+              && auth.hasPermission('INSCRIPTION_COMPLETER')
+            ) {
+
+              <button
+                class="btn btn-soft"
+                [disabled]="busy()"
+                (click)="incomplete()"
+              >
+                Marquer incomplet
+              </button>
+
+            }
+
+
+            @if (
+              d.registration.status !== 'FINALISE'
+              && d.registration.status !== 'ANNULE'
+              && auth.hasPermission('INSCRIPTION_ANNULER')
+            ) {
+
+              <button
+                class="btn btn-danger"
+                [disabled]="busy()"
+                (click)="cancelModal.set(true)"
+              >
+                Annuler
+              </button>
+
+            }
+
+          </div>
+
+          <p class="muted">
+            La confirmation de paiement est temporaire.
+            Elle sera remplacée par le module Paiements & Caisse.
+          </p>
+
+        </div>
+
+
+        <!-- CONTRÔLE -->
+
+        <div class="card">
+
+          <h2 class="section-title">
+            Complétude du dossier
+          </h2>
+
+          <div
+            [class]="
+              d.validation.valid
+                ? 'validation-ok'
+                : 'validation-bad'
+            "
+          >
+
+            @if (d.validation.valid) {
+
+              <strong>
+                Dossier complet
+              </strong>
+
+              <div>
+                L'inscription peut être finalisée.
+              </div>
+
+            } @else {
+
+              <strong>
+                Dossier incomplet
+              </strong>
+
+              <div>
+                Certains éléments doivent encore être complétés.
+              </div>
+
+            }
+
+          </div>
+
+
+          @if (!d.validation.valid) {
+
+            <ul>
+
+              @for (
+                missing of d.validation.missingItems;
+                track missing
+              ) {
+
+                <li>
+                  {{ missing }}
+                </li>
+
+              }
+
+            </ul>
+
+          }
+
+          <button
+            class="btn btn-soft"
+            (click)="validate()"
+          >
+            <i class="bi bi-arrow-clockwise"></i>
+            Recalculer
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- GUIDE ASSISTANTE -->
+
+      @if (
+        d.registration.status === 'PAYE_A_COMPLETER'
+        || d.registration.status === 'EN_COURS'
+        || d.registration.status === 'INCOMPLET'
+      ) {
+
+        <div class="card">
+
+          <h2 class="section-title">
+            Compléter le dossier
+          </h2>
+
+          <p class="muted">
+            Vérifie les différentes rubriques avant de
+            finaliser l'inscription.
+          </p>
+
+          <div class="grid-3">
+
+            <button
+              class="btn btn-soft"
+              (click)="setTab('guardians')"
+            >
+              <i class="bi bi-people"></i>
+              Responsables
+            </button>
+
+            <button
+              class="btn btn-soft"
+              (click)="setTab('family')"
+            >
+              <i class="bi bi-house-heart"></i>
+              Famille
+            </button>
+
+            <button
+              class="btn btn-soft"
+              (click)="setTab('medical')"
+            >
+              <i class="bi bi-heart-pulse"></i>
+              Médical
+            </button>
+
+            <button
+              class="btn btn-soft"
+              (click)="setTab('pickups')"
+            >
+              <i class="bi bi-person-check"></i>
+              Sorties autorisées
+            </button>
+
+            <button
+              class="btn btn-soft"
+              (click)="setTab('documents')"
+            >
+              <i class="bi bi-file-earmark-check"></i>
+              Pièces
+            </button>
+
+            <button
+              class="btn btn-soft"
+              (click)="setTab('consents')"
+            >
+              <i class="bi bi-check2-square"></i>
+              Consentements
+            </button>
+
+          </div>
+
+        </div>
+
+      }
+
+    }
+
+
+    <!-- ===================================================== -->
+    <!-- INFORMATIONS D'INSCRIPTION -->
+    <!-- ===================================================== -->
+
+    @if (tab() === 'info') {
+
+      <div class="card">
+
+        <h2 class="section-title">
+          Informations d'inscription
+        </h2>
+
+        <div class="grid-2">
+
+          <div class="field">
+
+            <label>
+              Établissement précédent
+            </label>
+
+            <input
+              [(ngModel)]="info.previousSchool"
+            >
+
+          </div>
+
+          <div class="field">
+
+            <label>
+              Classe précédente
+            </label>
+
+            <input
+              [(ngModel)]="info.previousClass"
+            >
+
+          </div>
+
+        </div>
+
+        <div class="field">
+
+          <label>
+            Notes
+          </label>
+
+          <textarea
+            rows="5"
+            [(ngModel)]="info.notes"
+          ></textarea>
+
+        </div>
+
+        @if (
+          auth.hasPermission('INSCRIPTION_COMPLETER')
+        ) {
+
+          <button
+            class="btn btn-primary"
+            [disabled]="busy()"
+            (click)="saveInfo()"
+          >
+            Enregistrer
+          </button>
+
+        }
+
+      </div>
+
+    }
+
+
+    <!-- ===================================================== -->
+    <!-- RESPONSABLES -->
+    <!-- ===================================================== -->
+
+    @if (tab() === 'guardians') {
+
+      <div class="card">
+
+        <h2 class="section-title">
+          Responsables liés à l'élève
+        </h2>
+
+        @if (links().length) {
+
+          @for (
+            link of links();
+            track link.id
+          ) {
+
+            <div class="doc-row">
+
+              <div>
+
+  <div class="name">
+
+    {{ link.guardianLastName }}
+    {{ link.guardianFirstName }}
+
+  </div>
+
+  <div class="sub">
+
+    {{ label(link.relationshipType) }}
+
+    @if (link.legalGuardian) {
+      · Responsable légal
+    }
+
+    @if (link.financialResponsible) {
+      · Responsable financier
+    }
+
+    @if (link.primaryContact) {
+      · Contact principal
+    }
+
+  </div>
+
+  @if (
+    link.guardianPhone
+    || link.guardianEmail
+  ) {
+
+    <div
+      class="sub"
+      style="margin-top:6px"
+    >
+
+      @if (link.guardianPhone) {
+
+        <span>
+          <i class="bi bi-telephone"></i>
+          {{ link.guardianPhone }}
+        </span>
+
+      }
+
+      @if (
+        link.guardianPhone
+        && link.guardianEmail
+      ) {
+
+        <span>
+          &nbsp; · &nbsp;
+        </span>
+
+      }
+
+      @if (link.guardianEmail) {
+
+        <span>
+          <i class="bi bi-envelope"></i>
+          {{ link.guardianEmail }}
+        </span>
+
+      }
+
+    </div>
+
+  }
+
+</div>
+
+              <span
+                class="badge"
+                [class.ACTIVE]="link.active"
+              >
+                {{ link.active ? 'ACTIF' : 'INACTIF' }}
+              </span>
+
+            </div>
+
+          }
+
+        } @else {
+
+          <div class="empty">
+            Aucun responsable lié à cet élève.
+          </div>
+
+        }
+
+      </div>
+
+
+      <div class="card">
+
+        <h2 class="section-title">
+          Ajouter un responsable
+        </h2>
+
+        <div class="field">
+
+          <label>
+            Rechercher un responsable
+          </label>
+
+          <div class="actions">
+
+            <input
+              style="flex:1"
+              type="search"
+              placeholder="Nom, prénom, téléphone, email..."
+              [(ngModel)]="guardianSearch"
+              (keyup.enter)="searchGuardians()"
+            >
+
+            <button
+              class="btn btn-primary"
+              (click)="searchGuardians()"
+            >
+              Rechercher
+            </button>
+
+          </div>
+
+        </div>
+
+
+        @for (
+          guardian of guardians();
+          track guardian.id
+        ) {
+
+          <div class="doc-row">
+
+            <div>
+
+              <div class="name">
+
+  @if (guardian.person) {
+
+    {{ guardian.person.lastName }}
+    {{ guardian.person.firstName }}
+
+  } @else {
+
+    Responsable
+
+  }
+
+</div>
+
+<div class="sub">
+
+  @if (guardian.person?.phone) {
+
+    <span>
+      <i class="bi bi-telephone"></i>
+      {{ guardian.person?.phone }}
+    </span>
+
+  }
+
+  @if (
+    guardian.person?.phone
+    && guardian.person?.email
+  ) {
+    ·
+  }
+
+  @if (guardian.person?.email) {
+
+    <span>
+      <i class="bi bi-envelope"></i>
+      {{ guardian.person?.email }}
+    </span>
+
+  }
+
+  · Statut : {{ guardian.status }}
+
+</div>
+
+            </div>
+
+            @if (
+              isGuardianLinked(guardian.id)
+            ) {
+
+              <span class="validation-ok">
+                Déjà lié
+              </span>
+
+            } @else {
+
+              <button
+                class="btn btn-soft"
+                (click)="selectGuardian(guardian)"
+              >
+                Lier
+              </button>
+
+            }
+
+          </div>
+
+        }
+
+
+        @if (guardianTotalPages() > 1) {
+
+          <div class="actions">
+
+            <button
+              class="btn btn-soft"
+              [disabled]="guardianPage() === 0"
+              (click)="previousGuardianPage()"
+            >
+              Précédent
+            </button>
+
+            <span class="muted">
+
+              Page
+              {{ guardianPage() + 1 }}
+              /
+              {{ guardianTotalPages() }}
+
+              ·
+
+              {{ guardianTotalElements() }}
+              responsable(s)
+
+            </span>
+
+            <button
+              class="btn btn-soft"
+              [disabled]="
+                guardianPage() + 1
+                >= guardianTotalPages()
+              "
+              (click)="nextGuardianPage()"
+            >
+              Suivant
+            </button>
+
+          </div>
+
+        }
+
+      </div>
+
+    }
+
+
+    <!-- ===================================================== -->
+    <!-- FAMILLE -->
+    <!-- ===================================================== -->
+
+    @if (tab() === 'family') {
+
+      <div class="card">
+
+        <h2 class="section-title">
+          Informations familiales
+        </h2>
+
+        <div class="grid-2">
+
+          <div class="field">
+
+            <label>
+              Situation du père
+            </label>
+
+            <select
+              [(ngModel)]="family.fatherLifeStatus"
+            >
+
+              <option [ngValue]="null">
+                Non renseigné
+              </option>
+
+              <option value="ALIVE">
+                Vivant
+              </option>
+
+              <option value="DECEASED">
+                Décédé
+              </option>
+
+              <option value="UNKNOWN">
+                Inconnu
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Situation de la mère
+            </label>
+
+            <select
+              [(ngModel)]="family.motherLifeStatus"
+            >
+
+              <option [ngValue]="null">
+                Non renseigné
+              </option>
+
+              <option value="ALIVE">
+                Vivante
+              </option>
+
+              <option value="DECEASED">
+                Décédée
+              </option>
+
+              <option value="UNKNOWN">
+                Inconnu
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Parents divorcés
+            </label>
+
+            <select
+              [(ngModel)]="family.parentsDivorced"
+            >
+
+              <option [ngValue]="null">
+                Non renseigné
+              </option>
+
+              <option [ngValue]="false">
+                Non
+              </option>
+
+              <option [ngValue]="true">
+                Oui
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Nombre de frères
+            </label>
+
+            <input
+              type="number"
+              min="0"
+              [(ngModel)]="family.numberOfBrothers"
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Nombre de sœurs
+            </label>
+
+            <input
+              type="number"
+              min="0"
+              [(ngModel)]="family.numberOfSisters"
+            >
+
+          </div>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Notes familiales
+          </label>
+
+          <textarea
+            rows="4"
+            [(ngModel)]="family.notes"
+          ></textarea>
+
+        </div>
+
+
+        @if (
+          auth.hasPermission(
+            'INFO_FAMILIALE_GERER'
+          )
+        ) {
+
+          <button
+            class="btn btn-primary"
+            [disabled]="busy()"
+            (click)="saveFamily()"
+          >
+            Enregistrer les informations familiales
+          </button>
+
+        }
+
+      </div>
+
+    }
+
+
+    <!-- ===================================================== -->
+    <!-- MÉDICAL -->
+    <!-- ===================================================== -->
+
+    @if (tab() === 'medical') {
+
+      @if (
+        auth.hasPermission(
+          'INFO_MEDICALE_ELEVE_CONSULTER'
+        )
+      ) {
+
+        <div class="card">
+
+          <h2 class="section-title">
+            Informations médicales
+          </h2>
+
+          <div class="alert">
+            Ces données sont sensibles et sont protégées
+            par des permissions spécifiques.
+          </div>
+
+          <div class="grid-2">
+
+            <div class="field">
+
+              <label>
+                Groupe sanguin
+              </label>
+
+              <input
+                [(ngModel)]="medical.bloodGroup"
+                placeholder="Ex. O+"
+              >
+
+            </div>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Maladies / conditions médicales
+            </label>
+
+            <textarea
+              rows="3"
+              [(ngModel)]="medical.medicalConditions"
+            ></textarea>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Allergies
+            </label>
+
+            <textarea
+              rows="3"
+              [(ngModel)]="medical.allergies"
+            ></textarea>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Traitements
+            </label>
+
+            <textarea
+              rows="3"
+              [(ngModel)]="medical.treatments"
+            ></textarea>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Consignes d'urgence
+            </label>
+
+            <textarea
+              rows="3"
+              [(ngModel)]="medical.emergencyNotes"
+            ></textarea>
+
+          </div>
+
+
+          @if (
+            auth.hasPermission(
+              'INFO_MEDICALE_ELEVE_GERER'
+            )
+          ) {
+
+            <button
+              class="btn btn-primary"
+              [disabled]="busy()"
+              (click)="saveMedical()"
+            >
+              Enregistrer les informations médicales
+            </button>
+
+          }
+
+        </div>
+
+      } @else {
+
+        <div class="alert alert-error">
+          Tu n'as pas la permission de consulter
+          les informations médicales.
+        </div>
+
+      }
+
+    }
+
+
+    <!-- ===================================================== -->
+    <!-- PERSONNES AUTORISÉES -->
+    <!-- ===================================================== -->
+
+    @if (tab() === 'pickups') {
+
+      <div class="card">
+
+        <div class="page-head">
+
+          <div>
+
+            <h2 class="section-title">
+              Personnes autorisées à récupérer l'enfant
+            </h2>
+
+          </div>
+
+          @if (
+            auth.hasPermission(
+              'PERSONNE_AUTORISEE_GERER'
+            )
+          ) {
+
+            <button
+              class="btn btn-primary"
+              (click)="openPickup()"
+            >
+              <i class="bi bi-person-plus"></i>
+              Ajouter
+            </button>
+
+          }
+
+        </div>
+
+
+        @for (
+          person of pickups();
+          track person.id
+        ) {
+
+          <div class="doc-row">
+
+            <div>
+
+              <div class="name">
+
+                {{ person.lastName }}
+                {{ person.firstName }}
+
+              </div>
+
+              <div class="sub">
+
+                {{ person.relationship || 'Lien non renseigné' }}
+
+                ·
+
+                {{ person.phone }}
+
+              </div>
+
+            </div>
+
+            <span
+              class="badge"
+            >
+              {{ person.active ? 'AUTORISÉE' : 'INACTIVE' }}
+            </span>
+
+          </div>
+
+        }
+
+
+        @if (!pickups().length) {
+
+          <div class="empty">
+            Aucune personne autorisée enregistrée.
+          </div>
+
+        }
+
+      </div>
+
+    }
+
+
+    <!-- ===================================================== -->
+    <!-- PIÈCES -->
+    <!-- ===================================================== -->
+
+    @if (tab() === 'documents') {
+
+      <div class="card">
+
+        <h2 class="section-title">
+          Pièces du dossier
+        </h2>
+
+        @for (
+          doc of d.documents;
+          track doc.requirementId
+        ) {
+
+          <div class="doc-row">
+
+            <div>
+
+              <div class="name">
+                {{ doc.requirementName }}
+              </div>
+
+              <div class="sub">
+
+                {{ doc.requirementCode }}
+
+                @if (doc.required) {
+                  · obligatoire
+                }
+
+              </div>
+
+            </div>
+
+            <label>
+
+              <input
+                type="checkbox"
+                [(ngModel)]="doc.provided"
+              >
+
+              Fournie
+
+            </label>
+
+            <div class="actions">
+
+              <label>
+
+                <input
+                  type="checkbox"
+                  [(ngModel)]="doc.verified"
+                >
+
+                Vérifiée
+
+              </label>
+
+              @if (
+                auth.hasPermission(
+                  'INSCRIPTION_COMPLETER'
+                )
+              ) {
+
+                <button
+                  class="btn btn-soft"
+                  (click)="saveDocument(doc)"
+                >
+                  Sauver
+                </button>
+
+              }
+
+            </div>
+
+          </div>
+
+        }
+
+
+        @if (!d.documents.length) {
+
+          <div class="empty">
+            Aucune exigence documentaire active.
+          </div>
+
+        }
+
+      </div>
+
+    }
+
+
+    <!-- ===================================================== -->
+    <!-- CONSENTEMENTS -->
+    <!-- ===================================================== -->
+
+    @if (tab() === 'consents') {
+
+      <div class="grid-2">
+
+        <div class="card">
+
+          <h2 class="section-title">
+            Consentements enregistrés
+          </h2>
+
+          @for (
+            c of d.consents;
+            track c.id
+          ) {
+
+            <div class="doc-row">
+
+              <div>
+
+                <div class="name">
+                  {{ label(c.consentType) }}
+                </div>
+
+                <div class="sub">
+                  {{ c.accepted ? 'Accepté' : 'Refusé' }}
+                </div>
+
+              </div>
+
+            </div>
+
+          }
+
+
+          @if (!d.consents.length) {
+
+            <div class="empty">
+              Aucun consentement enregistré.
+            </div>
+
+          }
+
+        </div>
+
+
+        <div class="card">
+
+          <h2 class="section-title">
+            Ajouter / mettre à jour
+          </h2>
+
+          <div class="field">
+
+            <label>
+              Type
+            </label>
+
+            <input
+              [(ngModel)]="consent.consentType"
+            >
+
+          </div>
+
+          <label>
+
+            <input
+              type="checkbox"
+              [(ngModel)]="consent.accepted"
+            >
+
+            Accepté
+
+          </label>
+
+          <div class="field">
+
+            <label>
+              Notes
+            </label>
+
+            <textarea
+              [(ngModel)]="consent.notes"
+            ></textarea>
+
+          </div>
+
+          @if (
+            auth.hasPermission(
+              'INSCRIPTION_COMPLETER'
+            )
+          ) {
+
+            <button
+              class="btn btn-primary"
+              (click)="saveConsent()"
+            >
+              Enregistrer
+            </button>
+
+          }
+
+        </div>
+
+      </div>
+
+    }
+
+
+    <!-- ===================================================== -->
+    <!-- SCOLARISATION -->
+    <!-- ===================================================== -->
+
+    @if (tab() === 'enrollment') {
+
+      <div class="card">
+
+        <h2 class="section-title">
+          Scolarisation annuelle
+        </h2>
+
+
+        @if (d.enrollment) {
+
+          <div class="alert alert-success">
+
+            Scolarisation créée
+
+            · {{ d.enrollment.status }}
+
+            · Classe #{{ d.enrollment.currentClassGroupId }}
+
+          </div>
+
+        } @else {
+
+          <div class="grid-3">
+
+            <div class="field">
+
+              <label>
+                Classe finale *
+              </label>
+
+              <select
+                [(ngModel)]="finalClassId"
+              >
+
+                <option [ngValue]="null">
+                  Sélectionner
+                </option>
+
+                @for (
+                  c of classes();
+                  track c.id
+                ) {
+
+                  @if (
+                    c.schoolYearId
+                    === d.registration.schoolYearId
+                  ) {
+
+                    <option [ngValue]="c.id">
+                      {{ c.name }}
+                    </option>
+
+                  }
+
+                }
+
+              </select>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Date d'inscription
+              </label>
+
+              <input
+                type="date"
+                [(ngModel)]="enrollmentDate"
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Type d'entrée
+              </label>
+
+              <select
+                [(ngModel)]="entryType"
+              >
+
+                <option value="NOUVELLE_INSCRIPTION">
+                  Nouvelle inscription
+                </option>
+
+                <option value="REINSCRIPTION">
+                  Réinscription
+                </option>
+
+                <option value="TRANSFERT">
+                  Transfert
+                </option>
+
+              </select>
+
+            </div>
+
+          </div>
+
+
+          <div
+            style="margin-top:14px"
+            [class]="
+              d.validation.valid
+                ? 'validation-ok'
+                : 'validation-bad'
+            "
+          >
+
+            {{
+              d.validation.valid
+                ? 'Toutes les validations sont satisfaites.'
+                : 'Le dossier doit être complet avant finalisation.'
+            }}
+
+          </div>
+
+
+          @if (
+            !d.validation.valid
+            && d.validation.missingItems.length
+          ) {
+
+            <ul>
+
+              @for (
+                missing of d.validation.missingItems;
+                track missing
+              ) {
+
+                <li>
+                  {{ missing }}
+                </li>
+
+              }
+
+            </ul>
+
+          }
+
+
+          @if (
+            auth.hasPermission(
+              'INSCRIPTION_FINALISER'
+            )
+          ) {
+
+            <button
+              style="margin-top:14px"
+              class="btn btn-success"
+              [disabled]="
+                !d.validation.valid
+                || busy()
+              "
+              (click)="finalize()"
+            >
+              Finaliser l'inscription
+            </button>
+
+          }
+
+        }
+
+      </div>
+
+    }
+
+
+    <!-- ===================================================== -->
+    <!-- MODALE RESPONSABLE -->
+    <!-- ===================================================== -->
+
+    @if (guardianModal()) {
+
+      <div class="modal-backdrop">
+
+        <div class="modal">
+
+          <h2>
+            Lier le responsable
+          </h2>
+
+          <div class="field">
+
+            <label>
+              Relation
+            </label>
+
+            <select
+              [(ngModel)]="linkForm.relationshipType"
+            >
+
+              <option value="FATHER">
+                Père
+              </option>
+
+              <option value="MOTHER">
+                Mère
+              </option>
+
+              <option value="LEGAL_GUARDIAN">
+                Tuteur légal
+              </option>
+
+              <option value="OTHER">
+                Autre
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <label>
+            <input
+              type="checkbox"
+              [(ngModel)]="linkForm.legalGuardian"
+            >
+            Responsable légal
+          </label>
+
+          <br>
+
+          <label>
+            <input
+              type="checkbox"
+              [(ngModel)]="linkForm.financialResponsible"
+            >
+            Responsable financier
+          </label>
+
+          <br>
+
+          <label>
+            <input
+              type="checkbox"
+              [(ngModel)]="linkForm.primaryContact"
+            >
+            Contact principal
+          </label>
+
+          <br>
+
+          <label>
+            <input
+              type="checkbox"
+              [(ngModel)]="linkForm.pickupAuthorized"
+            >
+            Autorisé à récupérer l'enfant
+          </label>
+
+
+          <div
+            class="actions"
+            style="margin-top:20px"
+          >
+
+            <button
+              class="btn btn-soft"
+              (click)="guardianModal.set(false)"
+            >
+              Annuler
+            </button>
+
+            <button
+              class="btn btn-primary"
+              [disabled]="busy()"
+              (click)="saveGuardianLink()"
+            >
+              Enregistrer
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    }
+
+
+    <!-- ===================================================== -->
+    <!-- MODALE PERSONNE AUTORISÉE -->
+    <!-- ===================================================== -->
+
+    @if (pickupModal()) {
+
+      <div class="modal-backdrop">
+
+        <div class="modal">
+
+          <h2>
+            Ajouter une personne autorisée
+          </h2>
+
+          <div class="grid-2">
+
+            <div class="field">
+
+              <label>
+                Nom *
+              </label>
+
+              <input
+                [(ngModel)]="pickup.lastName"
+              >
+
+            </div>
+
+            <div class="field">
+
+              <label>
+                Prénom *
+              </label>
+
+              <input
+                [(ngModel)]="pickup.firstName"
+              >
+
+            </div>
+
+            <div class="field">
+
+              <label>
+                Lien avec l'enfant
+              </label>
+
+              <input
+                [(ngModel)]="pickup.relationship"
+              >
+
+            </div>
+
+            <div class="field">
+
+              <label>
+                Téléphone *
+              </label>
+
+              <input
+                [(ngModel)]="pickup.phone"
+              >
+
+            </div>
+
+            <div class="field">
+
+              <label>
+                N° pièce d'identité
+              </label>
+
+              <input
+                [(ngModel)]="pickup.identityDocumentNumber"
+              >
+
+            </div>
+
+            <div class="field">
+
+              <label>
+                Délivrée par
+              </label>
+
+              <input
+                [(ngModel)]="pickup.issuedBy"
+              >
+
+            </div>
+
+          </div>
+
+
+          <div class="actions">
+
+            <button
+              class="btn btn-soft"
+              (click)="pickupModal.set(false)"
+            >
+              Annuler
+            </button>
+
+            <button
+              class="btn btn-primary"
+              [disabled]="busy()"
+              (click)="savePickup()"
+            >
+              Ajouter
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    }
+
+
+    <!-- ===================================================== -->
+    <!-- MODALE ANNULATION DOSSIER -->
+    <!-- ===================================================== -->
+
+    @if (cancelModal()) {
+
+      <div class="modal-backdrop">
+
+        <div class="modal">
+
+          <h2>
+            Annuler le dossier
+          </h2>
+
+          <p class="muted">
+            Cette action passe le dossier au statut ANNULE.
+          </p>
+
+          <div class="field">
+
+            <label>
+              Motif *
+            </label>
+
+            <textarea
+              rows="4"
+              [(ngModel)]="cancelReason"
+            ></textarea>
+
+          </div>
+
+          <div class="actions">
+
+            <button
+              class="btn btn-soft"
+              (click)="cancelModal.set(false)"
+            >
+              Retour
+            </button>
+
+            <button
+              class="btn btn-danger"
+              [disabled]="busy()"
+              (click)="cancel()"
+            >
+              Confirmer l'annulation
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    }
+
+  } @else {
+
+    @if (error()) {
+
+      <div class="alert alert-error">
+        {{ error() }}
+      </div>
+
+    } @else {
+
+      <div class="empty">
+        Chargement du dossier...
+      </div>
+
+    }
+
+  }
+
+</div>

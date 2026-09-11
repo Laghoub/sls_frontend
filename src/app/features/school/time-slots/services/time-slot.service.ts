@@ -1,0 +1,3 @@
+import {inject,Injectable} from '@angular/core';import {HttpClient} from '@angular/common/http';import {Observable} from 'rxjs';import {API_CONFIG} from '../../../../core/api.config';import {TimeSlot,TimeSlotRequest} from '../models/time-slot.model';
+@Injectable({providedIn:'root'}) export class TimeSlotService{private http=inject(HttpClient);private url=`${API_CONFIG.baseUrl}/time-slots`;getAll():Observable<TimeSlot[]>{return this.http.get<TimeSlot[]>(this.url)} create(r:TimeSlotRequest){return this.http.post<TimeSlot>(this.url,r)} update(id:number,r:TimeSlotRequest){return this.http.put<TimeSlot>(`${this.url}/${id}`,r)}
+}

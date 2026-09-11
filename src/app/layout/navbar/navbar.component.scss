@@ -1,0 +1,148 @@
+:host {
+  display: block;
+}
+
+.navbar {
+  height: 70px;
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.navbar-left,
+.navbar-right,
+.navbar-user {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-left {
+  gap: 14px;
+}
+
+.navbar-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar-subtitle {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+}
+
+.navbar-title strong {
+  margin-top: 2px;
+  font-size: 15px;
+  color: #0f172a;
+}
+
+.mobile-menu-button {
+  display: none;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 11px;
+  background: #eff6ff;
+  color: #1e40af;
+  font-size: 24px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-menu-button:hover {
+  background: #dbeafe;
+}
+
+.navbar-right {
+  gap: 14px;
+}
+
+.navbar-icon-button {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.navbar-icon-button:hover {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.notification-dot {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  right: 9px;
+  top: 9px;
+  border-radius: 50%;
+  background: #ef4444;
+  border: 2px solid white;
+}
+
+.navbar-user {
+  gap: 9px;
+  padding-left: 14px;
+  border-left: 1px solid #e2e8f0;
+}
+
+.user-avatar {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.user-text strong {
+  font-size: 13px;
+  color: #0f172a;
+}
+
+@media (max-width: 991px) {
+  .mobile-menu-button {
+    display: flex;
+  }
+}
+
+@media (max-width: 600px) {
+  .navbar {
+    height: 64px;
+    padding: 0 14px;
+  }
+
+  .navbar-subtitle,
+  .user-text {
+    display: none;
+  }
+
+  .navbar-title strong {
+    font-size: 12px;
+  }
+
+  .navbar-right {
+    gap: 7px;
+  }
+}

@@ -1,0 +1,307 @@
+<div class="login-page">
+
+  <div class="login-decoration login-decoration-one"></div>
+  <div class="login-decoration login-decoration-two"></div>
+
+  <main class="login-container">
+
+    <!-- =========================
+         PARTIE GAUCHE
+    ========================== -->
+    <section class="brand-panel">
+
+      <div class="brand-content">
+
+        <!-- Logo + nom du groupe -->
+        <div class="brand-identity">
+
+          <div class="logo-container">
+            <img
+              src="../../../../assets/logo.png"
+              alt="Logo Groupe Scolaire Sciences et Lettres"
+              class="school-logo"
+            />
+          </div>
+
+          <div class="school-name">
+            <span>Groupe Scolaire </span>
+            <strong>Sciences et Lettres</strong>
+          </div>
+
+        </div>
+
+
+        <div class="brand-text">
+
+          <span class="brand-eyebrow">
+            Plateforme de gestion
+          </span>
+
+          <h1>
+            Gestion scolaire
+          </h1>
+
+          <p>
+            Une plateforme centralisée pour gérer efficacement
+            l'établissement scolaire.
+          </p>
+
+        </div>
+
+
+        <div class="brand-features">
+
+          <div class="feature">
+
+            <span class="feature-icon">
+              <i class="bi bi-building"></i>
+            </span>
+
+            <div>
+              <strong>Administration</strong>
+              <span>Organisation centralisée</span>
+            </div>
+
+          </div>
+
+
+          <div class="feature">
+
+            <span class="feature-icon">
+              <i class="bi bi-people"></i>
+            </span>
+
+            <div>
+              <strong>Gestion scolaire</strong>
+              <span>Élèves, familles et personnel</span>
+            </div>
+
+          </div>
+
+
+          <div class="feature">
+
+            <span class="feature-icon">
+              <i class="bi bi-shield-check"></i>
+            </span>
+
+            <div>
+              <strong>Sécurisé</strong>
+              <span>Accès selon vos permissions</span>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         PARTIE DROITE : LOGIN
+    ========================== -->
+    <section class="login-panel">
+
+      <div class="login-card">
+
+        <!-- Logo version mobile -->
+        <div class="mobile-logo">
+
+          <img
+            src="/images/logo.png"
+            alt="Logo Groupe Scolaire Sciences et Lettres"
+          />
+
+          <div class="mobile-school-name">
+            <span>Groupe Scolaire</span>
+            <strong>Sciences et Lettres</strong>
+          </div>
+
+        </div>
+
+
+        <header class="login-header">
+
+          <span class="welcome-label">
+            Bienvenue
+          </span>
+
+          <h2>
+            Connectez-vous
+          </h2>
+
+          <p>
+            Saisissez vos identifiants pour accéder à votre espace.
+          </p>
+
+        </header>
+
+
+        <form
+          [formGroup]="form"
+          (ngSubmit)="submit()"
+          class="login-form"
+        >
+
+          <!-- IDENTIFIANT -->
+          <div class="form-group">
+
+            <label for="username">
+              Identifiant
+            </label>
+
+            <div class="input-wrapper">
+
+              <i class="bi bi-person input-icon"></i>
+
+              <input
+                id="username"
+                type="text"
+                formControlName="username"
+                placeholder="Votre identifiant"
+                autocomplete="username"
+              />
+
+            </div>
+
+            @if (
+              form.controls.username.touched &&
+              form.controls.username.invalid
+            ) {
+              <span class="field-error">
+                L'identifiant est obligatoire.
+              </span>
+            }
+
+          </div>
+
+
+          <!-- MOT DE PASSE -->
+          <div class="form-group">
+
+            <label for="password">
+              Mot de passe
+            </label>
+
+            <div class="input-wrapper">
+
+              <i class="bi bi-lock input-icon"></i>
+
+              <input
+                id="password"
+                [type]="showPassword() ? 'text' : 'password'"
+                formControlName="password"
+                placeholder="Votre mot de passe"
+                autocomplete="current-password"
+              />
+
+              <button
+                type="button"
+                class="password-toggle"
+                (click)="togglePassword()"
+                aria-label="Afficher ou masquer le mot de passe"
+              >
+
+                <i
+                  class="bi"
+                  [class.bi-eye]="!showPassword()"
+                  [class.bi-eye-slash]="showPassword()"
+                ></i>
+
+              </button>
+
+            </div>
+
+            @if (
+              form.controls.password.touched &&
+              form.controls.password.invalid
+            ) {
+              <span class="field-error">
+                Le mot de passe est obligatoire.
+              </span>
+            }
+
+          </div>
+
+
+          <!-- ERREUR -->
+          @if (errorMessage()) {
+
+            <div class="message error-message">
+
+              <i class="bi bi-exclamation-circle"></i>
+
+              <span>
+                {{ errorMessage() }}
+              </span>
+
+            </div>
+
+          }
+
+
+          <!-- SUCCÈS -->
+          @if (successMessage()) {
+
+            <div class="message success-message">
+
+              <i class="bi bi-check-circle"></i>
+
+              <span>
+                {{ successMessage() }}
+              </span>
+
+            </div>
+
+          }
+
+
+          <!-- BOUTON CONNEXION -->
+          <button
+            type="submit"
+            class="login-button"
+            [disabled]="loading()"
+          >
+
+            @if (loading()) {
+
+              <span class="spinner"></span>
+
+              <span>
+                Connexion...
+              </span>
+
+            } @else {
+
+              <span>
+                Se connecter
+              </span>
+
+              <i class="bi bi-arrow-right"></i>
+
+            }
+
+          </button>
+
+        </form>
+
+
+        <footer class="login-footer">
+
+          <i class="bi bi-shield-lock"></i>
+
+          <span>
+            Connexion sécurisée
+          </span>
+
+        </footer>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>

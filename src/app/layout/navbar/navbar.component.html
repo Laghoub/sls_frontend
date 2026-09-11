@@ -1,0 +1,33 @@
+<header class="navbar">
+  <div class="navbar-left">
+    <button
+      type="button"
+      class="mobile-menu-button"
+      (click)="toggleMenu()"
+      aria-label="Ouvrir le menu">
+      <i class="bi bi-list"></i>
+    </button>
+
+    <div class="navbar-title">
+      <span class="navbar-subtitle">Espace de gestion</span>
+      <strong>Groupe Scolaire Sciences et Lettres</strong>
+    </div>
+  </div>
+
+  <div class="navbar-right">
+    <button type="button" class="navbar-icon-button" title="Notifications">
+      <i class="bi bi-bell"></i>
+      <span class="notification-dot"></span>
+    </button>
+
+    <div class="navbar-user">
+      <div class="user-avatar">
+        <i class="bi bi-person-fill"></i>
+      </div>
+
+      <div class="user-text">
+        <strong>{{ auth.currentUser()?.username || 'Utilisateur' }}</strong>
+      </div>
+    </div>
+  </div>
+</header>

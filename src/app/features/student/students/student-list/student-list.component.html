@@ -1,0 +1,950 @@
+<div class="student-page">
+
+  <!-- ========================================= -->
+  <!-- HEADER                                    -->
+  <!-- ========================================= -->
+
+  <header class="page-header">
+
+    <div>
+
+      <p class="eyebrow">
+        Gestion des élèves
+      </p>
+
+      <h1>
+        Élèves
+      </h1>
+
+      <p class="subtitle">
+        Identité et profil scolaire des élèves.
+      </p>
+
+    </div>
+
+
+    @if (
+      auth.hasPermission('ELEVE_CREER')
+    ) {
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="openCreate()">
+
+        <i class="bi bi-person-plus"></i>
+
+        Nouvel élève
+
+      </button>
+
+    }
+
+  </header>
+
+
+  <!-- ========================================= -->
+  <!-- MESSAGES                                  -->
+  <!-- ========================================= -->
+
+  @if (success()) {
+
+    <div class="alert success">
+      {{ success() }}
+    </div>
+
+  }
+
+
+  @if (error()) {
+
+    <div class="alert error">
+      {{ error() }}
+    </div>
+
+  }
+
+
+  <!-- ========================================= -->
+  <!-- RECHERCHE                                 -->
+  <!-- ========================================= -->
+
+  <div class="toolbar">
+
+    <input
+      type="search"
+      placeholder="Nom, prénom, matricule, téléphone..."
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="onSearch()"
+    />
+
+  </div>
+
+
+  <!-- ========================================= -->
+  <!-- TABLEAU                                   -->
+  <!-- ========================================= -->
+
+  <section class="card">
+
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>
+              Élève
+            </th>
+
+            <th>
+              Matricule
+            </th>
+
+            <th>
+              Téléphone
+            </th>
+
+            <th>
+              Admission
+            </th>
+
+            <th>
+              Statut
+            </th>
+
+            <th>
+              Actions
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          @for (
+            student of students();
+            track student.id
+          ) {
+
+            <tr>
+
+              <!-- ================================= -->
+              <!-- ÉLÈVE                            -->
+              <!-- ================================= -->
+
+              <td>
+
+                <div>
+
+                  <strong>
+
+                    {{
+                      student.person?.lastName
+                      || '—'
+                    }}
+
+                    {{
+                      student.person?.firstName
+                      || ''
+                    }}
+
+                  </strong>
+
+                </div>
+
+
+                @if (
+                  student.person?.birthDate
+                ) {
+
+                  <small>
+
+                    Né(e) le
+
+                    {{
+                      student.person?.birthDate
+                      | date:'dd/MM/yyyy'
+                    }}
+
+                  </small>
+
+                }
+
+              </td>
+
+
+              <!-- ================================= -->
+              <!-- MATRICULE                         -->
+              <!-- ================================= -->
+
+              <td>
+
+                <strong>
+                  {{ student.studentNumber }}
+                </strong>
+
+              </td>
+
+
+              <!-- ================================= -->
+              <!-- TÉLÉPHONE                         -->
+              <!-- ================================= -->
+
+              <td>
+
+                {{
+                  student.person?.phone
+                  || '—'
+                }}
+
+              </td>
+
+
+              <!-- ================================= -->
+              <!-- ADMISSION                         -->
+              <!-- ================================= -->
+
+              <td>
+
+                {{
+                  student.initialAdmissionDate
+                  ? (
+                      student.initialAdmissionDate
+                      | date:'dd/MM/yyyy'
+                    )
+                  : '—'
+                }}
+
+              </td>
+
+
+              <!-- ================================= -->
+              <!-- STATUT                            -->
+              <!-- ================================= -->
+
+              <td>
+
+                <span class="status">
+                  {{ student.status }}
+                </span>
+
+              </td>
+
+
+              <!-- ================================= -->
+              <!-- ACTIONS                           -->
+              <!-- ================================= -->
+
+              <td>
+
+                <a
+                  class="icon-btn"
+                  [routerLink]="[
+                    '/student/students',
+                    student.id
+                  ]"
+                  title="Voir le dossier">
+
+                  <i class="bi bi-eye"></i>
+
+                </a>
+
+
+                @if (
+                  auth.hasPermission(
+                    'ELEVE_MODIFIER'
+                  )
+                ) {
+
+                  <button
+                    type="button"
+                    class="icon-btn"
+                    title="Modifier"
+                    (click)="openEdit(student)">
+
+                    <i class="bi bi-pencil"></i>
+
+                  </button>
+
+                }
+
+              </td>
+
+            </tr>
+
+          }
+
+          @empty {
+
+            <tr>
+
+              <td colspan="6">
+
+                <div class="empty">
+
+                  @if (loading()) {
+
+                    Chargement...
+
+                  } @else if (
+                    searchTerm.trim()
+                  ) {
+
+                    Aucun élève trouvé.
+
+                  } @else {
+
+                    Aucun élève enregistré.
+
+                  }
+
+                </div>
+
+              </td>
+
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- PAGINATION                               -->
+    <!-- ========================================= -->
+
+    @if (
+      !loading()
+      &&
+      totalElements() > 0
+    ) {
+
+      <div class="pagination">
+
+        <!-- ===================================== -->
+        <!-- INFOS                                -->
+        <!-- ===================================== -->
+
+        <div class="pagination-info">
+
+          Affichage
+
+          <strong>
+            {{ firstItemNumber() }}
+          </strong>
+
+          à
+
+          <strong>
+            {{ lastItemNumber() }}
+          </strong>
+
+          sur
+
+          <strong>
+            {{ totalElements() }}
+          </strong>
+
+          élève{{ totalElements() > 1 ? 's' : '' }}
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- PARTIE DROITE                         -->
+        <!-- ===================================== -->
+
+        <div class="pagination-right">
+
+
+          <!-- =================================== -->
+          <!-- TAILLE PAGE                         -->
+          <!-- =================================== -->
+
+          <div class="pagination-size">
+
+            <span>
+              Afficher
+            </span>
+
+            <select
+              [ngModel]="pageSize()"
+              (ngModelChange)="changePageSize($event)">
+
+              <option [ngValue]="10">
+                10
+              </option>
+
+              <option [ngValue]="20">
+                20
+              </option>
+
+              <option [ngValue]="50">
+                50
+              </option>
+
+              <option [ngValue]="100">
+                100
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- =================================== -->
+          <!-- CONTRÔLES PAGINATION                -->
+          <!-- =================================== -->
+
+          <div class="pagination-controls">
+
+
+            <!-- PAGE PRÉCÉDENTE -->
+
+            <button
+              type="button"
+              class="pagination-btn"
+              [disabled]="first()"
+              (click)="previousPage()"
+              title="Page précédente">
+
+              <i class="bi bi-chevron-left"></i>
+
+            </button>
+
+
+            <!-- PREMIÈRE PAGE SI NÉCESSAIRE -->
+
+            @if (
+              totalPages() > 5
+              &&
+              page() > 2
+            ) {
+
+              <button
+                type="button"
+                class="pagination-page"
+                (click)="goToPage(0)">
+
+                1
+
+              </button>
+
+
+              @if (
+                page() > 3
+              ) {
+
+                <span class="pagination-dots">
+                  ...
+                </span>
+
+              }
+
+            }
+
+
+            <!-- PAGES VISIBLES -->
+
+            @for (
+              p of visiblePages();
+              track p
+            ) {
+
+              <button
+                type="button"
+                class="pagination-page"
+                [class.active]="
+                  p === page()
+                "
+                (click)="goToPage(p)">
+
+                {{ p + 1 }}
+
+              </button>
+
+            }
+
+
+            <!-- DERNIÈRE PAGE SI NÉCESSAIRE -->
+
+            @if (
+              totalPages() > 5
+              &&
+              page() < totalPages() - 3
+            ) {
+
+              @if (
+                page() < totalPages() - 4
+              ) {
+
+                <span class="pagination-dots">
+                  ...
+                </span>
+
+              }
+
+
+              <button
+                type="button"
+                class="pagination-page"
+                (click)="
+                  goToPage(
+                    totalPages() - 1
+                  )
+                ">
+
+                {{ totalPages() }}
+
+              </button>
+
+            }
+
+
+            <!-- PAGE SUIVANTE -->
+
+            <button
+              type="button"
+              class="pagination-btn"
+              [disabled]="last()"
+              (click)="nextPage()"
+              title="Page suivante">
+
+              <i class="bi bi-chevron-right"></i>
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    }
+
+  </section>
+
+</div>
+
+
+<!-- ========================================= -->
+<!-- MODALE                                    -->
+<!-- ========================================= -->
+
+@if (modal()) {
+
+  <div
+    class="modal-backdrop"
+    (click)="closeModal()">
+
+    <section
+      class="modal"
+      (click)="$event.stopPropagation()">
+
+
+      <!-- ===================================== -->
+      <!-- HEADER MODALE                         -->
+      <!-- ===================================== -->
+
+      <div class="modal-header">
+
+        <div>
+
+          <p class="eyebrow">
+
+            {{
+              editing()
+                ? 'Modification'
+                : 'Création'
+            }}
+
+          </p>
+
+          <h2>
+
+            {{
+              editing()
+                ? 'Modifier l’élève'
+                : 'Nouvel élève'
+            }}
+
+          </h2>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="icon-btn"
+          [disabled]="saving()"
+          (click)="closeModal()">
+
+          <i class="bi bi-x-lg"></i>
+
+        </button>
+
+      </div>
+
+
+      <!-- ===================================== -->
+      <!-- BODY MODALE                           -->
+      <!-- ===================================== -->
+
+      <div class="modal-body">
+
+
+        <!-- =================================== -->
+        <!-- IDENTITÉ                            -->
+        <!-- =================================== -->
+
+        <h3>
+          Identité de l'élève
+        </h3>
+
+
+        <div class="form-grid">
+
+
+          <!-- NOM -->
+
+          <div class="field">
+
+            <label>
+              Nom *
+            </label>
+
+            <input
+              [(ngModel)]="form.lastName"
+              maxlength="100"
+              [disabled]="!!editing()"
+            />
+
+          </div>
+
+
+          <!-- PRÉNOM -->
+
+          <div class="field">
+
+            <label>
+              Prénom *
+            </label>
+
+            <input
+              [(ngModel)]="form.firstName"
+              maxlength="100"
+              [disabled]="!!editing()"
+            />
+
+          </div>
+
+
+          <!-- DATE DE NAISSANCE -->
+
+          <div class="field">
+
+            <label>
+              Date de naissance
+            </label>
+
+            <input
+              type="date"
+              [(ngModel)]="form.birthDate"
+              [disabled]="!!editing()"
+            />
+
+          </div>
+
+
+          <!-- LIEU DE NAISSANCE -->
+
+          <div class="field">
+
+            <label>
+              Lieu de naissance
+            </label>
+
+            <input
+              [(ngModel)]="form.birthPlace"
+              maxlength="150"
+              [disabled]="!!editing()"
+            />
+
+          </div>
+
+
+          <!-- SEXE -->
+
+          <div class="field">
+
+            <label>
+              Sexe
+            </label>
+
+            <select
+              [(ngModel)]="form.sex"
+              [disabled]="!!editing()">
+
+              <option value="">
+                Non renseigné
+              </option>
+
+              <option value="M">
+                Masculin
+              </option>
+
+              <option value="F">
+                Féminin
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- NATIONALITÉ -->
+
+          <div class="field">
+
+            <label>
+              Nationalité
+            </label>
+
+            <input
+              [(ngModel)]="form.nationality"
+              maxlength="80"
+              [disabled]="!!editing()"
+            />
+
+          </div>
+
+
+          <!-- ADRESSE -->
+
+          <div class="field full">
+
+            <label>
+              Adresse
+            </label>
+
+            <input
+              [(ngModel)]="form.address"
+              maxlength="300"
+              [disabled]="!!editing()"
+            />
+
+          </div>
+
+
+          <!-- TÉLÉPHONE -->
+
+          <div class="field">
+
+            <label>
+              Téléphone
+            </label>
+
+            <input
+              [(ngModel)]="form.phone"
+              maxlength="30"
+              [disabled]="!!editing()"
+            />
+
+          </div>
+
+
+          <!-- TÉLÉPHONE SECONDAIRE -->
+
+          <div class="field">
+
+            <label>
+              Téléphone secondaire
+            </label>
+
+            <input
+              [(ngModel)]="form.secondaryPhone"
+              maxlength="30"
+              [disabled]="!!editing()"
+            />
+
+          </div>
+
+
+          <!-- EMAIL -->
+
+          <div class="field full">
+
+            <label>
+              Email
+            </label>
+
+            <input
+              type="email"
+              [(ngModel)]="form.email"
+              maxlength="150"
+              [disabled]="!!editing()"
+            />
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================== -->
+        <!-- INFORMATIONS SCOLAIRES              -->
+        <!-- =================================== -->
+
+        <h3>
+          Informations scolaires
+        </h3>
+
+
+        <div class="form-grid">
+
+
+          <!-- MATRICULE AUTOMATIQUE -->
+
+          @if (!editing()) {
+
+            <div class="field full">
+
+              <div class="alert">
+
+                <i class="bi bi-info-circle"></i>
+
+                Le matricule de l'élève sera généré
+                automatiquement lors de l'enregistrement.
+
+              </div>
+
+            </div>
+
+          }
+
+
+          <!-- DATE D'ADMISSION -->
+
+          <div class="field">
+
+            <label>
+              Date d'admission initiale
+            </label>
+
+            <input
+              type="date"
+              [(ngModel)]="
+                form.initialAdmissionDate
+              "
+            />
+
+          </div>
+
+
+          <!-- STATUT -->
+
+          <div class="field">
+
+            <label>
+              Statut *
+            </label>
+
+            <select
+              [(ngModel)]="form.status">
+
+              <option value="ACTIVE">
+                ACTIVE
+              </option>
+
+              <option value="INACTIVE">
+                INACTIVE
+              </option>
+
+              <option value="ARCHIVED">
+                ARCHIVED
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+
+        @if (editing()) {
+
+          <div class="alert">
+
+            Pour cette première version,
+            l'identité de la personne est
+            affichée mais seule la partie
+            scolaire de l'élève est modifiée
+            depuis cet écran.
+
+          </div>
+
+        }
+
+      </div>
+
+
+      <!-- ===================================== -->
+      <!-- FOOTER MODALE                         -->
+      <!-- ===================================== -->
+
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="btn btn-soft"
+          [disabled]="saving()"
+          (click)="closeModal()">
+
+          Annuler
+
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="
+            saving()
+            ||
+            !form.lastName.trim()
+            ||
+            !form.firstName.trim()
+          "
+          (click)="save()">
+
+          @if (saving()) {
+
+            <span>
+              Enregistrement...
+            </span>
+
+          } @else {
+
+            <span>
+              Enregistrer
+            </span>
+
+          }
+
+        </button>
+
+      </div>
+
+    </section>
+
+  </div>
+
+}

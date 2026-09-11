@@ -1,0 +1,76 @@
+<div class="finance-page">
+    <div class="page-head">
+        <div>
+            <div class="eyebrow">Encaissement</div>
+            <h1>Nouveau paiement</h1>
+            <div class="muted">Sélectionnez le responsable, le dossier puis ventilez le montant sur les créances.</div>
+        </div><a class="btn btn-soft" routerLink="/finance/payments">Retour</a>
+    </div>@if(error()){<div class="alert alert-error">{{error()}}</div>}<div class="card">
+        <h2 class="section-title">1. Responsable payeur</h2>
+        <div class="toolbar">
+            <div class="field"><label>Rechercher</label><input [(ngModel)]="guardianSearch"
+                    (keyup.enter)="searchGuardians()" placeholder="Nom, prénom, téléphone, email..."></div><button
+                class="btn btn-soft" (click)="searchGuardians()">Rechercher</button>
+        </div>@if(guardians().length){<div class="search-results">@for(g of guardians();track g.id){<div
+                class="search-row">
+                <div>
+                    <div class="name">{{g.person?.lastName}} {{g.person?.firstName}}</div>
+                    <div class="sub">{{g.person?.phone}} · {{g.person?.email}}</div>
+                </div><button class="btn btn-soft" (click)="chooseGuardian(g)">Choisir</button>
+            </div>}</div>}@if(guardian();as g){<div class="alert alert-success" style="margin-top:12px">
+            <b>{{g.person?.lastName}} {{g.person?.firstName}}</b> sélectionné.
+        </div>}
+    </div>
+    <div class="card">
+        <h2 class="section-title">2. Dossier à régler</h2>
+        <div class="toolbar">
+            <div class="field"><label>Dossier en attente de paiement</label><input [(ngModel)]="registrationSearch"
+                    (keyup.enter)="searchRegistrations()" placeholder="Élève, matricule..."></div><button
+                class="btn btn-soft" (click)="searchRegistrations()" [disabled]="!guardian()">Rechercher</button>
+        </div>@if(registrations().length){<div class="search-results">@for(r of registrations();track r.id){<div
+                class="search-row">
+                <div>
+                    <div class="name">{{r.studentLastName}} {{r.studentFirstName}}</div>
+                    <div class="sub">{{r.studentNumber}} · {{r.status}}</div>
+                </div><button class="btn btn-soft" (click)="chooseRegistration(r)">Choisir</button>
+            </div>}</div>}@if(registration();as r){<div class="alert alert-success" style="margin-top:12px">Dossier de
+            <b>{{r.studentLastName}} {{r.studentFirstName}}</b>
+        </div>}
+    </div>
+    <div class="card">
+        <h2 class="section-title">3. Ventilation</h2>@for(c of charges();track c.id){<div class="allocation-row">
+            <div>
+                <div class="name">{{c.label}}</div>
+                <div class="sub">Reste dû : {{c.remainingAmount|number:'1.2-2'}}</div>
+            </div>
+            <div class="field"><label>Montant affecté</label><input type="number" min="0" [max]="c.remainingAmount"
+                    step="0.01" [(ngModel)]="allocationAmounts[c.id]" (ngModelChange)="recomputeTotal()"></div><button
+                class="btn btn-soft" (click)="allocationAmounts[c.id]=c.remainingAmount;recomputeTotal()">Tout</button>
+        </div>}@if(registration()&&!charges().length){<div class="empty">Aucune créance payable sur ce dossier.</div>}
+    </div>
+    <div class="card">
+        <h2 class="section-title">4. Paiement</h2>
+        <div class="grid-2">
+            <div class="field"><label>Mode de paiement *</label><select [(ngModel)]="paymentMethodId">
+                    <option [ngValue]="null">Sélectionner</option>@for(m of methods();track m.id){<option
+                        [ngValue]="m.id">{{m.name}}</option>}
+                </select></div>
+            <div class="field"><label>Montant encaissé *</label><input type="number" min="0.01" step="0.01"
+                    [(ngModel)]="totalAmount"></div>
+            <div class="field"><label>Session de caisse</label>@if(cashState.current();as cs){<div
+                    class="alert alert-success" style="margin:0">Session ouverte · {{cs.openedAt|date:'dd/MM/yyyy
+                    HH:mm'}}</div>}@else{<div class="muted">Aucune session ouverte dans cet onglet. Le paiement sera
+                    créé sans session de caisse.</div>}</div>
+            <div class="field"><label>Référence externe</label><input [(ngModel)]="externalReference"
+                    placeholder="Chèque, virement..."></div>
+        </div>
+        <div class="field" style="margin-top:12px"><label>Notes</label><textarea rows="3"
+                [(ngModel)]="notes"></textarea></div>
+        <div class="muted" style="margin-top:10px">Si le montant encaissé dépasse la somme ventilée, le backend crée
+            automatiquement un crédit famille pour le reliquat.</div>
+        <div class="actions" style="margin-top:18px"><button class="btn btn-primary" (click)="create()"
+                [disabled]="saving()||!guardian()||!paymentMethodId||totalAmount<=0"><i
+                    class="bi bi-check2-circle"></i>{{saving()?'Enregistrement...':'Valider le paiement'}}</button>
+        </div>
+    </div>
+</div>

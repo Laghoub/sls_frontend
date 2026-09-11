@@ -1,0 +1,1 @@
+export interface ClassGroup{id:number;schoolYearId:number;schoolYearLabel?:string;levelId:number;levelName?:string;campusId:number;campusName?:string;code:string;name:string;capacity?:number|null;status:string} export type ClassGroupRequest=Omit<ClassGroup,'id'|'schoolYearLabel'|'levelName'|'campusName'>;

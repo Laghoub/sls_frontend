@@ -1,0 +1,348 @@
+<div class="page">
+
+  <header class="head">
+
+    <div>
+      <span class="eyebrow">Configuration scolaire</span>
+
+      <h1>Créneaux horaires</h1>
+
+      <p>
+        Configurez les plages horaires utilisées par l'établissement.
+      </p>
+    </div>
+
+    @if (canCreate()) {
+      <button
+        class="btn primary"
+        type="button"
+        (click)="openCreate()"
+      >
+        <i class="bi bi-plus-lg"></i>
+        Nouveau
+      </button>
+    }
+
+  </header>
+
+
+  @if (success()) {
+
+    <div class="alert success">
+      {{ success() }}
+    </div>
+
+  }
+
+
+  @if (error() && !modal()) {
+
+    <div class="alert error">
+      {{ error() }}
+    </div>
+
+  }
+
+
+  <section class="card">
+
+    <div class="toolbar">
+
+      <div>
+        <strong>Liste</strong>
+
+        <small>
+          {{ items().length }} élément(s)
+        </small>
+      </div>
+
+
+      <button
+        class="btn light"
+        type="button"
+        (click)="load()"
+      >
+        <i
+          class="bi bi-arrow-clockwise"
+          [class.spin]="loading()"
+        ></i>
+
+        Actualiser
+      </button>
+
+    </div>
+
+
+    @if (loading()) {
+
+      <div class="state">
+        Chargement...
+      </div>
+
+    } @else if (items().length === 0) {
+
+      <div class="state">
+        Aucune donnée
+      </div>
+
+    } @else {
+
+      <div class="table">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Créneau</th>
+              <th>Début</th>
+              <th>Fin</th>
+              <th>État</th>
+              <th></th>
+            </tr>
+          </thead>
+
+
+          <tbody>
+
+            @for (i of items(); track i.id) {
+
+              <tr>
+
+                <td>
+
+                  <div class="entity">
+
+                    <div class="ico">
+                      <i class="bi bi-clock"></i>
+                    </div>
+
+                    <div>
+
+                      <strong>
+                        {{ i.code }}
+                      </strong>
+
+                      <span>
+                        Ordre {{ i.displayOrder }}
+                      </span>
+
+                    </div>
+
+                  </div>
+
+                </td>
+
+
+                <td>
+                  {{ i.startTime.substring(0, 5) }}
+                </td>
+
+
+                <td>
+                  {{ i.endTime.substring(0, 5) }}
+                </td>
+
+
+                <td>
+
+                  <span
+                    class="badge"
+                    [class.ok]="i.active"
+                  >
+                    {{ i.active ? 'Actif' : 'Inactif' }}
+                  </span>
+
+                </td>
+
+
+                <td class="actions">
+
+                  @if (canEdit()) {
+
+                    <button
+                      class="icon"
+                      type="button"
+                      (click)="openEdit(i)"
+                      title="Modifier"
+                    >
+                      <i class="bi bi-pencil"></i>
+                    </button>
+
+                  }
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    }
+
+  </section>
+
+</div>
+
+
+@if (modal()) {
+
+  <div
+    class="overlay"
+    (click)="close()"
+  >
+
+    <section
+      class="modal"
+      (click)="$event.stopPropagation()"
+    >
+
+      <header class="modal-head">
+
+        <h2>
+          {{ editing() ? 'Modifier' : 'Créer' }} — Créneau horaire
+        </h2>
+
+
+        <button
+          class="icon"
+          type="button"
+          (click)="close()"
+          [disabled]="saving()"
+        >
+          <i class="bi bi-x-lg"></i>
+        </button>
+
+      </header>
+
+
+      <form
+        [formGroup]="form"
+        (ngSubmit)="save()"
+      >
+
+        <div class="body">
+
+          <div class="grid">
+
+            <div class="field">
+
+              <label>
+                Code *
+              </label>
+
+              <input
+                type="text"
+                formControlName="code"
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Ordre *
+              </label>
+
+              <input
+                type="number"
+                min="0"
+                formControlName="displayOrder"
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Début *
+              </label>
+
+              <input
+                type="time"
+                formControlName="startTime"
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Fin *
+              </label>
+
+              <input
+                type="time"
+                formControlName="endTime"
+              >
+
+            </div>
+
+
+            <label class="check">
+
+              <input
+                type="checkbox"
+                formControlName="active"
+              >
+
+              Actif
+
+            </label>
+
+          </div>
+
+
+          @if (error()) {
+
+            <div class="alert error">
+              {{ error() }}
+            </div>
+
+          }
+
+        </div>
+
+
+        <footer class="modal-foot">
+
+          <button
+            type="button"
+            class="btn light"
+            (click)="close()"
+            [disabled]="saving()"
+          >
+            Annuler
+          </button>
+
+
+          <button
+            class="btn primary"
+            type="submit"
+            [disabled]="saving()"
+          >
+
+            @if (saving()) {
+              Enregistrement...
+            } @else {
+              Enregistrer
+            }
+
+          </button>
+
+        </footer>
+
+      </form>
+
+    </section>
+
+  </div>
+
+}

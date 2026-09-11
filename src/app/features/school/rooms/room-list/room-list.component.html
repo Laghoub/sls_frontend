@@ -1,0 +1,65 @@
+<div class="page">
+    <header class="head">
+        <div><span class="eyebrow">Configuration scolaire</span>
+            <h1>Salles</h1>
+            <p>Gestion des salles de l'établissement.</p>
+        </div>@if(canCreate()){<button class="btn primary" (click)="openCreate()">Nouveau</button>}
+    </header>@if(success()){<div class="alert success">{{success()}}</div>}@if(error()&&!modal()){<div
+        class="alert error">{{error()}}</div>}<section class="card">
+        <div class="toolbar">
+            <div><strong>Liste</strong><small>{{items().length}} élément(s)</small></div><button class="btn light"
+                (click)="load()">Actualiser</button>
+        </div>@if(loading()){<div class="state">Chargement...</div>}@else{<div class="table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Salle</th>
+                        <th>Campus</th>
+                        <th>Type</th>
+                        <th>Capacité</th>
+                        <th>État</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>@for(i of items();track i.id){<tr>
+                        <td>
+                            <div class="entity">
+                                <div class="ico"><i class="bi bi-door-open"></i></div>
+                                <div><strong>{{i.name}}</strong><span>{{i.code}}</span></div>
+                            </div>
+                        </td>
+                        <td>{{refName(i.campusId)}}</td>
+                        <td>{{i.roomType||'—'}}</td>
+                        <td>{{i.capacity??'—'}}</td>
+                        <td><span class="badge" [class.ok]="i.active">{{i.active?'Active':'Inactive'}}</span></td>
+                        <td class="actions">@if(canEdit()){<button class="icon" (click)="openEdit(i)"><i
+                                    class="bi bi-pencil"></i></button>}</td>
+                    </tr>}</tbody>
+            </table>
+        </div>}
+    </section>
+</div>@if(modal()){<div class="overlay" (click)="close()">
+    <section class="modal" (click)="$event.stopPropagation()">
+        <header class="modal-head">
+            <h2>{{editing()?'Modifier':'Créer'}} — Salles</h2><button class="icon" (click)="close()"><i
+                    class="bi bi-x-lg"></i></button>
+        </header>
+        <form [formGroup]="form" (ngSubmit)="save()">
+            <div class="body">
+                <div class="grid">
+                    <div class="field full"><label>Campus *</label><select formControlName="campusId">
+                            <option [ngValue]="0">Sélectionner</option>@for(r of refs();track r.id){<option
+                                [ngValue]="r.id">{{r.name}}</option>}
+                        </select></div>
+                    <div class="field"><label>Code *</label><input formControlName="code"></div>
+                    <div class="field"><label>Nom *</label><input formControlName="name"></div>
+                    <div class="field"><label>Capacité</label><input type="number" formControlName="capacity"></div>
+                    <div class="field"><label>Type</label><input formControlName="roomType"></div><label
+                        class="check"><input type="checkbox" formControlName="active"> Active</label>
+                </div>@if(error()){<div class="alert error">{{error()}}</div>}
+            </div>
+            <footer class="modal-foot"><button type="button" class="btn light" (click)="close()">Annuler</button><button
+                    class="btn primary">Enregistrer</button></footer>
+        </form>
+    </section>
+</div>}

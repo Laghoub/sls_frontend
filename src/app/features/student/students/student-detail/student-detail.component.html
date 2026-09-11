@@ -1,0 +1,364 @@
+<div class="student-page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Dossier élève</p>
+      <h1>{{ student()?.studentNumber || "Chargement..." }}</h1>
+      <p class="subtitle">
+        Person #{{ student()?.personId }} · {{ student()?.status }}
+      </p>
+    </div>
+    <a class="btn btn-soft" routerLink="/student/students"
+      ><i class="bi bi-arrow-left"></i>Retour</a
+    >
+  </header>
+  @if (success()) {
+    <div class="alert success">{{ success() }}</div>
+  }
+  @if (error()) {
+    <div class="alert error">{{ error() }}</div>
+  }
+  <nav class="tabs">
+    <button
+      class="tab"
+      [class.active]="tab() === 'overview'"
+      (click)="setTab('overview')"
+    >
+      Vue générale
+    </button>
+    @if (auth.hasPermission("LIEN_RESPONSABLE_CONSULTER")) {
+      <button
+        class="tab"
+        [class.active]="tab() === 'guardians'"
+        (click)="setTab('guardians')"
+      >
+        Responsables
+      </button>
+    }
+    @if (auth.hasPermission("INFO_FAMILIALE_CONSULTER")) {
+      <button
+        class="tab"
+        [class.active]="tab() === 'family'"
+        (click)="setTab('family')"
+      >
+        Famille
+      </button>
+    }
+    @if (auth.hasPermission("PERSONNE_AUTORISEE_CONSULTER")) {
+      <button
+        class="tab"
+        [class.active]="tab() === 'pickups'"
+        (click)="setTab('pickups')"
+      >
+        Sorties autorisées
+      </button>
+    }
+    @if (auth.hasPermission("INFO_MEDICALE_ELEVE_CONSULTER")) {
+      <button
+        class="tab"
+        [class.active]="tab() === 'medical'"
+        (click)="setTab('medical')"
+      >
+        Médical
+      </button>
+    }
+  </nav>
+  @if (tab() === "overview") {
+    <section class="card section">
+      <h2>Informations principales</h2>
+      <div class="cards">
+        <div class="mini">
+          <small>Matricule</small
+          ><strong>{{ student()?.studentNumber || "—" }}</strong>
+        </div>
+        <div class="mini">
+          <small>Admission</small
+          ><strong>{{ student()?.initialAdmissionDate || "—" }}</strong>
+        </div>
+        <div class="mini">
+          <small>Statut</small><strong>{{ student()?.status || "—" }}</strong>
+        </div>
+      </div>
+    </section>
+  }
+  @if (tab() === "guardians") {
+    <section class="card section">
+      <div class="section-head">
+        <h2>Responsables liés</h2>
+        @if (auth.hasPermission("LIEN_RESPONSABLE_GERER")) {
+          <button
+  class="btn btn-primary"
+  (click)="openGuardianModal()"
+>
+  <i class="bi bi-person-plus"></i>
+  Lier un responsable
+</button>
+        }
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Responsable</th>
+              <th>Lien</th>
+              <th>Légal</th>
+              <th>Financier</th>
+              <th>Principal</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (l of links(); track l.id) {
+              <tr>
+                <td>
+  <strong>
+    {{ guardianDisplayName(l.guardianId) }}
+  </strong>
+</td>
+                <td>{{ l.relationshipType }}</td>
+                <td>{{ l.legalGuardian ? "Oui" : "Non" }}</td>
+                <td>{{ l.financialResponsible ? "Oui" : "Non" }}</td>
+                <td>{{ l.primaryContact ? "Oui" : "Non" }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5">
+                  <div class="empty">Aucun responsable lié.</div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+  @if (tab() === "family") {
+    <section class="card section">
+      <h2>Informations familiales</h2>
+      <div class="form-grid">
+        <div class="field">
+          <label>Situation du père</label
+          ><input [(ngModel)]="family.fatherLifeStatus" />
+        </div>
+        <div class="field">
+          <label>Situation de la mère</label
+          ><input [(ngModel)]="family.motherLifeStatus" />
+        </div>
+        <div class="field">
+          <label>Nombre de frères</label
+          ><input type="number" min="0" [(ngModel)]="family.numberOfBrothers" />
+        </div>
+        <div class="field">
+          <label>Nombre de sœurs</label
+          ><input type="number" min="0" [(ngModel)]="family.numberOfSisters" />
+        </div>
+        <div class="field full">
+          <label>Parents divorcés</label
+          ><select [(ngModel)]="family.parentsDivorced">
+            <option [ngValue]="null">Non renseigné</option>
+            <option [ngValue]="true">Oui</option>
+            <option [ngValue]="false">Non</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label>Notes</label><textarea [(ngModel)]="family.notes"></textarea>
+        </div>
+      </div>
+      @if (auth.hasPermission("INFO_FAMILIALE_GERER")) {
+        <div class="actions">
+          <button class="btn btn-primary" (click)="saveFamily()">
+            Enregistrer
+          </button>
+        </div>
+      }
+    </section>
+  }
+  @if (tab() === "pickups") {
+    <section class="card section">
+      <div class="section-head">
+        <h2>Personnes autorisées</h2>
+        @if (auth.hasPermission("PERSONNE_AUTORISEE_GERER")) {
+          <button class="btn btn-primary" (click)="openPickup()">
+            Ajouter
+          </button>
+        }
+      </div>
+      <div class="cards">
+        @for (p of pickups(); track p.id) {
+          <div class="mini">
+            <strong>{{ p.firstName }} {{ p.lastName }}</strong
+            ><span>{{ p.relationship || "Lien non renseigné" }}</span
+            ><span>{{ p.phone }}</span
+            ><span class="status">{{ p.active ? "ACTIF" : "INACTIF" }}</span>
+          </div>
+        } @empty {
+          <div class="empty">Aucune personne autorisée.</div>
+        }
+      </div>
+    </section>
+  }
+  @if (tab() === "medical") {
+    <section class="card section">
+      <div class="medical-note">
+        <i class="bi bi-shield-lock"></i> Données sensibles — accès contrôlé.
+      </div>
+      <h2>Informations médicales</h2>
+      <div class="form-grid">
+        <div class="field">
+          <label>Groupe sanguin</label
+          ><input [(ngModel)]="medical.bloodGroup" />
+        </div>
+        <div class="field full">
+          <label>Conditions médicales</label
+          ><textarea [(ngModel)]="medical.medicalConditions"></textarea>
+        </div>
+        <div class="field full">
+          <label>Allergies</label
+          ><textarea [(ngModel)]="medical.allergies"></textarea>
+        </div>
+        <div class="field full">
+          <label>Traitements</label
+          ><textarea [(ngModel)]="medical.treatments"></textarea>
+        </div>
+        <div class="field full">
+          <label>Notes d’urgence</label
+          ><textarea [(ngModel)]="medical.emergencyNotes"></textarea>
+        </div>
+      </div>
+      @if (auth.hasPermission("INFO_MEDICALE_ELEVE_GERER")) {
+        <div class="actions">
+          <button class="btn btn-primary" (click)="saveMedical()">
+            Enregistrer
+          </button>
+        </div>
+      }
+    </section>
+  }
+</div>
+@if (guardianModal()) {
+  <div class="modal-backdrop" (click)="guardianModal.set(false)">
+    <section class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Lier un responsable</h2>
+        <button class="icon-btn" (click)="guardianModal.set(false)">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="field full">
+            <label>Responsable *</label
+            ><select [(ngModel)]="linkForm.guardianId">
+              <option [ngValue]="0">Sélectionner...</option>
+             @for (g of availableGuardians(); track g.id) {
+
+  <option [ngValue]="g.id">
+
+    {{ g.person?.lastName || 'Responsable' }}
+    {{ g.person?.firstName || '' }}
+
+    @if (g.person?.phone) {
+      — {{ g.person?.phone }}
+    }
+
+  </option>
+}
+            </select>
+          </div>
+          <div class="field">
+            <label>Relation</label
+            ><input [(ngModel)]="linkForm.relationshipType" />
+          </div>
+          <label class="checkbox"
+            ><input
+              type="checkbox"
+              [(ngModel)]="linkForm.legalGuardian"
+            />Responsable légal</label
+          ><label class="checkbox"
+            ><input
+              type="checkbox"
+              [(ngModel)]="linkForm.financialResponsible"
+            />Responsable financier</label
+          ><label class="checkbox"
+            ><input
+              type="checkbox"
+              [(ngModel)]="linkForm.primaryContact"
+            />Contact principal</label
+          ><label class="checkbox"
+            ><input
+              type="checkbox"
+              [(ngModel)]="linkForm.pickupAuthorized"
+            />Autorisé à récupérer</label
+          >
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-soft" (click)="guardianModal.set(false)">
+          Annuler</button
+        ><button
+          class="btn btn-primary"
+          [disabled]="!linkForm.guardianId || saving()"
+          (click)="saveLink()"
+        >
+          Enregistrer
+        </button>
+      </div>
+    </section>
+  </div>
+}
+@if (pickupModal()) {
+  <div class="modal-backdrop" (click)="pickupModal.set(false)">
+    <section class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Personne autorisée</h2>
+        <button class="icon-btn" (click)="pickupModal.set(false)">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="field">
+            <label>Prénom *</label><input [(ngModel)]="pickup.firstName" />
+          </div>
+          <div class="field">
+            <label>Nom *</label><input [(ngModel)]="pickup.lastName" />
+          </div>
+          <div class="field">
+            <label>Lien</label><input [(ngModel)]="pickup.relationship" />
+          </div>
+          <div class="field">
+            <label>Téléphone *</label><input [(ngModel)]="pickup.phone" />
+          </div>
+          <div class="field">
+            <label>N° pièce</label
+            ><input [(ngModel)]="pickup.identityDocumentNumber" />
+          </div>
+          <div class="field">
+            <label>Délivrée par</label><input [(ngModel)]="pickup.issuedBy" />
+          </div>
+          <div class="field">
+            <label>Valide du</label
+            ><input type="date" [(ngModel)]="pickup.validFrom" />
+          </div>
+          <div class="field">
+            <label>Au</label
+            ><input type="date" [(ngModel)]="pickup.validUntil" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-soft" (click)="pickupModal.set(false)">
+          Annuler</button
+        ><button
+          class="btn btn-primary"
+          [disabled]="
+            !pickup.firstName.trim() ||
+            !pickup.lastName.trim() ||
+            !pickup.phone.trim()
+          "
+          (click)="savePickup()"
+        >
+          Ajouter
+        </button>
+      </div>
+    </section>
+  </div>
+}

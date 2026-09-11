@@ -1,0 +1,338 @@
+<div class="page">
+
+  <header class="head">
+    <div>
+      <span class="eyebrow">Configuration scolaire</span>
+
+      <h1>Campus</h1>
+
+      <p>
+        Gérez les différents sites de l'établissement.
+      </p>
+    </div>
+
+    @if (canCreate()) {
+      <button
+        class="btn primary"
+        type="button"
+        (click)="openCreate()"
+      >
+        <i class="bi bi-plus-lg"></i>
+        Nouveau
+      </button>
+    }
+  </header>
+
+
+  @if (success()) {
+    <div class="alert success">
+      {{ success() }}
+    </div>
+  }
+
+
+  @if (error() && !modal()) {
+    <div class="alert error">
+      {{ error() }}
+    </div>
+  }
+
+
+  <section class="card">
+
+    <div class="toolbar">
+
+      <div>
+        <strong>Liste</strong>
+
+        <small>
+          {{ items().length }} élément(s)
+        </small>
+      </div>
+
+
+      <button
+        class="btn light"
+        type="button"
+        (click)="load()"
+      >
+        <i
+          class="bi bi-arrow-clockwise"
+          [class.spin]="loading()"
+        ></i>
+
+        Actualiser
+      </button>
+
+    </div>
+
+
+    @if (loading()) {
+
+      <div class="state">
+        Chargement...
+      </div>
+
+    } @else if (items().length === 0) {
+
+      <div class="state">
+        Aucune donnée
+      </div>
+
+    } @else {
+
+      <div class="table">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Campus</th>
+              <th>Adresse</th>
+              <th>Téléphone</th>
+              <th>État</th>
+              <th></th>
+            </tr>
+          </thead>
+
+
+          <tbody>
+
+            @for (i of items(); track i.id) {
+
+              <tr>
+
+                <td>
+
+                  <div class="entity">
+
+                    <div class="ico">
+                      <i class="bi bi-building"></i>
+                    </div>
+
+                    <div>
+                      <strong>
+                        {{ i.name }}
+                      </strong>
+
+                      <span>
+                        {{ i.code }}
+                      </span>
+                    </div>
+
+                  </div>
+
+                </td>
+
+
+                <td>
+                  {{ i.address || '—' }}
+                </td>
+
+
+                <td>
+                  {{ i.phone || '—' }}
+                </td>
+
+
+                <td>
+
+                  <span
+                    class="badge"
+                    [class.ok]="i.active"
+                  >
+                    {{ i.active ? 'Actif' : 'Inactif' }}
+                  </span>
+
+                </td>
+
+
+                <td class="actions">
+
+                  @if (canEdit()) {
+
+                    <button
+                      class="icon"
+                      type="button"
+                      (click)="openEdit(i)"
+                      title="Modifier"
+                    >
+                      <i class="bi bi-pencil"></i>
+                    </button>
+
+                  }
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    }
+
+  </section>
+
+</div>
+
+
+@if (modal()) {
+
+  <div
+    class="overlay"
+    (click)="close()"
+  >
+
+    <section
+      class="modal"
+      (click)="$event.stopPropagation()"
+    >
+
+      <header class="modal-head">
+
+        <h2>
+          {{ editing() ? 'Modifier' : 'Créer' }} — Campus
+        </h2>
+
+
+        <button
+          class="icon"
+          type="button"
+          (click)="close()"
+          [disabled]="saving()"
+        >
+          <i class="bi bi-x-lg"></i>
+        </button>
+
+      </header>
+
+
+      <form
+        [formGroup]="form"
+        (ngSubmit)="save()"
+      >
+
+        <div class="body">
+
+          <div class="grid">
+
+            <div class="field">
+
+              <label>
+                Code *
+              </label>
+
+              <input
+                type="text"
+                formControlName="code"
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Nom *
+              </label>
+
+              <input
+                type="text"
+                formControlName="name"
+              >
+
+            </div>
+
+
+            <div class="field full">
+
+              <label>
+                Adresse
+              </label>
+
+              <textarea
+                formControlName="address"
+              ></textarea>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Téléphone
+              </label>
+
+              <input
+                type="text"
+                formControlName="phone"
+              >
+
+            </div>
+
+
+            <label class="check">
+
+              <input
+                type="checkbox"
+                formControlName="active"
+              >
+
+              Actif
+
+            </label>
+
+          </div>
+
+
+          @if (error()) {
+
+            <div class="alert error">
+              {{ error() }}
+            </div>
+
+          }
+
+        </div>
+
+
+        <footer class="modal-foot">
+
+          <button
+            type="button"
+            class="btn light"
+            (click)="close()"
+            [disabled]="saving()"
+          >
+            Annuler
+          </button>
+
+
+          <button
+            class="btn primary"
+            type="submit"
+            [disabled]="saving()"
+          >
+
+            @if (saving()) {
+              Enregistrement...
+            } @else {
+              Enregistrer
+            }
+
+          </button>
+
+        </footer>
+
+      </form>
+
+    </section>
+
+  </div>
+
+}

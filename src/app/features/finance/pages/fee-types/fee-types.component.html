@@ -1,0 +1,73 @@
+<div class="finance-page">
+    <div class="page-head">
+        <div>
+            <div class="eyebrow">Paramétrage</div>
+            <h1>Types de frais</h1>
+            <div class="muted">Inscription, scolarité, transport et autres catégories facturables.</div>
+        </div>@if(auth.hasPermission('TARIF_GERER')){<button class="btn btn-primary" (click)="openCreate()"><i
+                class="bi bi-plus-lg"></i>Nouveau type</button>}
+    </div>@if(error()){<div class="alert alert-error">{{error()}}</div>}@if(success()){<div class="alert alert-success">
+        {{success()}}</div>}<div class="card">
+        <div class="toolbar">
+            <div class="field"><label>Recherche</label><input [(ngModel)]="search" (keyup.enter)="filter()"
+                    placeholder="Code, nom, catégorie..."></div><button class="btn btn-soft" (click)="filter()"><i
+                    class="bi bi-search"></i>Rechercher</button>
+        </div>
+    </div>
+    <div class="card">
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Nom</th>
+                        <th>Catégorie</th>
+                        <th>Ordre</th>
+                        <th>État</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>@for(x of items();track x.id){<tr>
+                        <td class="name">{{x.code}}</td>
+                        <td>{{x.name}}</td>
+                        <td>{{x.category}}</td>
+                        <td>{{x.displayOrder ?? '—'}}</td>
+                        <td><span class="badge" [class.ACTIVE]="x.active">{{x.active?'ACTIF':'INACTIF'}}</span></td>
+                        <td>@if(auth.hasPermission('TARIF_GERER')){<button class="btn btn-soft" (click)="openEdit(x)"><i
+                                    class="bi bi-pencil"></i>Modifier</button>}</td>
+                    </tr>}@if(!loading()&&!items().length){<tr>
+                        <td colspan="6">
+                            <div class="empty">Aucun type de frais.</div>
+                        </td>
+                    </tr>}</tbody>
+            </table>
+        </div>
+        <div class="pagination"><span class="muted">{{total()}} élément(s)</span>
+            <div class="pages"><button class="page-btn" (click)="prev()" [disabled]="page()===0">‹</button>@for(i of
+                range();track i){<button class="page-btn" [class.active]="i===page()"
+                    (click)="go(i)">{{i+1}}</button>}<button class="page-btn" (click)="next()"
+                    [disabled]="page()+1>=pages()">›</button></div><select [(ngModel)]="size"
+                (change)="page.set(0);load()">
+                <option [ngValue]="10">10</option>
+                <option [ngValue]="20">20</option>
+                <option [ngValue]="50">50</option>
+                <option [ngValue]="100">100</option>
+            </select>
+        </div>
+    </div>@if(modal()){<div class="modal-backdrop">
+        <div class="modal">
+            <h2>{{editing()?'Modifier':'Nouveau'}} type de frais</h2>
+            <div class="grid-2">
+                <div class="field"><label>Code *</label><input [(ngModel)]="form.code"></div>
+                <div class="field"><label>Nom *</label><input [(ngModel)]="form.name"></div>
+                <div class="field"><label>Catégorie *</label><input [(ngModel)]="form.category"
+                        placeholder="INSCRIPTION"></div>
+                <div class="field"><label>Ordre d'affichage</label><input type="number" [(ngModel)]="form.displayOrder">
+                </div>
+            </div><label><input type="checkbox" [(ngModel)]="form.active"> Actif</label>
+            <div class="actions" style="margin-top:18px"><button class="btn btn-soft"
+                    (click)="modal.set(false)">Annuler</button><button class="btn btn-primary"
+                    (click)="save()">Enregistrer</button></div>
+        </div>
+    </div>}
+</div>

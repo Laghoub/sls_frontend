@@ -1,0 +1,94 @@
+<div class="finance-page">
+    <div class="page-head">
+        <div>
+            <div class="eyebrow">Facturation</div>
+            <h1>Créances</h1>
+            <div class="muted">Montants dus avant leur règlement. La créance est distincte du paiement.</div>
+        </div>@if(auth.hasPermission('CREANCE_GERER')){<button class="btn btn-primary" (click)="openCreate()"
+            [disabled]="!registrationCaseId"><i class="bi bi-plus-lg"></i>Nouvelle créance</button>}
+    </div>@if(error()){<div class="alert alert-error">{{error()}}</div>}<div class="card">
+        <h2 class="section-title">Sélectionner un dossier d'inscription</h2>
+        <div class="toolbar">
+            <div class="field"><label>Recherche</label><input [(ngModel)]="registrationSearch"
+                    (keyup.enter)="searchRegistrations()" placeholder="Élève, matricule, responsable..."></div><button
+                class="btn btn-soft" (click)="searchRegistrations()">Rechercher</button>
+        </div>@if(registrations().length){<div class="search-results">@for(r of registrations();track r.id){<div
+                class="search-row">
+                <div>
+                    <div class="name">{{r.studentLastName}} {{r.studentFirstName}}</div>
+                    <div class="sub">{{r.studentNumber}} · Responsable {{r.guardianLastName}} {{r.guardianFirstName}} ·
+                        {{r.status}}</div>
+                </div><button class="btn btn-soft" (click)="chooseRegistration(r)">Choisir</button>
+            </div>}</div>}@if(selectedRegistration();as r){<div class="alert alert-success" style="margin-top:12px">
+            Dossier sélectionné : <b>{{r.studentLastName}} {{r.studentFirstName}}</b> · {{r.studentNumber}}</div>}
+    </div>
+    <div class="card">
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Libellé</th>
+                        <th>Frais</th>
+                        <th>Montant</th>
+                        <th>Payé</th>
+                        <th>Reste</th>
+                        <th>Échéance</th>
+                        <th>Statut</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>@for(x of items();track x.id){<tr>
+                        <td class="name">{{x.label}}</td>
+                        <td>{{fee(x.feeTypeId)}}</td>
+                        <td class="money">{{x.finalAmount|number:'1.2-2'}}</td>
+                        <td>{{x.paidAmount|number:'1.2-2'}}</td>
+                        <td class="money">{{x.remainingAmount|number:'1.2-2'}}</td>
+                        <td>{{x.dueDate?(x.dueDate|date:'dd/MM/yyyy'):'—'}}</td>
+                        <td><span class="badge {{x.status}}">{{status(x.status)}}</span></td>
+                        <td>@if(auth.hasPermission('CREANCE_GERER')&&x.status!=='PAID'&&x.status!=='CANCELLED'){<button
+                                class="btn btn-danger" (click)="askCancel(x.id)">Annuler</button>}</td>
+                    </tr>}@if(!items().length){<tr>
+                        <td colspan="8">
+                            <div class="empty">{{registrationCaseId?'Aucune créance pour ce dossier.':'Sélectionnez un
+                                dossier pour afficher ses créances.'}}</div>
+                        </td>
+                    </tr>}</tbody>
+            </table>
+        </div>
+        <div class="pagination"><span class="muted">{{total()}} créance(s)</span>
+            <div><button class="page-btn" (click)="prev()" [disabled]="page()===0">‹</button> {{page()+1}} /
+                {{pages()||1}} <button class="page-btn" (click)="next()" [disabled]="page()+1>=pages()">›</button></div>
+            <select [(ngModel)]="size" (change)="page.set(0);load()">
+                <option [ngValue]="10">10</option>
+                <option [ngValue]="20">20</option>
+                <option [ngValue]="50">50</option>
+                <option [ngValue]="100">100</option>
+            </select>
+        </div>
+    </div>@if(modal()){<div class="modal-backdrop">
+        <div class="modal">
+            <h2>Nouvelle créance</h2>
+            <div class="grid-2">
+                <div class="field"><label>Type de frais *</label><select [(ngModel)]="form.feeTypeId">@for(f of
+                        feeTypes();track f.id){<option [ngValue]="f.id">{{f.name}}</option>}</select></div>
+                <div class="field"><label>Libellé *</label><input [(ngModel)]="form.label"></div>
+                <div class="field"><label>Montant initial *</label><input type="number" min="0" step="0.01"
+                        [(ngModel)]="form.originalAmount"></div>
+                <div class="field"><label>Remise</label><input type="number" min="0" step="0.01"
+                        [(ngModel)]="form.discountAmount"></div>
+                <div class="field"><label>Échéance</label><input type="date" [(ngModel)]="form.dueDate"></div>
+            </div>
+            <div class="actions" style="margin-top:18px"><button class="btn btn-soft"
+                    (click)="modal.set(false)">Annuler</button><button class="btn btn-primary"
+                    (click)="save()">Créer</button></div>
+        </div>
+    </div>}@if(cancelId()){<div class="modal-backdrop">
+        <div class="modal">
+            <h2>Annuler la créance</h2>
+            <div class="field"><label>Motif *</label><textarea rows="4" [(ngModel)]="cancelReason"></textarea></div>
+            <div class="actions"><button class="btn btn-soft" (click)="cancelId.set(null)">Retour</button><button
+                    class="btn btn-danger" (click)="confirmCancel()"
+                    [disabled]="!cancelReason.trim()">Confirmer</button></div>
+        </div>
+    </div>}
+</div>

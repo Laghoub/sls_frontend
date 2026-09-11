@@ -1,0 +1,1 @@
+export interface SchoolYear{id:number;code:string;label:string;startDate:string;endDate:string;status:string;currentYear:boolean} export type SchoolYearRequest=Omit<SchoolYear,'id'>;

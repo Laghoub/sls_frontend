@@ -1,0 +1,124 @@
+<div class="reg-page">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Admissions</div>
+      <h1>Nouvelle pré-inscription</h1>
+      <div class="muted">
+        Réutilise un élève et un responsable existants, sans charger toute la
+        base.
+      </div>
+    </div>
+    <a class="btn btn-soft" routerLink="/registration">Retour</a>
+  </div>
+  @if (error()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  }
+  <div class="stepper">
+    <div class="step active">1. Élève</div>
+    <div class="step active">2. Responsable</div>
+    <div class="step active">3. Scolarité demandée</div>
+    <div class="step">4. Paiement</div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <h2 class="section-title">Élève</h2>
+      <div class="field">
+        <label>Rechercher</label
+        ><input
+          [(ngModel)]="studentSearch"
+          (ngModelChange)="searchStudents()"
+          placeholder="Nom, prénom ou matricule"
+        />
+      </div>
+      <div class="choice-list">
+        @for (s of students(); track s.id) {
+          <div
+            class="choice"
+            [class.selected]="studentId === s.id"
+            (click)="studentId = s.id"
+          >
+            <div class="name">
+              {{ s.person?.lastName }} {{ s.person?.firstName }}
+            </div>
+            <div class="sub">
+              {{ s.studentNumber }} · {{ s.person?.phone || "Sans téléphone" }}
+            </div>
+          </div>
+        }
+      </div>
+      <div class="sub">
+        Élève absent ? Crée-le d'abord dans le référentiel Élèves, puis reviens
+        ici.
+      </div>
+    </div>
+    <div class="card">
+      <h2 class="section-title">Responsable</h2>
+      <div class="field">
+        <label>Rechercher</label
+        ><input
+          [(ngModel)]="guardianSearch"
+          (ngModelChange)="searchGuardians()"
+          placeholder="Nom, prénom ou téléphone"
+        />
+      </div>
+      <div class="choice-list">
+        @for (g of guardians(); track g.id) {
+          <div
+            class="choice"
+            [class.selected]="guardianId === g.id"
+            (click)="guardianId = g.id"
+          >
+            <div class="name">
+              {{ g.person?.lastName }} {{ g.person?.firstName }}
+            </div>
+            <div class="sub">
+              {{ g.person?.phone || "Sans téléphone" }} ·
+              {{ g.person?.email || "Sans email" }}
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h2 class="section-title">Scolarité demandée</h2>
+    <div class="grid-3">
+      <div class="field">
+        <label>Année scolaire *</label
+        ><select [(ngModel)]="schoolYearId">
+          <option [ngValue]="null">Sélectionner</option>
+          @for (y of years(); track y.id) {
+            <option [ngValue]="y.id">{{ y.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label>Niveau demandé *</label
+        ><select [(ngModel)]="levelId" (change)="classGroupId = null">
+          <option [ngValue]="null">Sélectionner</option>
+          @for (l of levels(); track l.id) {
+            <option [ngValue]="l.id">{{ l.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label>Classe souhaitée</label
+        ><select [(ngModel)]="classGroupId">
+          <option [ngValue]="null">À affecter plus tard</option>
+          @for (c of availableClasses(); track c.id) {
+            <option [ngValue]="c.id">{{ c.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label>Date</label><input type="date" [(ngModel)]="registrationDate" />
+      </div>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
+      <i class="bi bi-check2-circle"></i>
+      {{ saving() ? "Création..." : "Créer la pré-inscription" }}
+    </button>
+  </div>
+</div>

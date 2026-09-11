@@ -1,0 +1,4 @@
+import {inject,Injectable} from '@angular/core';import {HttpClient} from '@angular/common/http';import {Observable} from 'rxjs';import {API_CONFIG} from '../../../../core/api.config';import {SchoolYear,SchoolYearRequest} from '../models/school-year.model';
+@Injectable({providedIn:'root'}) export class SchoolYearService{private http=inject(HttpClient);private url=`${API_CONFIG.baseUrl}/school-years`;getAll():Observable<SchoolYear[]>{return this.http.get<SchoolYear[]>(this.url)} create(r:SchoolYearRequest){return this.http.post<SchoolYear>(this.url,r)} update(id:number,r:SchoolYearRequest){return this.http.put<SchoolYear>(`${this.url}/${id}`,r)}
+  setCurrent(id:number){return this.http.put<SchoolYear>(`${this.url}/${id}/current`,{});}
+}

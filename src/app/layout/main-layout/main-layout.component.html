@@ -1,0 +1,18 @@
+<div class="app-layout">
+  <app-sidebar
+    [mobileOpen]="mobileMenuOpen"
+    (closeMobile)="closeMobileMenu()">
+  </app-sidebar>
+
+  @if (mobileMenuOpen) {
+    <div class="sidebar-overlay" (click)="closeMobileMenu()"></div>
+  }
+
+  <div class="main-wrapper">
+    <app-navbar (menuToggle)="toggleMobileMenu()"></app-navbar>
+
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

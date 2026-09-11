@@ -1,0 +1,100 @@
+<aside
+  class="sidebar"
+  [class.mobile-open]="mobileOpen"
+  [class.pinned]="pinned">
+
+  <div class="sidebar-header">
+    <div class="brand">
+      <div class="logo-container">
+        <img src="../../../assets/logo.png" alt="Groupe Scolaire Sciences et Lettres" />
+      </div>
+
+      <div class="brand-name">
+        <strong>Groupe Scolaire</strong>
+        <span>Sciences et Lettres</span>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="pin-button desktop-only"
+      (click)="togglePinned()"
+      [title]="pinned ? 'Réduire le menu' : 'Garder le menu ouvert'">
+      <i [class]="pinned ? 'bi bi-chevron-bar-left' : 'bi bi-chevron-bar-right'"></i>
+    </button>
+
+    <button
+      type="button"
+      class="close-mobile mobile-only"
+      (click)="close()"
+      aria-label="Fermer le menu">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </div>
+
+  <nav class="sidebar-menu">
+    @for (item of menuItems; track item.label) {
+      @if (hasAccess(item)) {
+        @if (item.children?.length) {
+          <div class="menu-group">
+            <button
+              type="button"
+              class="menu-item group-button"
+              [class.group-open]="isGroupOpen(item.label)"
+              (click)="toggleGroup(item.label)"
+              [title]="item.label">
+              <span class="menu-icon"><i [class]="item.icon"></i></span>
+              <span class="menu-label">{{ item.label }}</span>
+              <i class="bi bi-chevron-down menu-arrow"></i>
+            </button>
+
+            @if (isGroupOpen(item.label)) {
+              <div class="submenu">
+                @for (child of item.children; track child.label) {
+                  @if (hasAccess(child)) {
+                    <a
+                      class="submenu-item"
+                      [routerLink]="child.route"
+                      routerLinkActive="active"
+                      (click)="navigationClicked()">
+                      <i [class]="child.icon"></i>
+                      <span>{{ child.label }}</span>
+                    </a>
+                  }
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <a
+            class="menu-item"
+            [routerLink]="item.route"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+            (click)="navigationClicked()"
+            [title]="item.label">
+            <span class="menu-icon"><i [class]="item.icon"></i></span>
+            <span class="menu-label">{{ item.label }}</span>
+          </a>
+        }
+      }
+    }
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-avatar">
+        <i class="bi bi-person-fill"></i>
+      </div>
+
+      <div class="sidebar-user-info">
+        <strong>{{ auth.currentUser()?.username || 'Utilisateur' }}</strong>
+      </div>
+    </div>
+
+    <button type="button" class="logout-button" (click)="logout()">
+      <i class="bi bi-box-arrow-right"></i>
+      <span class="menu-label">Déconnexion</span>
+    </button>
+  </div>
+</aside>

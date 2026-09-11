@@ -1,0 +1,848 @@
+<div class="student-page">
+
+  <!-- ========================================= -->
+  <!-- HEADER                                    -->
+  <!-- ========================================= -->
+
+  <header class="page-header">
+
+    <div>
+
+      <p class="eyebrow">
+        Gestion des responsables
+      </p>
+
+      <h1>
+        Responsables
+      </h1>
+
+      <p class="subtitle">
+        Gestion des parents et responsables des élèves.
+      </p>
+
+    </div>
+
+
+    @if (
+      auth.hasPermission(
+        'RESPONSABLE_CREER'
+      )
+    ) {
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="openCreate()">
+
+        <i class="bi bi-person-plus"></i>
+
+        Nouveau responsable
+
+      </button>
+
+    }
+
+  </header>
+
+
+  <!-- ========================================= -->
+  <!-- MESSAGES                                  -->
+  <!-- ========================================= -->
+
+  @if (success()) {
+
+    <div class="alert success">
+      {{ success() }}
+    </div>
+
+  }
+
+
+  @if (error()) {
+
+    <div class="alert error">
+      {{ error() }}
+    </div>
+
+  }
+
+
+  <!-- ========================================= -->
+  <!-- RECHERCHE                                 -->
+  <!-- ========================================= -->
+
+  <div class="toolbar">
+
+    <input
+      type="search"
+      placeholder="Nom, prénom, téléphone, email..."
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="onSearch()"
+    />
+
+  </div>
+
+
+  <!-- ========================================= -->
+  <!-- TABLEAU                                   -->
+  <!-- ========================================= -->
+
+  <section class="card">
+
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>
+              Responsable
+            </th>
+
+            <th>
+              Téléphone
+            </th>
+
+            <th>
+              Email
+            </th>
+
+            <th>
+              Statut
+            </th>
+
+            <th>
+              Actions
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          @for (
+            guardian of guardians();
+            track guardian.id
+          ) {
+
+            <tr>
+
+              <!-- ================================= -->
+              <!-- RESPONSABLE                       -->
+              <!-- ================================= -->
+
+              <td>
+
+                <div>
+
+                  <strong>
+
+                    {{
+                      guardian.person?.lastName
+                      || '—'
+                    }}
+
+                    {{
+                      guardian.person?.firstName
+                      || ''
+                    }}
+
+                  </strong>
+
+                </div>
+
+
+                @if (
+                  guardian.person?.birthDate
+                ) {
+
+                  <small>
+
+                    Né(e) le
+
+                    {{
+                      guardian.person?.birthDate
+                      | date:'dd/MM/yyyy'
+                    }}
+
+                  </small>
+
+                }
+
+              </td>
+
+
+              <!-- ================================= -->
+              <!-- TÉLÉPHONE                         -->
+              <!-- ================================= -->
+
+              <td>
+
+                {{
+                  guardian.person?.phone
+                  || '—'
+                }}
+
+              </td>
+
+
+              <!-- ================================= -->
+              <!-- EMAIL                             -->
+              <!-- ================================= -->
+
+              <td>
+
+                {{
+                  guardian.person?.email
+                  || '—'
+                }}
+
+              </td>
+
+
+              <!-- ================================= -->
+              <!-- STATUT                            -->
+              <!-- ================================= -->
+
+              <td>
+
+                <span class="status">
+                  {{ guardian.status }}
+                </span>
+
+              </td>
+
+
+              <!-- ================================= -->
+              <!-- ACTIONS                           -->
+              <!-- ================================= -->
+
+              <td>
+
+                @if (
+                  auth.hasPermission(
+                    'RESPONSABLE_MODIFIER'
+                  )
+                ) {
+
+                  <button
+                    type="button"
+                    class="icon-btn"
+                    title="Modifier"
+                    (click)="openEdit(guardian)">
+
+                    <i class="bi bi-pencil"></i>
+
+                  </button>
+
+                }
+
+              </td>
+
+            </tr>
+
+          }
+
+          @empty {
+
+            <tr>
+
+              <td colspan="5">
+
+                <div class="empty">
+
+                  @if (loading()) {
+
+                    Chargement...
+
+                  } @else if (
+                    searchTerm.trim()
+                  ) {
+
+                    Aucun responsable trouvé.
+
+                  } @else {
+
+                    Aucun responsable enregistré.
+
+                  }
+
+                </div>
+
+              </td>
+
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- PAGINATION                               -->
+    <!-- ========================================= -->
+
+    @if (
+      !loading()
+      &&
+      totalElements() > 0
+    ) {
+
+      <div class="pagination">
+
+        <!-- ===================================== -->
+        <!-- INFORMATIONS                          -->
+        <!-- ===================================== -->
+
+        <div class="pagination-info">
+
+          Affichage
+
+          <strong>
+            {{ firstItemNumber() }}
+          </strong>
+
+          à
+
+          <strong>
+            {{ lastItemNumber() }}
+          </strong>
+
+          sur
+
+          <strong>
+            {{ totalElements() }}
+          </strong>
+
+          responsable{{
+            totalElements() > 1
+              ? 's'
+              : ''
+          }}
+
+        </div>
+
+
+        <div class="pagination-right">
+
+
+          <!-- =================================== -->
+          <!-- NOMBRE PAR PAGE                     -->
+          <!-- =================================== -->
+
+          <div class="pagination-size">
+
+            <span>
+              Afficher
+            </span>
+
+            <select
+              [ngModel]="pageSize()"
+              (ngModelChange)="changePageSize($event)">
+
+              <option [ngValue]="10">
+                10
+              </option>
+
+              <option [ngValue]="20">
+                20
+              </option>
+
+              <option [ngValue]="50">
+                50
+              </option>
+
+              <option [ngValue]="100">
+                100
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- =================================== -->
+          <!-- NAVIGATION                          -->
+          <!-- =================================== -->
+
+          <div class="pagination-controls">
+
+            <button
+              type="button"
+              class="pagination-btn"
+              [disabled]="first()"
+              (click)="previousPage()"
+              title="Page précédente">
+
+              <i class="bi bi-chevron-left"></i>
+
+            </button>
+
+
+            @if (
+              totalPages() > 5
+              &&
+              page() > 2
+            ) {
+
+              <button
+                type="button"
+                class="pagination-page"
+                (click)="goToPage(0)">
+
+                1
+
+              </button>
+
+
+              @if (
+                page() > 3
+              ) {
+
+                <span class="pagination-dots">
+                  ...
+                </span>
+
+              }
+
+            }
+
+
+            @for (
+              p of visiblePages();
+              track p
+            ) {
+
+              <button
+                type="button"
+                class="pagination-page"
+                [class.active]="
+                  p === page()
+                "
+                (click)="goToPage(p)">
+
+                {{ p + 1 }}
+
+              </button>
+
+            }
+
+
+            @if (
+              totalPages() > 5
+              &&
+              page() < totalPages() - 3
+            ) {
+
+              @if (
+                page() < totalPages() - 4
+              ) {
+
+                <span class="pagination-dots">
+                  ...
+                </span>
+
+              }
+
+
+              <button
+                type="button"
+                class="pagination-page"
+                (click)="
+                  goToPage(
+                    totalPages() - 1
+                  )
+                ">
+
+                {{ totalPages() }}
+
+              </button>
+
+            }
+
+
+            <button
+              type="button"
+              class="pagination-btn"
+              [disabled]="last()"
+              (click)="nextPage()"
+              title="Page suivante">
+
+              <i class="bi bi-chevron-right"></i>
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    }
+
+  </section>
+
+</div>
+
+
+<!-- ========================================= -->
+<!-- MODALE                                    -->
+<!-- ========================================= -->
+
+@if (modal()) {
+
+  <div
+    class="modal-backdrop"
+    (click)="closeModal()">
+
+    <section
+      class="modal"
+      (click)="$event.stopPropagation()">
+
+
+      <!-- ===================================== -->
+      <!-- HEADER                                -->
+      <!-- ===================================== -->
+
+      <div class="modal-header">
+
+        <div>
+
+          <p class="eyebrow">
+
+            {{
+              editing()
+                ? 'Modification'
+                : 'Création'
+            }}
+
+          </p>
+
+          <h2>
+
+            {{
+              editing()
+                ? 'Modifier le responsable'
+                : 'Nouveau responsable'
+            }}
+
+          </h2>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="icon-btn"
+          [disabled]="saving()"
+          (click)="closeModal()">
+
+          <i class="bi bi-x-lg"></i>
+
+        </button>
+
+      </div>
+
+
+      <!-- ===================================== -->
+      <!-- BODY                                  -->
+      <!-- ===================================== -->
+
+      <div class="modal-body">
+
+
+        <h3>
+          Identité du responsable
+        </h3>
+
+
+        <div class="form-grid">
+
+
+          <!-- NOM -->
+
+          <div class="field">
+
+            <label>
+              Nom *
+            </label>
+
+            <input
+              [(ngModel)]="form.lastName"
+              maxlength="100"
+              [disabled]="!!editing()"
+            />
+
+          </div>
+
+
+          <!-- PRÉNOM -->
+
+          <div class="field">
+
+            <label>
+              Prénom *
+            </label>
+
+            <input
+              [(ngModel)]="form.firstName"
+              maxlength="100"
+              [disabled]="!!editing()"
+            />
+
+          </div>
+
+
+          <!-- DATE DE NAISSANCE -->
+
+          <div class="field">
+
+            <label>
+              Date de naissance
+            </label>
+
+            <input
+              type="date"
+              [(ngModel)]="form.birthDate"
+              [disabled]="!!editing()"
+            />
+
+          </div>
+
+
+          <!-- LIEU DE NAISSANCE -->
+
+          <div class="field">
+
+            <label>
+              Lieu de naissance
+            </label>
+
+            <input
+              [(ngModel)]="form.birthPlace"
+              maxlength="150"
+              [disabled]="!!editing()"
+            />
+
+          </div>
+
+
+          <!-- SEXE -->
+
+          <div class="field">
+
+            <label>
+              Sexe
+            </label>
+
+            <select
+              [(ngModel)]="form.sex"
+              [disabled]="!!editing()">
+
+              <option value="">
+                Non renseigné
+              </option>
+
+              <option value="M">
+                Masculin
+              </option>
+
+              <option value="F">
+                Féminin
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- NATIONALITÉ -->
+
+          <div class="field">
+
+            <label>
+              Nationalité
+            </label>
+
+            <input
+              [(ngModel)]="form.nationality"
+              maxlength="80"
+              [disabled]="!!editing()"
+            />
+
+          </div>
+
+
+          <!-- ADRESSE -->
+
+          <div class="field full">
+
+            <label>
+              Adresse
+            </label>
+
+            <input
+              [(ngModel)]="form.address"
+              maxlength="300"
+              [disabled]="!!editing()"
+            />
+
+          </div>
+
+
+          <!-- TÉLÉPHONE -->
+
+          <div class="field">
+
+            <label>
+              Téléphone
+            </label>
+
+            <input
+              [(ngModel)]="form.phone"
+              maxlength="30"
+              [disabled]="!!editing()"
+            />
+
+          </div>
+
+
+          <!-- SECOND TÉLÉPHONE -->
+
+          <div class="field">
+
+            <label>
+              Téléphone secondaire
+            </label>
+
+            <input
+              [(ngModel)]="form.secondaryPhone"
+              maxlength="30"
+              [disabled]="!!editing()"
+            />
+
+          </div>
+
+
+          <!-- EMAIL -->
+
+          <div class="field full">
+
+            <label>
+              Email
+            </label>
+
+            <input
+              type="email"
+              [(ngModel)]="form.email"
+              maxlength="150"
+              [disabled]="!!editing()"
+            />
+
+          </div>
+
+
+          <!-- STATUT -->
+
+          <div class="field">
+
+            <label>
+              Statut *
+            </label>
+
+            <select
+              [(ngModel)]="form.status">
+
+              <option value="ACTIVE">
+                ACTIVE
+              </option>
+
+              <option value="INACTIVE">
+                INACTIVE
+              </option>
+
+              <option value="ARCHIVED">
+                ARCHIVED
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+
+        @if (editing()) {
+
+          <div class="alert">
+
+            Pour cette première version,
+            l'identité de la personne reste
+            en lecture seule.
+
+            Seul le statut du responsable
+            est modifié depuis cet écran.
+
+          </div>
+
+        }
+
+      </div>
+
+
+      <!-- ===================================== -->
+      <!-- FOOTER                                -->
+      <!-- ===================================== -->
+
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="btn btn-soft"
+          [disabled]="saving()"
+          (click)="closeModal()">
+
+          Annuler
+
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="
+            saving()
+            ||
+            !form.lastName.trim()
+            ||
+            !form.firstName.trim()
+          "
+          (click)="save()">
+
+          @if (saving()) {
+
+            Enregistrement...
+
+          } @else {
+
+            Enregistrer
+
+          }
+
+        </button>
+
+      </div>
+
+    </section>
+
+  </div>
+
+}

@@ -1,0 +1,72 @@
+<div class="page">
+    <header class="head">
+        <div><span class="eyebrow">Configuration scolaire</span>
+            <h1>Calendrier scolaire</h1>
+            <p>Gérez les jours fériés, fermetures et autres exceptions.</p>
+        </div>@if(canManage()){<button class="btn primary" (click)="openCreate()">Nouvelle exception</button>}
+    </header>@if(success()){<div class="alert success">{{success()}}</div>}@if(error()&&!modal()){<div
+        class="alert error">{{error()}}</div>}<section class="card">
+        <div class="toolbar">
+            <div><strong>Exceptions</strong><small>{{items().length}} élément(s)</small></div><button class="btn light"
+                (click)="load()">Actualiser</button>
+        </div>@if(loading()){<div class="state">Chargement...</div>}@else{<div class="table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Événement</th>
+                        <th>Type</th>
+                        <th>Périmètre</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>@for(i of items();track i.id){<tr>
+                        <td>{{i.exceptionDate|date:'dd/MM/yyyy'}}</td>
+                        <td>
+                            <div class="entity">
+                                <div class="ico"><i class="bi bi-calendar-event"></i></div>
+                                <div><strong>{{i.label}}</strong><span>{{i.description||'—'}}</span></div>
+                            </div>
+                        </td>
+                        <td><span class="badge">{{i.exceptionType}}</span></td>
+                        <td>{{scope(i)}}</td>
+                        <td class="actions">@if(canManage()){<button class="icon" (click)="openEdit(i)"><i
+                                    class="bi bi-pencil"></i></button>}</td>
+                    </tr>}</tbody>
+            </table>
+        </div>}
+    </section>
+</div>
+@if(modal()){<div class="overlay" (click)="close()">
+    <section class="modal" (click)="$event.stopPropagation()">
+        <header class="modal-head">
+            <h2>{{editing()?'Modifier':'Créer'}} une exception</h2><button class="icon" (click)="close()"><i
+                    class="bi bi-x-lg"></i></button>
+        </header>
+        <form [formGroup]="form" (ngSubmit)="save()">
+            <div class="body">
+                <div class="grid">
+                    <div class="field"><label>Année scolaire *</label><select formControlName="schoolYearId">
+                            <option [ngValue]="0">Sélectionner</option>@for(x of years();track x.id){<option
+                                [ngValue]="x.id">{{x.label}}</option>}
+                        </select></div>
+                    <div class="field"><label>Date *</label><input type="date" formControlName="exceptionDate"></div>
+                    <div class="field"><label>Campus</label><select formControlName="campusId">
+                            <option [ngValue]="0">Tous</option>@for(x of campuses();track x.id){<option
+                                [ngValue]="x.id">{{x.name}}</option>}
+                        </select></div>
+                    <div class="field"><label>Cycle</label><select formControlName="cycleId">
+                            <option [ngValue]="0">Tous</option>@for(x of cycles();track x.id){<option [ngValue]="x.id">
+                                {{x.name}}</option>}
+                        </select></div>
+                    <div class="field"><label>Type *</label><input formControlName="exceptionType"></div>
+                    <div class="field"><label>Libellé *</label><input formControlName="label"></div>
+                    <div class="field full"><label>Description</label><textarea
+                            formControlName="description"></textarea></div>
+                </div>@if(error()){<div class="alert error">{{error()}}</div>}
+            </div>
+            <footer class="modal-foot"><button type="button" class="btn light" (click)="close()">Annuler</button><button
+                    class="btn primary">Enregistrer</button></footer>
+        </form>
+    </section>
+</div>}

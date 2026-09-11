@@ -1,0 +1,3 @@
+import {inject,Injectable} from '@angular/core';import {HttpClient} from '@angular/common/http';import {Observable} from 'rxjs';import {API_CONFIG} from '../../../../core/api.config';import {ClassGroup,ClassGroupRequest} from '../models/class-group.model';
+@Injectable({providedIn:'root'}) export class ClassGroupService{private http=inject(HttpClient);private url=`${API_CONFIG.baseUrl}/class-groups`;getAll():Observable<ClassGroup[]>{return this.http.get<ClassGroup[]>(this.url)} create(r:ClassGroupRequest){return this.http.post<ClassGroup>(this.url,r)} update(id:number,r:ClassGroupRequest){return this.http.put<ClassGroup>(`${this.url}/${id}`,r)}
+}

@@ -1,0 +1,1 @@
+export interface Cycle{id:number;code:string;name:string;displayOrder:number;active:boolean} export type CycleRequest=Omit<Cycle,'id'>;

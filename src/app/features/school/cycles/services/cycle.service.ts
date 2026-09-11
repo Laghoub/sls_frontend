@@ -1,0 +1,3 @@
+import {inject,Injectable} from '@angular/core';import {HttpClient} from '@angular/common/http';import {Observable} from 'rxjs';import {API_CONFIG} from '../../../../core/api.config';import {Cycle,CycleRequest} from '../models/cycle.model';
+@Injectable({providedIn:'root'}) export class CycleService{private http=inject(HttpClient);private url=`${API_CONFIG.baseUrl}/cycles`;getAll():Observable<Cycle[]>{return this.http.get<Cycle[]>(this.url)} create(r:CycleRequest){return this.http.post<Cycle>(this.url,r)} update(id:number,r:CycleRequest){return this.http.put<Cycle>(`${this.url}/${id}`,r)}
+}

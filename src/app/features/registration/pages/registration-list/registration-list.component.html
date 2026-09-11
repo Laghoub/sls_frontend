@@ -1,0 +1,126 @@
+<div class="reg-page">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Admissions</div>
+      <h1>Dossiers d'inscription</h1>
+      <div class="muted">
+        Pré-inscriptions, dossiers à compléter et inscriptions finalisées.
+      </div>
+    </div>
+    @if (auth.hasPermission("INSCRIPTION_CREER")) {
+      <a class="btn btn-primary" routerLink="/registration/new"
+        ><i class="bi bi-plus-lg"></i> Nouvelle inscription</a
+      >
+    }
+  </div>
+  @if (error()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  }
+  <div class="card">
+    <div class="toolbar">
+      <div class="field">
+        <label>Recherche</label
+        ><input
+          [(ngModel)]="search"
+          (keyup.enter)="filter()"
+          placeholder="Élève, matricule, responsable..."
+        />
+      </div>
+      <div class="field">
+        <label>Année scolaire</label
+        ><select [(ngModel)]="schoolYearId" (change)="filter()">
+          <option [ngValue]="null">Toutes</option>
+          @for (y of years(); track y.id) {
+            <option [ngValue]="y.id">{{ y.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label>Statut</label
+        ><select [(ngModel)]="status" (change)="filter()">
+          <option [ngValue]="null">Tous</option>
+          @for (s of statuses; track s) {
+            <option [ngValue]="s">{{ label(s) }}</option>
+          }
+        </select>
+      </div>
+      <button class="btn btn-soft" (click)="filter()">
+        <i class="bi bi-search"></i> Rechercher
+      </button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Élève</th>
+            <th>Responsable</th>
+            <th>Date</th>
+            <th>Statut</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of items(); track r.id) {
+            <tr>
+              <td>
+                <div class="name">
+                  {{ r.studentLastName }} {{ r.studentFirstName }}
+                </div>
+                <div class="sub">{{ r.studentNumber }}</div>
+              </td>
+              <td>{{ r.guardianLastName }} {{ r.guardianFirstName }}</td>
+              <td>{{ r.registrationDate | date: "dd/MM/yyyy" }}</td>
+              <td>
+                <span class="badge {{ r.status }}">{{ label(r.status) }}</span>
+              </td>
+              <td>
+                <a class="btn btn-soft" [routerLink]="['/registration', r.id]"
+                  ><i class="bi bi-eye"></i> Ouvrir</a
+                >
+              </td>
+            </tr>
+          }
+          @if (!loading() && !items().length) {
+            <tr>
+              <td colspan="5">
+                <div class="empty">Aucun dossier trouvé.</div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <div class="muted">{{ total() }} dossier(s)</div>
+      <div class="pages">
+        <button class="page-btn" (click)="prev()" [disabled]="page() === 0">
+          ‹
+        </button>
+        @for (i of range(); track i) {
+          <button
+            class="page-btn"
+            [class.active]="i === page()"
+            (click)="go(i)"
+          >
+            {{ i + 1 }}
+          </button>
+        }
+        <button
+          class="page-btn"
+          (click)="next()"
+          [disabled]="page() + 1 >= pages()"
+        >
+          ›
+        </button>
+      </div>
+      <select [(ngModel)]="size" (change)="changeSize()">
+        <option [ngValue]="10">10</option>
+        <option [ngValue]="20">20</option>
+        <option [ngValue]="50">50</option>
+        <option [ngValue]="100">100</option>
+      </select>
+    </div>
+  </div>
+</div>

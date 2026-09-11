@@ -1,0 +1,46 @@
+<div class="finance-page">
+    <div class="page-head">
+        <div>
+            <div class="eyebrow">Finance</div>
+            <h1>Paramétrage</h1>
+            <div class="muted">Modes de paiement utilisés lors des encaissements et remboursements.</div>
+        </div>@if(auth.hasPermission('FINANCE_PARAMETRER')){<button class="btn btn-primary" (click)="create()">Nouveau
+            mode</button>}
+    </div>@if(error()){<div class="alert alert-error">{{error()}}</div>}<div class="card">
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Nom</th>
+                        <th>État</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>@for(x of items();track x.id){<tr>
+                        <td class="name">{{x.code}}</td>
+                        <td>{{x.name}}</td>
+                        <td><span class="badge" [class.ACTIVE]="x.active">{{x.active?'ACTIF':'INACTIF'}}</span></td>
+                        <td>@if(auth.hasPermission('FINANCE_PARAMETRER')){<button class="btn btn-soft"
+                                (click)="edit(x)">Modifier</button>}</td>
+                    </tr>}@if(!items().length){<tr>
+                        <td colspan="4">
+                            <div class="empty">Aucun mode de paiement.</div>
+                        </td>
+                    </tr>}</tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card"><a class="btn btn-soft" style="pointer-events:none">Les types de frais sont gérés dans l'écran
+            dédié « Types de frais ».</a></div>@if(modal()){<div class="modal-backdrop">
+        <div class="modal">
+            <h2>{{editing()?'Modifier':'Nouveau'}} mode de paiement</h2>
+            <div class="grid-2">
+                <div class="field"><label>Code *</label><input [(ngModel)]="form.code"></div>
+                <div class="field"><label>Nom *</label><input [(ngModel)]="form.name"></div>
+            </div><label><input type="checkbox" [(ngModel)]="form.active"> Actif</label>
+            <div class="actions"><button class="btn btn-soft" (click)="modal.set(false)">Annuler</button><button
+                    class="btn btn-primary" (click)="save()">Enregistrer</button></div>
+        </div>
+    </div>}
+</div>

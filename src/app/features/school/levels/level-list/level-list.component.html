@@ -1,0 +1,62 @@
+<div class="page">
+    <header class="head">
+        <div><span class="eyebrow">Configuration scolaire</span>
+            <h1>Niveaux</h1>
+            <p>Gestion des niveaux de l'établissement.</p>
+        </div>@if(canCreate()){<button class="btn primary" (click)="openCreate()">Nouveau</button>}
+    </header>@if(success()){<div class="alert success">{{success()}}</div>}@if(error()&&!modal()){<div
+        class="alert error">{{error()}}</div>}<section class="card">
+        <div class="toolbar">
+            <div><strong>Liste</strong><small>{{items().length}} élément(s)</small></div><button class="btn light"
+                (click)="load()">Actualiser</button>
+        </div>@if(loading()){<div class="state">Chargement...</div>}@else{<div class="table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Niveau</th>
+                        <th>Cycle</th>
+                        <th>Ordre</th>
+                        <th>État</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>@for(i of items();track i.id){<tr>
+                        <td>
+                            <div class="entity">
+                                <div class="ico"><i class="bi bi-layers"></i></div>
+                                <div><strong>{{i.name}}</strong><span>{{i.code}}</span></div>
+                            </div>
+                        </td>
+                        <td>{{refName(i.cycleId)}}</td>
+                        <td>{{i.displayOrder}}</td>
+                        <td><span class="badge" [class.ok]="i.active">{{i.active?'Actif':'Inactif'}}</span></td>
+                        <td class="actions">@if(canEdit()){<button class="icon" (click)="openEdit(i)"><i
+                                    class="bi bi-pencil"></i></button>}</td>
+                    </tr>}</tbody>
+            </table>
+        </div>}
+    </section>
+</div>@if(modal()){<div class="overlay" (click)="close()">
+    <section class="modal" (click)="$event.stopPropagation()">
+        <header class="modal-head">
+            <h2>{{editing()?'Modifier':'Créer'}} — Niveaux</h2><button class="icon" (click)="close()"><i
+                    class="bi bi-x-lg"></i></button>
+        </header>
+        <form [formGroup]="form" (ngSubmit)="save()">
+            <div class="body">
+                <div class="grid">
+                    <div class="field full"><label>Cycle *</label><select formControlName="cycleId">
+                            <option [ngValue]="0">Sélectionner</option>@for(r of refs();track r.id){<option
+                                [ngValue]="r.id">{{r.name}}</option>}
+                        </select></div>
+                    <div class="field"><label>Code *</label><input formControlName="code"></div>
+                    <div class="field"><label>Nom *</label><input formControlName="name"></div>
+                    <div class="field"><label>Ordre *</label><input type="number" formControlName="displayOrder"></div>
+                    <label class="check"><input type="checkbox" formControlName="active"> Actif</label>
+                </div>@if(error()){<div class="alert error">{{error()}}</div>}
+            </div>
+            <footer class="modal-foot"><button type="button" class="btn light" (click)="close()">Annuler</button><button
+                    class="btn primary">Enregistrer</button></footer>
+        </form>
+    </section>
+</div>}
