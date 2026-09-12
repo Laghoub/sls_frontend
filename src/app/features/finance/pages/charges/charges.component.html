@@ -3,9 +3,16 @@
         <div>
             <div class="eyebrow">Facturation</div>
             <h1>Créances</h1>
-            <div class="muted">Montants dus avant leur règlement. La créance est distincte du paiement.</div>
-        </div>@if(auth.hasPermission('CREANCE_GERER')){<button class="btn btn-primary" (click)="openCreate()"
-            [disabled]="!registrationCaseId"><i class="bi bi-plus-lg"></i>Nouvelle créance</button>}
+            <div class="muted">Consultez les montants dus. Pour les livres, cantine, transport et autres frais, utilisez une tarification existante.</div>
+        </div>
+        @if(auth.hasPermission('CREANCE_GERER')){
+        <div class="actions">
+            <a class="btn btn-primary" routerLink="/finance/billing"><i class="bi bi-receipt-cutoff"></i>Nouvelle facturation</a>
+            <button class="btn btn-soft" (click)="openCreate()" [disabled]="!registrationCaseId" title="Création manuelle exceptionnelle liée à un dossier d'inscription">
+                <i class="bi bi-plus-lg"></i>Créance exceptionnelle
+            </button>
+        </div>
+        }
     </div>@if(error()){<div class="alert alert-error">{{error()}}</div>}<div class="card">
         <h2 class="section-title">Sélectionner un dossier d'inscription</h2>
         <div class="toolbar">

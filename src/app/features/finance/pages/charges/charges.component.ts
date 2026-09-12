@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/config/auth/services/auth.service';
 import {
   RegistrationChoice,
@@ -17,7 +18,7 @@ import { StudentChargeService } from '../../services/student-charge.service';
 @Component({
   selector: 'app-charges',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './charges.component.html',
   styleUrl: './charges.component.scss',
 })

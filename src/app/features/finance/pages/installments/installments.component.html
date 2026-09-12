@@ -1,5 +1,129 @@
-<div class="finance-page"><div class="page-head"><div><div class="eyebrow">Facturation</div><h1>Générer les mensualités</h1><div class="muted">Génère les créances de scolarité à partir de la scolarisation annuelle et des tarifs actifs.</div></div></div>
-@if(error()){<div class="alert alert-error">{{error()}}</div>}@if(success()){<div class="alert alert-success">{{success()}}</div>}
-<div class="card"><div class="grid-2"><div class="field"><label>Année scolaire *</label><select [(ngModel)]="schoolYearId" (ngModelChange)="loadEnrollments()">@for(y of schoolYears();track y.id){<option [ngValue]="y.id">{{y.label}}</option>}</select></div><div class="field"><label>Scolarisation *</label><select [(ngModel)]="enrollmentId"><option [ngValue]="null">Sélectionner...</option>@for(e of enrollments();track e.id){<option [ngValue]="e.id">{{e.studentNumber}} · Élève #{{e.studentId}} · {{e.status}}</option>}</select></div><div class="field"><label>À partir du</label><input type="date" [(ngModel)]="fromDate"></div><div class="field"><label>Jusqu'au</label><input type="date" [(ngModel)]="toDate"></div></div><div class="actions" style="margin-top:16px"><button class="btn btn-primary" [disabled]="!enrollmentId" (click)="generate()"><i class="bi bi-calendar2-plus"></i>Générer l'échéancier</button></div><div class="muted" style="margin-top:10px">Sans période renseignée, le backend utilise la période de scolarisation/année scolaire. Les doublons sont ignorés automatiquement.</div></div>
-@if(result();as r){<div class="grid-3"><div class="stat"><div class="muted">Créées</div><div class="value">{{r.createdCount}}</div></div><div class="stat"><div class="muted">Ignorées</div><div class="value">{{r.skippedCount}}</div></div><div class="stat"><div class="muted">Scolarisation</div><div class="value">#{{r.studentEnrollmentId}}</div></div></div>}
+<div class="finance-page">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Facturation</div>
+      <h1>Mensualités & rattrapage</h1>
+      <div class="muted">
+        Les échéances sont maintenant générées automatiquement lors de la
+        création de la scolarisation. Cet écran sert au contrôle et au
+        rattrapage individuel.
+      </div>
+    </div>
+  </div>
+
+  @if(error()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  }
+
+  @if(success()) {
+    <div class="alert alert-success">{{ success() }}</div>
+  }
+
+  <div class="card">
+    <div class="section-title">Fonctionnement automatique</div>
+    <div class="muted">
+      Lorsqu'une nouvelle scolarisation est créée, le backend recherche les
+      tarifs <strong>SCOLARITE</strong> applicables et génère les échéances
+      correspondantes. Il n'est donc plus nécessaire de venir générer les
+      mensualités élève par élève dans le fonctionnement normal.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="page-head">
+      <div>
+        <div class="section-title">Rattrapage individuel</div>
+        <div class="muted">
+          À utiliser pour une ancienne scolarisation, un élève arrivé plus tard
+          ou pour compléter des échéances manquantes. Les doublons sont ignorés
+          automatiquement.
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="field">
+        <label>Année scolaire *</label>
+        <select
+          [(ngModel)]="schoolYearId"
+          (ngModelChange)="loadEnrollments()"
+        >
+          @for(y of schoolYears(); track y.id) {
+            <option [ngValue]="y.id">{{ y.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Élève / scolarisation *</label>
+        <select [(ngModel)]="enrollmentId" [disabled]="loadingEnrollments()">
+          <option [ngValue]="null">
+            {{ loadingEnrollments() ? 'Chargement...' : 'Sélectionner...' }}
+          </option>
+          @for(e of enrollments(); track e.id) {
+            <option [ngValue]="e.id">{{ enrollmentLabel(e) }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label>À partir du</label>
+        <input type="date" [(ngModel)]="fromDate" />
+      </div>
+
+      <div class="field">
+        <label>Jusqu'au</label>
+        <input type="date" [(ngModel)]="toDate" />
+      </div>
+    </div>
+
+    @if(selectedEnrollment(); as selected) {
+      <div class="stat" style="margin-top: 16px">
+        <div class="muted">Scolarisation sélectionnée</div>
+        <div class="value" style="font-size: 1.05rem">
+          {{ enrollmentLabel(selected) }}
+        </div>
+        <div class="sub">
+          Statut : {{ selected.status }} · Entrée : {{ selected.entryType }}
+        </div>
+      </div>
+    }
+
+    <div class="actions" style="margin-top: 16px">
+      <button
+        class="btn btn-primary"
+        [disabled]="!enrollmentId || generating()"
+        (click)="generate()"
+      >
+        <i class="bi bi-arrow-repeat"></i>
+        {{ generating() ? 'Génération...' : 'Compléter les échéances manquantes' }}
+      </button>
+    </div>
+
+    <div class="muted" style="margin-top: 10px">
+      Sans période renseignée, le backend utilise la période de la
+      scolarisation / année scolaire.
+    </div>
+  </div>
+
+  @if(result(); as r) {
+    <div class="grid-3">
+      <div class="stat">
+        <div class="muted">Créées</div>
+        <div class="value">{{ r.createdCount }}</div>
+      </div>
+
+      <div class="stat">
+        <div class="muted">Déjà existantes / ignorées</div>
+        <div class="value">{{ r.skippedCount }}</div>
+      </div>
+
+      <div class="stat">
+        <div class="muted">Élève</div>
+        <div class="value" style="font-size: 1rem">
+          {{ selectedEnrollment() ? enrollmentLabel(selectedEnrollment()!) : '—' }}
+        </div>
+      </div>
+    </div>
+  }
 </div>

@@ -1,0 +1,197 @@
+<div class="finance-page discount-page">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Finance · Réductions</div>
+      <h1>Réductions & avantages</h1>
+      <div class="muted">Demandes exceptionnelles, validation administrative et règles familiales automatiques.</div>
+    </div>
+    <div class="year-filter field">
+      <label>Année scolaire</label>
+      <select [(ngModel)]="schoolYearId" (ngModelChange)="onYearChange()">
+        @for(y of years(); track y.id) { <option [ngValue]="y.id">{{ y.label }}</option> }
+      </select>
+    </div>
+  </div>
+
+  @if(error()) { <div class="alert alert-error">{{ error() }}</div> }
+  @if(success()) { <div class="alert alert-success">{{ success() }}</div> }
+
+  <div class="discount-tabs">
+    <button type="button" [class.active]="activeTab === 'REQUESTS'" (click)="setTab('REQUESTS')">
+      <i class="bi bi-person-check"></i>
+      Demandes de réduction
+      @if(total() > 0) { <span>{{ total() }}</span> }
+    </button>
+    <button type="button" [class.active]="activeTab === 'RULES'" (click)="setTab('RULES')">
+      <i class="bi bi-diagram-3"></i>
+      Règles automatiques
+      @if(rules().length) { <span>{{ rules().length }}</span> }
+    </button>
+  </div>
+
+  @if(activeTab === 'REQUESTS') {
+    <section class="card">
+      <div class="section-head">
+        <div>
+          <h2 class="section-title">Demandes individuelles</h2>
+          <div class="muted">Une demande saisie par le comptable reste en attente. Un utilisateur disposant de REDUCTION_VALIDER peut l’appliquer.</div>
+        </div>
+        @if(auth.hasPermission('REDUCTION_CREER')) {
+          <button class="btn btn-primary" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Nouvelle réduction</button>
+        }
+      </div>
+
+      <div class="toolbar filters-row">
+        <div class="field compact-field">
+          <label>Statut</label>
+          <select [(ngModel)]="filterStatus" (ngModelChange)="page.set(0); loadRequests()">
+            <option value="">Tous</option>
+            <option value="PENDING_APPROVAL">En attente de validation</option>
+            <option value="APPROVED">Validées</option>
+            <option value="REJECTED">Refusées</option>
+          </select>
+        </div>
+        <div class="workflow-hint"><i class="bi bi-shield-check"></i><span><strong>Contrôle :</strong> la réduction n’impacte les créances qu’après validation.</span></div>
+      </div>
+
+      @if(loading()) {
+        <div class="empty">Chargement des réductions...</div>
+      } @else if(!items().length) {
+        <div class="empty-state"><i class="bi bi-percent"></i><strong>Aucune réduction</strong><span>Aucune demande ne correspond au filtre sélectionné.</span></div>
+      } @else {
+        <div class="table-wrap">
+          <table class="data-table discount-table">
+            <thead><tr><th>Élève</th><th>Application</th><th>Réduction</th><th>Période</th><th>Motif</th><th>Statut</th><th>Actions</th></tr></thead>
+            <tbody>
+              @for(x of items(); track x.id) {
+                <tr>
+                  <td><div class="name">{{ enrollmentName(x.studentEnrollmentId) }}</div><div class="sub">{{ enrollmentMeta(x.studentEnrollmentId) }}</div></td>
+                  <td>{{ feeName(x.feeTypeId) }}</td>
+                  <td><div class="discount-value">{{ valueLabel(x.discountType, x.value) }}</div><div class="sub">{{ typeLabel(x.discountType) }}</div></td>
+                  <td><div>{{ x.startDate | date:'dd/MM/yyyy' }}</div><div class="sub">{{ x.endDate ? ('jusqu’au ' + (x.endDate | date:'dd/MM/yyyy')) : 'sans date de fin' }}</div></td>
+                  <td class="reason-cell">{{ x.reason || '—' }} @if(x.rejectionReason){<div class="rejection-note"><i class="bi bi-x-circle"></i> {{ x.rejectionReason }}</div>}</td>
+                  <td><span class="status-badge" [class]="'status-badge ' + x.status">{{ statusLabel(x.status) }}</span></td>
+                  <td>
+                    <div class="actions">
+                      @if(x.status === 'PENDING_APPROVAL' && auth.hasPermission('REDUCTION_VALIDER')) {
+                        <button class="btn-icon success" title="Valider" (click)="approve(x)"><i class="bi bi-check-lg"></i></button>
+                      }
+                      @if(x.status === 'PENDING_APPROVAL' && auth.hasPermission('REDUCTION_REFUSER')) {
+                        <button class="btn-icon danger" title="Refuser" (click)="openReject(x)"><i class="bi bi-x-lg"></i></button>
+                      }
+                      @if(x.status === 'APPROVED' && auth.hasPermission('REDUCTION_VALIDER')) {
+                        <button class="btn-icon" title="Recalculer les créances" (click)="reapply(x)"><i class="bi bi-arrow-repeat"></i></button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <span>{{ total() }} réduction(s)</span>
+          <div class="pages"><button class="page-btn" [disabled]="page()===0" (click)="prev()">Précédent</button><span class="page-info">Page {{ page()+1 }} / {{ pages() || 1 }}</span><button class="page-btn" [disabled]="page()+1>=pages()" (click)="next()">Suivant</button></div>
+        </div>
+      }
+    </section>
+  }
+
+  @if(activeTab === 'RULES') {
+    <section class="card">
+      <div class="section-head">
+        <div>
+          <h2 class="section-title">Règles automatiques</h2>
+          <div class="muted">Exemple : 2e enfant de la famille = 50 % de réduction sur la scolarité.</div>
+        </div>
+        @if(auth.hasPermission('REDUCTION_PARAMETRER')) {
+          <button class="btn btn-primary" (click)="openRuleCreate()"><i class="bi bi-plus-lg"></i> Nouvelle règle</button>
+        }
+      </div>
+
+      <div class="rule-explainer">
+        <div><i class="bi bi-1-circle"></i><span><strong>Tarif normal</strong><small>Le tarif de base reste inchangé.</small></span></div>
+        <i class="bi bi-arrow-right"></i>
+        <div><i class="bi bi-2-circle"></i><span><strong>Règle</strong><small>Le moteur calcule l’avantage applicable.</small></span></div>
+        <i class="bi bi-arrow-right"></i>
+        <div><i class="bi bi-3-circle"></i><span><strong>Créance nette</strong><small>Montant brut, réduction et montant final restent traçables.</small></span></div>
+      </div>
+
+      @if(!rules().length) {
+        <div class="empty-state"><i class="bi bi-diagram-3"></i><strong>Aucune règle automatique</strong><span>Créez par exemple une règle « 2e enfant -50 % ».</span></div>
+      } @else {
+        <div class="rules-grid">
+          @for(x of rules(); track x.id) {
+            <article class="rule-card" [class.inactive]="!x.active">
+              <div class="rule-top"><span class="rule-code">{{ x.code }}</span><span class="status-dot" [class.active]="x.active">{{ x.active ? 'Active' : 'Inactive' }}</span></div>
+              <h3>{{ x.name }}</h3>
+              <div class="rule-big-value">{{ valueLabel(x.discountType, x.value) }}</div>
+              <div class="rule-meta"><div><span>Condition</span><strong>{{ conditionLabel(x) }}</strong></div><div><span>Portée</span><strong>{{ ruleScope(x) }}</strong></div><div><span>Priorité</span><strong>{{ x.priority }}</strong></div></div>
+              <div class="rule-actions">
+                @if(auth.hasPermission('REDUCTION_PARAMETRER')) { <button class="btn btn-soft" (click)="openRuleEdit(x)"><i class="bi bi-pencil"></i> Modifier</button> }
+                @if(auth.hasPermission('REDUCTION_VALIDER') && x.active) { <button class="btn btn-primary" [disabled]="applyingRuleId()===x.id" (click)="applyRule(x)"><i class="bi bi-play-fill"></i>{{ applyingRuleId()===x.id ? 'Application...' : 'Appliquer' }}</button> }
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </section>
+  }
+
+  @if(modal()) {
+    <div class="modal-backdrop" (click)="modal.set(false)">
+      <div class="modal discount-modal" (click)="$event.stopPropagation()">
+        <div class="modal-head"><div><div class="eyebrow">Demande de réduction</div><h2>Nouvelle réduction</h2></div><button class="close-btn" (click)="modal.set(false)"><i class="bi bi-x-lg"></i></button></div>
+        <div class="modal-help"><i class="bi bi-info-circle"></i><span>Si vous êtes administrateur avec la permission de validation, la réduction sera validée immédiatement. Sinon elle restera en attente.</span></div>
+        <div class="field"><label>Rechercher un élève scolarisé</label><input [(ngModel)]="enrollmentSearch" placeholder="Nom, prénom, matricule ou classe"></div>
+        <div class="field"><label>Élève *</label><select [(ngModel)]="form.studentEnrollmentId"><option [ngValue]="0">Sélectionner</option>@for(e of filteredEnrollments(); track e.id){<option [ngValue]="e.id">{{ e.studentLastName }} {{ e.studentFirstName }} — {{ e.studentNumber }} @if(e.classGroupName){· {{ e.classGroupName }}}</option>}</select></div>
+        <div class="grid-2">
+          <div class="field"><label>Appliquer à</label><select [(ngModel)]="form.feeTypeId"><option [ngValue]="null">Tous les frais</option>@for(f of feeTypes(); track f.id){<option [ngValue]="f.id">{{ f.name }}</option>}</select></div>
+          <div class="field"><label>Type de réduction *</label><select [(ngModel)]="form.discountType"><option value="PERCENTAGE">Pourcentage</option><option value="FIXED_AMOUNT">Montant fixe à déduire</option><option value="NEW_AMOUNT">Nouveau montant final</option></select></div>
+          <div class="field"><label>Valeur *</label><input type="number" min="0" step="0.01" [(ngModel)]="form.value"><small>{{ discountValueHint(form.discountType) }}</small></div>
+          <div class="field"><label>Date de début *</label><input type="date" [(ngModel)]="form.startDate"></div>
+          <div class="field"><label>Date de fin</label><input type="date" [(ngModel)]="form.endDate"></div>
+          <div class="field full-field"><label>Motif / justification</label><textarea rows="3" [(ngModel)]="form.reason" placeholder="Ex. situation familiale, décision de direction..."></textarea></div>
+        </div>
+        <div class="modal-actions"><button class="btn btn-soft" (click)="modal.set(false)">Annuler</button><button class="btn btn-primary" [disabled]="saving()" (click)="saveDiscount()"><i class="bi bi-send-check"></i>{{ saving() ? 'Enregistrement...' : 'Enregistrer la demande' }}</button></div>
+      </div>
+    </div>
+  }
+
+  @if(ruleModal()) {
+    <div class="modal-backdrop" (click)="ruleModal.set(false)">
+      <div class="modal rule-modal" (click)="$event.stopPropagation()">
+        <div class="modal-head"><div><div class="eyebrow">Règle automatique</div><h2>{{ editingRule() ? 'Modifier la règle' : 'Nouvelle règle' }}</h2></div><button class="close-btn" (click)="ruleModal.set(false)"><i class="bi bi-x-lg"></i></button></div>
+        <div class="grid-2">
+          <div class="field"><label>Année scolaire *</label><select [(ngModel)]="ruleForm.schoolYearId"><option [ngValue]="0">Sélectionner</option>@for(y of years(); track y.id){<option [ngValue]="y.id">{{ y.label }}</option>}</select></div>
+          <div class="field"><label>Code *</label><input [(ngModel)]="ruleForm.code" placeholder="EX. FAM_2_50"></div>
+          <div class="field full-field"><label>Nom *</label><input [(ngModel)]="ruleForm.name" placeholder="Ex. Deuxième enfant -50 %"></div>
+          <div class="field"><label>Type</label><select [(ngModel)]="ruleForm.discountType"><option value="PERCENTAGE">Pourcentage</option><option value="FIXED_AMOUNT">Montant fixe</option><option value="NEW_AMOUNT">Nouveau montant</option></select></div>
+          <div class="field"><label>Valeur</label><input type="number" min="0" step="0.01" [(ngModel)]="ruleForm.value"></div>
+          <div class="field"><label>Condition</label><select [(ngModel)]="ruleForm.conditionType"><option value="ALWAYS">Toujours</option><option value="FAMILY_CHILD_RANK">Rang de l’enfant dans la famille</option></select></div>
+          @if(ruleForm.conditionType === 'FAMILY_CHILD_RANK') { <div class="field"><label>Rang de l’enfant</label><input type="number" min="1" step="1" [(ngModel)]="ruleForm.childRank"><small>2 = deuxième enfant, 3 = troisième enfant…</small></div> }
+          <div class="field"><label>Type de frais</label><select [(ngModel)]="ruleForm.feeTypeId"><option [ngValue]="null">Tous les frais</option>@for(f of feeTypes(); track f.id){<option [ngValue]="f.id">{{ f.name }}</option>}</select></div>
+          <div class="field"><label>Priorité</label><input type="number" [(ngModel)]="ruleForm.priority"><small>Une priorité plus élevée passe avant une règle moins prioritaire.</small></div>
+          <div class="field"><label>Cycle</label><select [(ngModel)]="ruleForm.cycleId" (ngModelChange)="onRuleCycleChange()"><option [ngValue]="null">Tous</option>@for(c of cycles(); track c.id){<option [ngValue]="c.id">{{ c.name }}</option>}</select></div>
+          <div class="field"><label>Niveau</label><select [(ngModel)]="ruleForm.levelId" (ngModelChange)="onRuleLevelChange()"><option [ngValue]="null">Tous</option>@for(l of filteredRuleLevels(); track l.id){<option [ngValue]="l.id">{{ l.name }}</option>}</select></div>
+          <div class="field"><label>Classe</label><select [(ngModel)]="ruleForm.classGroupId"><option [ngValue]="null">Toutes</option>@for(c of filteredRuleClasses(); track c.id){<option [ngValue]="c.id">{{ c.name }}</option>}</select></div>
+          <div class="field"><label>Campus</label><select [(ngModel)]="ruleForm.campusId"><option [ngValue]="null">Tous</option>@for(c of campuses(); track c.id){<option [ngValue]="c.id">{{ c.name }}</option>}</select></div>
+          <div class="field"><label>Valable à partir du</label><input type="date" [(ngModel)]="ruleForm.validFrom"></div>
+          <div class="field"><label>Valable jusqu’au</label><input type="date" [(ngModel)]="ruleForm.validUntil"></div>
+        </div>
+        <div class="checks-row"><label><input type="checkbox" [(ngModel)]="ruleForm.active"> Règle active</label><label><input type="checkbox" [(ngModel)]="ruleForm.requiresApproval"> Validation spécifique requise</label></div>
+        <div class="modal-actions"><button class="btn btn-soft" (click)="ruleModal.set(false)">Annuler</button><button class="btn btn-primary" [disabled]="saving()" (click)="saveRule()"><i class="bi bi-check2-circle"></i>{{ saving() ? 'Enregistrement...' : 'Enregistrer la règle' }}</button></div>
+      </div>
+    </div>
+  }
+
+  @if(rejectModal()) {
+    <div class="modal-backdrop" (click)="rejectModal.set(false)">
+      <div class="modal reject-modal" (click)="$event.stopPropagation()">
+        <div class="reject-icon"><i class="bi bi-x-circle"></i></div><h2>Refuser cette réduction ?</h2><p class="muted">La réduction ne sera pas appliquée. Le motif sera conservé dans l’historique.</p>
+        <div class="field"><label>Motif du refus *</label><textarea rows="4" [(ngModel)]="rejectionReason" placeholder="Expliquez la décision..."></textarea></div>
+        <div class="modal-actions"><button class="btn btn-soft" (click)="rejectModal.set(false)">Annuler</button><button class="btn btn-danger" (click)="reject()"><i class="bi bi-x-lg"></i> Confirmer le refus</button></div>
+      </div>
+    </div>
+  }
+</div>

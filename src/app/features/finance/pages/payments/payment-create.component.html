@@ -1,76 +1,185 @@
-<div class="finance-page">
-    <div class="page-head">
-        <div>
-            <div class="eyebrow">Encaissement</div>
-            <h1>Nouveau paiement</h1>
-            <div class="muted">Sélectionnez le responsable, le dossier puis ventilez le montant sur les créances.</div>
-        </div><a class="btn btn-soft" routerLink="/finance/payments">Retour</a>
-    </div>@if(error()){<div class="alert alert-error">{{error()}}</div>}<div class="card">
-        <h2 class="section-title">1. Responsable payeur</h2>
-        <div class="toolbar">
-            <div class="field"><label>Rechercher</label><input [(ngModel)]="guardianSearch"
-                    (keyup.enter)="searchGuardians()" placeholder="Nom, prénom, téléphone, email..."></div><button
-                class="btn btn-soft" (click)="searchGuardians()">Rechercher</button>
-        </div>@if(guardians().length){<div class="search-results">@for(g of guardians();track g.id){<div
-                class="search-row">
-                <div>
-                    <div class="name">{{g.person?.lastName}} {{g.person?.firstName}}</div>
-                    <div class="sub">{{g.person?.phone}} · {{g.person?.email}}</div>
-                </div><button class="btn btn-soft" (click)="chooseGuardian(g)">Choisir</button>
-            </div>}</div>}@if(guardian();as g){<div class="alert alert-success" style="margin-top:12px">
-            <b>{{g.person?.lastName}} {{g.person?.firstName}}</b> sélectionné.
-        </div>}
+<div class="finance-page payment-workspace">
+  <div class="page-head payment-page-head">
+    <div>
+      <div class="eyebrow">Finance · Encaissements</div>
+      <h1>Nouvel encaissement</h1>
+      <div class="muted">Ventilez automatiquement le paiement d'une famille sur les échéances les plus anciennes.</div>
     </div>
-    <div class="card">
-        <h2 class="section-title">2. Dossier à régler</h2>
-        <div class="toolbar">
-            <div class="field"><label>Dossier en attente de paiement</label><input [(ngModel)]="registrationSearch"
-                    (keyup.enter)="searchRegistrations()" placeholder="Élève, matricule..."></div><button
-                class="btn btn-soft" (click)="searchRegistrations()" [disabled]="!guardian()">Rechercher</button>
-        </div>@if(registrations().length){<div class="search-results">@for(r of registrations();track r.id){<div
-                class="search-row">
-                <div>
-                    <div class="name">{{r.studentLastName}} {{r.studentFirstName}}</div>
-                    <div class="sub">{{r.studentNumber}} · {{r.status}}</div>
-                </div><button class="btn btn-soft" (click)="chooseRegistration(r)">Choisir</button>
-            </div>}</div>}@if(registration();as r){<div class="alert alert-success" style="margin-top:12px">Dossier de
-            <b>{{r.studentLastName}} {{r.studentFirstName}}</b>
-        </div>}
-    </div>
-    <div class="card">
-        <h2 class="section-title">3. Ventilation</h2>@for(c of charges();track c.id){<div class="allocation-row">
-            <div>
-                <div class="name">{{c.label}}</div>
-                <div class="sub">Reste dû : {{c.remainingAmount|number:'1.2-2'}}</div>
-            </div>
-            <div class="field"><label>Montant affecté</label><input type="number" min="0" [max]="c.remainingAmount"
-                    step="0.01" [(ngModel)]="allocationAmounts[c.id]" (ngModelChange)="recomputeTotal()"></div><button
-                class="btn btn-soft" (click)="allocationAmounts[c.id]=c.remainingAmount;recomputeTotal()">Tout</button>
-        </div>}@if(registration()&&!charges().length){<div class="empty">Aucune créance payable sur ce dossier.</div>}
-    </div>
-    <div class="card">
-        <h2 class="section-title">4. Paiement</h2>
-        <div class="grid-2">
-            <div class="field"><label>Mode de paiement *</label><select [(ngModel)]="paymentMethodId">
-                    <option [ngValue]="null">Sélectionner</option>@for(m of methods();track m.id){<option
-                        [ngValue]="m.id">{{m.name}}</option>}
-                </select></div>
-            <div class="field"><label>Montant encaissé *</label><input type="number" min="0.01" step="0.01"
-                    [(ngModel)]="totalAmount"></div>
-            <div class="field"><label>Session de caisse</label>@if(cashState.current();as cs){<div
-                    class="alert alert-success" style="margin:0">Session ouverte · {{cs.openedAt|date:'dd/MM/yyyy
-                    HH:mm'}}</div>}@else{<div class="muted">Aucune session ouverte dans cet onglet. Le paiement sera
-                    créé sans session de caisse.</div>}</div>
-            <div class="field"><label>Référence externe</label><input [(ngModel)]="externalReference"
-                    placeholder="Chèque, virement..."></div>
+    <a class="btn btn-soft" routerLink="/finance/payments"><i class="bi bi-arrow-left"></i> Retour</a>
+  </div>
+
+  @if(error()) { <div class="alert alert-error">{{ error() }}</div> }
+  @if(success()) { <div class="alert alert-success">{{ success() }}</div> }
+
+  <div class="top-grid">
+    <section class="card family-card">
+      <div class="section-kicker">Famille</div>
+      <h2 class="section-title">Responsable & enfants</h2>
+
+      <div class="guardian-search">
+        <div class="field grow">
+          <label>Responsable payeur</label>
+          <div class="search-input-wrap">
+            <i class="bi bi-search"></i>
+            <input [(ngModel)]="guardianSearch" (keyup.enter)="searchGuardians()" placeholder="Nom, prénom, téléphone, email...">
+          </div>
         </div>
-        <div class="field" style="margin-top:12px"><label>Notes</label><textarea rows="3"
-                [(ngModel)]="notes"></textarea></div>
-        <div class="muted" style="margin-top:10px">Si le montant encaissé dépasse la somme ventilée, le backend crée
-            automatiquement un crédit famille pour le reliquat.</div>
-        <div class="actions" style="margin-top:18px"><button class="btn btn-primary" (click)="create()"
-                [disabled]="saving()||!guardian()||!paymentMethodId||totalAmount<=0"><i
-                    class="bi bi-check2-circle"></i>{{saving()?'Enregistrement...':'Valider le paiement'}}</button>
+        <button class="btn btn-soft search-btn" (click)="searchGuardians()">Rechercher</button>
+      </div>
+
+      @if(guardians().length) {
+        <div class="search-results floating-results">
+          @for(g of guardians(); track g.id) {
+            <button type="button" class="guardian-result" (click)="chooseGuardian(g)">
+              <span class="avatar guardian-avatar"><i class="bi bi-person"></i></span>
+              <span class="guardian-copy">
+                <strong>{{ g.person?.lastName }} {{ g.person?.firstName }}</strong>
+                <small>{{ g.person?.phone || 'Téléphone non renseigné' }} · {{ g.person?.email || 'Email non renseigné' }}</small>
+              </span>
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          }
         </div>
+      }
+
+      @if(guardian(); as g) {
+        <div class="guardian-selected">
+          <span class="avatar guardian-avatar"><i class="bi bi-person-check"></i></span>
+          <div>
+            <strong>{{ g.person?.lastName }} {{ g.person?.firstName }}</strong>
+            <small>{{ g.person?.phone || '—' }} · {{ g.person?.email || '—' }}</small>
+          </div>
+          <span class="selected-pill"><i class="bi bi-check-circle-fill"></i> Sélectionné</span>
+        </div>
+
+        <div class="children-title">Enfants de la famille</div>
+        @if(loadingStudents()) {
+          <div class="empty compact">Chargement des enfants...</div>
+        } @else if(!students().length) {
+          <div class="empty compact">Aucun élève lié activement à ce responsable.</div>
+        } @else {
+          <div class="children-list">
+            @for(s of students(); track s.studentId) {
+              <div class="child-row">
+                <span class="avatar child-avatar">{{ s.firstName?.charAt(0) }}{{ s.lastName?.charAt(0) }}</span>
+                <div class="child-copy">
+                  <strong>{{ s.lastName }} {{ s.firstName }}</strong>
+                  <small>{{ s.studentNumber }} @if(s.classGroupName){ · {{ s.classGroupName }} } @if(s.levelName){ · {{ s.levelName }} }</small>
+                </div>
+                <span class="active-pill">Actif</span>
+              </div>
+            }
+          </div>
+        }
+      } @else {
+        <div class="family-placeholder">
+          <i class="bi bi-people"></i>
+          <span>Sélectionnez un responsable pour charger automatiquement tous ses enfants et leurs créances ouvertes.</span>
+        </div>
+      }
+    </section>
+
+    <section class="card allocation-card" [class.card-disabled]="!guardian()">
+      <div class="section-kicker">Paiement</div>
+      <h2 class="section-title">Montant & ventilation</h2>
+
+      <div class="field amount-field">
+        <label>Montant reçu (DA) *</label>
+        <div class="amount-input-wrap">
+          <input type="number" min="0.01" step="0.01" [(ngModel)]="totalAmount" placeholder="0">
+          <span>DA</span>
+        </div>
+      </div>
+
+      <div class="allocation-mode">
+        <button type="button" class="mode-card" [class.selected]="allocationMode === 'AUTO'" (click)="allocationMode='AUTO'">
+          <span class="mode-icon"><i class="bi bi-stars"></i></span>
+          <span><strong>Ventilation automatique</strong><small>Par échéance la plus ancienne, puis enfant</small></span>
+        </button>
+        <button type="button" class="mode-card" [class.selected]="allocationMode === 'MANUAL'" (click)="useManualMode()">
+          <span class="mode-icon"><i class="bi bi-sliders"></i></span>
+          <span><strong>Ventilation manuelle</strong><small>Ajuster librement chaque affectation</small></span>
+        </button>
+      </div>
+
+      <button type="button" class="btn btn-primary auto-btn" [disabled]="!guardian() || totalAmount <= 0 || allocating()" (click)="ventilerAutomatiquement()">
+        <i class="bi" [class.bi-magic]="!allocating()" [class.bi-hourglass-split]="allocating()"></i>
+        {{ allocating() ? 'Calcul de la ventilation...' : 'Ventiler automatiquement' }}
+      </button>
+
+      <div class="rule-box">
+        <i class="bi bi-info-circle"></i>
+        <div><strong>Règle appliquée</strong><span>Septembre enfant 1 → septembre enfant 2 → octobre enfant 1… Une créance est complétée avant de passer à la suivante.</span></div>
+      </div>
+    </section>
+  </div>
+
+  <section class="card debts-card" [class.card-disabled]="!guardian()">
+    <div class="debts-head">
+      <div>
+        <div class="section-kicker">Créances ouvertes</div>
+        <h2 class="section-title">Échéances de la famille</h2>
+      </div>
+      <div class="debt-total"><span>Reste famille</span><strong>{{ outstandingTotal() | number:'1.2-2' }} DA</strong></div>
     </div>
+
+    @if(!guardian()) {
+      <div class="empty compact">Sélectionnez d'abord un responsable.</div>
+    } @else if(loadingCharges()) {
+      <div class="empty compact">Chargement des créances de la famille...</div>
+    } @else if(!charges().length) {
+      <div class="alert alert-success no-margin"><i class="bi bi-check-circle"></i> Aucune créance ouverte pour cette famille.</div>
+    } @else {
+      <div class="table-wrap">
+        <table class="data-table family-debts-table">
+          <thead>
+            <tr>
+              <th>Élève</th><th>Créance</th><th>Période</th><th>Échéance</th><th>Reste dû</th><th>Ventilation</th><th>Après paiement</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for(c of charges(); track c.chargeId) {
+              <tr [class.row-allocated]="allocationAmounts[c.chargeId] > 0">
+                <td><div class="student-cell"><span class="mini-avatar">{{ c.studentFirstName?.charAt(0) }}{{ c.studentLastName?.charAt(0) }}</span><span><strong>{{ c.studentLastName }} {{ c.studentFirstName }}</strong><small>{{ c.studentNumber }}</small></span></div></td>
+                <td><strong>{{ c.label }}</strong><small class="status-line">{{ c.status }}</small></td>
+                <td class="period-cell">{{ periodLabel(c) }}</td>
+                <td>{{ c.dueDate ? (c.dueDate | date:'dd/MM/yyyy') : '—' }}</td>
+                <td class="money strong">{{ c.remainingAmount | number:'1.2-2' }} DA</td>
+                <td class="allocation-cell"><input type="number" min="0" [max]="c.remainingAmount" step="0.01" [(ngModel)]="allocationAmounts[c.chargeId]" (ngModelChange)="onAllocationChange(c)"></td>
+                <td class="money"><span [class.paid-after]="c.remainingAmount - (allocationAmounts[c.chargeId] || 0) === 0">{{ c.remainingAmount - (allocationAmounts[c.chargeId] || 0) | number:'1.2-2' }} DA</span></td>
+                <td><div class="row-actions"><button class="mini-btn" type="button" (click)="setFull(c)">Tout</button>@if(allocationAmounts[c.chargeId] > 0){<button class="mini-btn muted-btn" type="button" (click)="clearCharge(c)">×</button>}</div></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+  <div class="bottom-grid">
+    <section class="card payment-details-card" [class.card-disabled]="!guardian()">
+      <div class="section-kicker">Encaissement</div>
+      <h2 class="section-title">Détails du paiement</h2>
+      <div class="grid-2">
+        <div class="field"><label>Mode de paiement *</label><select [(ngModel)]="paymentMethodId"><option [ngValue]="null">Sélectionner</option>@for(m of methods(); track m.id){<option [ngValue]="m.id">{{ m.name }}</option>}</select></div>
+        <div class="field"><label>Référence externe</label><input [(ngModel)]="externalReference" placeholder="Chèque, virement..."></div>
+        <div class="field"><label>Session de caisse</label>@if(cashState.current(); as cs){<div class="session-box session-open"><i class="bi bi-cash-coin"></i><div><strong>Session #{{ cs.id }} ouverte</strong><span>{{ cs.openedAt | date:'dd/MM/yyyy HH:mm' }}</span></div></div>}@else if(requiresCashSession()){<div class="session-box session-required"><i class="bi bi-exclamation-triangle"></i><div><strong>Session de caisse requise</strong><span>Ouvrez une session avant de valider ce paiement.</span></div></div>}@else{<div class="session-box"><i class="bi bi-bank"></i><div><strong>Virement bancaire</strong><span>Aucune session de caisse physique n’est nécessaire.</span></div></div>}</div>
+        <div class="field"><label>Notes</label><textarea rows="3" [(ngModel)]="notes" placeholder="Note interne..."></textarea></div>
+      </div>
+    </section>
+
+    <section class="card recap-card">
+      <div class="section-kicker">Récapitulatif</div>
+      <h2 class="section-title">Validation</h2>
+      <div class="recap-lines">
+        <div><span>Montant reçu</span><strong>{{ totalAmount | number:'1.2-2' }} DA</strong></div>
+        <div><span>Montant ventilé</span><strong class="blue">{{ allocatedTotal() | number:'1.2-2' }} DA</strong></div>
+        <div><span>Créances touchées</span><strong>{{ selectedChargesCount() }}</strong></div>
+        <div class="recap-unallocated"><span>Non ventilé / avoir</span><strong>{{ unallocatedTotal() | number:'1.2-2' }} DA</strong></div>
+      </div>
+      @if(unallocatedTotal() > 0) { <div class="credit-note"><i class="bi bi-wallet2"></i><div><strong>{{ unallocatedTotal() | number:'1.2-2' }} DA deviendront un avoir famille</strong><span>Le reliquat sera conservé automatiquement après validation.</span></div></div> }
+      <button class="btn btn-success validate-btn" [disabled]="!canValidatePayment()" (click)="create()"><i class="bi bi-check2-circle"></i>{{ saving() ? 'Validation...' : 'Valider l’encaissement' }}</button>
+      <button class="btn btn-soft reset-btn" type="button" (click)="resetAllocation()"><i class="bi bi-arrow-counterclockwise"></i> Réinitialiser la ventilation</button>
+    </section>
+  </div>
 </div>

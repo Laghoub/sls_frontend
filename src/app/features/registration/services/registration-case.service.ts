@@ -47,12 +47,6 @@ export class RegistrationCaseService {
       {},
     );
   }
-  paymentConfirmed(id: number) {
-    return this.http.post<RegistrationCase>(
-      `${this.url}/${id}/payment-confirmed`,
-      {},
-    );
-  }
   startCompletion(id: number) {
     return this.http.post<RegistrationCase>(
       `${this.url}/${id}/start-completion`,

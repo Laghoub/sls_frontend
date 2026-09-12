@@ -17,4 +17,8 @@ export class RefundService {
   create(r: RefundRequest) {
     return this.http.post<Refund>(this.url, r);
   }
+
+  reconcileLegacy() {
+    return this.http.post<{ reconciled: number }>(`${this.url}/reconcile-legacy`, {});
+  }
 }

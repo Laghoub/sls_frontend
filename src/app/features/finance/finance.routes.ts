@@ -7,6 +7,8 @@ export const FINANCE_ROUTES: Routes = [
   { path: 'installments', loadComponent: () => import('./pages/installments/installments.component').then(m => m.InstallmentsComponent) },
   { path: 'fee-types', loadComponent: () => import('./pages/fee-types/fee-types.component').then(m => m.FeeTypesComponent) },
   { path: 'tariffs', loadComponent: () => import('./pages/tariffs/tariffs.component').then(m => m.TariffsComponent) },
+  { path: 'billing', loadComponent: () => import('./pages/billing/billing.component').then(m => m.BillingComponent) },
+  { path: 'discounts', loadComponent: () => import('./pages/discounts/discounts.component').then(m => m.DiscountsComponent) },
   { path: 'charges', loadComponent: () => import('./pages/charges/charges.component').then(m => m.ChargesComponent) },
   { path: 'payments', loadComponent: () => import('./pages/payments/payment-list.component').then(m => m.PaymentListComponent) },
   { path: 'payments/new', loadComponent: () => import('./pages/payments/payment-create.component').then(m => m.PaymentCreateComponent) },

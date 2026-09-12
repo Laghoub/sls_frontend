@@ -318,10 +318,6 @@ export class RegistrationDetailComponent {
     );
   }
 
-  paid(): void {
-    this.action(this.cases.paymentConfirmed(this.id), 'Paiement confirmé.');
-  }
-
   start(): void {
     this.action(
       this.cases.startCompletion(this.id),

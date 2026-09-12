@@ -18,6 +18,7 @@ export interface Tariff {
   id: number;
   schoolYearId: number;
   feeTypeId: number;
+  cycleId: number | null;
   levelId: number | null;
   classGroupId: number | null;
   campusId: number | null;
@@ -32,6 +33,7 @@ export interface Tariff {
 export interface TariffRequest {
   schoolYearId: number;
   feeTypeId: number;
+  cycleId: number | null;
   levelId: number | null;
   classGroupId: number | null;
   campusId: number | null;
@@ -123,7 +125,9 @@ export interface PaymentCreateRequest {
 export interface FamilyCredit {
   id: number;
   guardianId: number;
-  sourcePaymentId: number;
+  sourcePaymentId: number | null;
+  sourceStudentDiscountId?: number | null;
+  sourceType?: string;
   initialAmount: number;
   remainingAmount: number;
   status: string;
@@ -203,6 +207,8 @@ export interface Refund {
   validatedBy: number | null;
   validatedAt: string | null;
   createdAt: string;
+  creditReversedAmount: number;
+  allocationReversedAmount: number;
 }
 export interface RefundRequest {
   paymentId: number;

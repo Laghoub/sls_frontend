@@ -1,1 +1,32 @@
 @use '../../shared/finance';
+
+.alert-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 12px 14px; border-radius: 12px; margin-bottom: 14px; }
+.refund-summary, .receipt-totals { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
+.refund-summary > div, .receipt-totals > div { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; }
+.refund-summary span, .receipt-totals span, .receipt-responsible span { display: block; color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+.refund-summary strong, .receipt-totals strong { font-size: 18px; color: #0f172a; }
+.section-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:14px; }
+.refund-row { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; padding:14px 0; border-bottom:1px solid #e2e8f0; }
+.refund-impact { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+.refund-impact span { display:inline-flex; gap:6px; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; border-radius:999px; padding:5px 9px; font-size:12px; color:#475569; }
+.info-note { margin-top:14px; padding:12px 14px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:12px; color:#1e40af; line-height:1.45; }
+.refund-cap { display:flex; justify-content:space-between; gap:16px; background:#fff7ed; border:1px solid #fed7aa; padding:12px 14px; border-radius:12px; margin:14px 0; }
+.cash-session-ok, .credit-note, .refund-note { display:flex; gap:12px; align-items:flex-start; padding:12px 14px; border-radius:12px; margin:14px 0; }
+.cash-session-ok, .credit-note { background:#ecfdf5; border:1px solid #a7f3d0; color:#065f46; }
+.refund-note { background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; }
+.cash-session-ok i, .credit-note i, .refund-note i { font-size:18px; margin-top:2px; }
+.cash-session-ok strong, .cash-session-ok span, .credit-note strong, .credit-note span, .refund-note strong, .refund-note span { display:block; }
+.cash-session-ok span, .credit-note span, .refund-note span { font-size:13px; margin-top:3px; opacity:.9; }
+.receipt-modal { width:min(980px, 94vw); max-width:980px; }
+.receipt-responsible { margin:14px 0; background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:14px; }
+.receipt-responsible strong, .receipt-responsible small { display:block; }
+.receipt-responsible small { margin-top:4px; color:#64748b; }
+.receipt-totals { grid-template-columns:repeat(3, minmax(0,1fr)); }
+
+@media (max-width: 850px) {
+  .refund-summary, .receipt-totals { grid-template-columns:1fr 1fr; }
+  .section-head { flex-direction:column; }
+}
+@media (max-width: 560px) {
+  .refund-summary, .receipt-totals { grid-template-columns:1fr; }
+}

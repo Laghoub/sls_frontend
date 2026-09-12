@@ -1,178 +1,211 @@
 <div class="finance-page">
-    <div class="page-head">
-        <div>
-            <div class="eyebrow">Tarification</div>
-            <h1>Grilles tarifaires</h1>
-            <div class="muted">Tarifs par année, niveau, classe ou campus.</div>
-        </div>
-        @if (auth.hasPermission("TARIF_GERER")) {
-        <button class="btn btn-primary" (click)="openCreate()">
-            <i class="bi bi-plus-lg"></i>Nouveau tarif
-        </button>
-        }
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Tarification</div>
+      <h1>Grilles tarifaires</h1>
+      <div class="muted">Tarifs par année, cycle, niveau, classe ou campus.</div>
     </div>
-    @if (error()) {
+
+    @if (auth.hasPermission('TARIF_GERER')) {
+      <button class="btn btn-primary" (click)="openCreate()">
+        <i class="bi bi-plus-lg"></i>
+        Nouveau tarif
+      </button>
+    }
+  </div>
+
+  @if (error()) {
     <div class="alert alert-error">{{ error() }}</div>
-    }
-    <div class="card">
-        <div class="toolbar">
-            <div class="field">
-                <label>Année scolaire</label><select [(ngModel)]="schoolYearId" (change)="page.set(0); load()">
-                    <option [ngValue]="null">Toutes</option>
-                    @for (y of years(); track y.id) {
-                    <option [ngValue]="y.id">
-                        {{ y.label }}
-                    </option>
-                    }
-                </select>
-            </div>
-        </div>
+  }
+
+  <div class="card">
+    <div class="toolbar">
+      <div class="field">
+        <label>Année scolaire</label>
+        <select [(ngModel)]="schoolYearId" (change)="page.set(0); load()">
+          <option [ngValue]="null">Toutes</option>
+          @for (y of years(); track y.id) {
+            <option [ngValue]="y.id">{{ y.label }}</option>
+          }
+        </select>
+      </div>
     </div>
-    <div class="card">
-        <div class="table-wrap">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Frais</th>
-                        <th>Année</th>
-                        <th>Périmètre</th>
-                        <th>Montant</th>
-                        <th>Fréquence</th>
-                        <th>Validité</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (x of items(); track x.id) {
-                    <tr>
-                        <td class="name">{{ fee(x.feeTypeId) }}</td>
-                        <td>{{ year(x.schoolYearId) }}</td>
-                        <td>{{ scope(x) }}</td>
-                        <td class="money">{{ x.amount | number: "1.2-2" }}</td>
-                        <td>{{ x.billingFrequency }}</td>
-                        <td>
-                            {{ x.validFrom | date: "dd/MM/yyyy" }} →
-                            {{ x.validUntil ? (x.validUntil | date: "dd/MM/yyyy") : "—" }}
-                        </td>
-                        <td>
-                            @if (auth.hasPermission("TARIF_GERER")) {
-                            <button class="btn btn-soft" (click)="openEdit(x)">
-                                Modifier
-                            </button>
-                            }
-                        </td>
-                    </tr>
-                    }
-                    @if (!items().length) {
-                    <tr>
-                        <td colspan="7">
-                            <div class="empty">Aucun tarif.</div>
-                        </td>
-                    </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-        <div class="pagination">
-            <span class="muted">{{ total() }} tarif(s)</span>
-            <div class="pages">
-                <button class="page-btn" (click)="prev()" [disabled]="page() === 0">
-                    ‹</button><span>{{ page() + 1 }} / {{ pages() || 1 }}</span><button class="page-btn"
-                    (click)="next()" [disabled]="page() + 1 >= pages()">
-                    ›
-                </button>
-            </div>
-            <select [(ngModel)]="size" (change)="page.set(0); load()">
-                <option [ngValue]="10">10</option>
-                <option [ngValue]="20">20</option>
-                <option [ngValue]="50">50</option>
-                <option [ngValue]="100">100</option>
-            </select>
-        </div>
+  </div>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Frais</th>
+            <th>Année</th>
+            <th>Périmètre</th>
+            <th>Montant</th>
+            <th>Fréquence</th>
+            <th>Validité</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (x of items(); track x.id) {
+            <tr>
+              <td class="name">{{ fee(x.feeTypeId) }}</td>
+              <td>{{ year(x.schoolYearId) }}</td>
+              <td>{{ scope(x) }}</td>
+              <td class="money">{{ x.amount | number: '1.2-2' }} DA</td>
+              <td>{{ frequency(x.billingFrequency) }}</td>
+              <td>
+                {{ x.validFrom | date: 'dd/MM/yyyy' }} →
+                {{ x.validUntil ? (x.validUntil | date: 'dd/MM/yyyy') : '—' }}
+              </td>
+              <td>
+                @if (auth.hasPermission('TARIF_GERER')) {
+                  <button class="btn btn-soft" (click)="openEdit(x)">Modifier</button>
+                }
+              </td>
+            </tr>
+          }
+
+          @if (!items().length) {
+            <tr>
+              <td colspan="7"><div class="empty">Aucun tarif.</div></td>
+            </tr>
+          }
+        </tbody>
+      </table>
     </div>
-    @if (modal()) {
+
+    <div class="pagination">
+      <span class="muted">{{ total() }} tarif(s)</span>
+      <div class="pages">
+        <button class="page-btn" (click)="prev()" [disabled]="page() === 0">‹</button>
+        <span>{{ page() + 1 }} / {{ pages() || 1 }}</span>
+        <button class="page-btn" (click)="next()" [disabled]="page() + 1 >= pages()">›</button>
+      </div>
+      <select [(ngModel)]="size" (change)="page.set(0); load()">
+        <option [ngValue]="10">10</option>
+        <option [ngValue]="20">20</option>
+        <option [ngValue]="50">50</option>
+        <option [ngValue]="100">100</option>
+      </select>
+    </div>
+  </div>
+
+  @if (modal()) {
     <div class="modal-backdrop">
-        <div class="modal">
-            <h2>{{ editing() ? "Modifier" : "Créer" }} un tarif</h2>
-            <div class="grid-2">
-                <div class="field">
-                    <label>Année *</label><select [(ngModel)]="form.schoolYearId">
-                        @for (y of years(); track y.id) {
-                        <option [ngValue]="y.id">{{ y.label }}</option>
-                        }
-                    </select>
-                </div>
-                <div class="field">
-                    <label>Type de frais *</label>
+      <div class="modal">
+        <h2>{{ editing() ? 'Modifier' : 'Créer' }} un tarif</h2>
+        <p class="muted tariff-help">
+          Laissez un périmètre sur « Tous » pour rendre le tarif plus général.
+          Un tarif de classe est plus précis qu'un tarif de niveau, lui-même plus précis qu'un tarif de cycle.
+        </p>
 
-                    <select [(ngModel)]="form.feeTypeId">
-                        @if (!feeTypes().length) {
-                        <option [ngValue]="0" disabled>
-                            Aucun type de frais disponible
-                        </option>
-                        }
+        <div class="grid-2">
+          <div class="field">
+            <label>Année *</label>
+            <select [(ngModel)]="form.schoolYearId" (change)="form.classGroupId = null">
+              @for (y of years(); track y.id) {
+                <option [ngValue]="y.id">{{ y.label }}</option>
+              }
+            </select>
+          </div>
 
-                        @for (f of feeTypes(); track f.id) {
-                        <option [ngValue]="f.id">
-                            {{ f.name }}
-                        </option>
-                        }
-                    </select>
-                </div>
-                <div class="field">
-                    <label>Niveau</label><select [(ngModel)]="form.levelId">
-                        <option [ngValue]="null">Tous</option>
-                        @for (l of levels(); track l.id) {
-                        <option [ngValue]="l.id">
-                            {{ l.name }}
-                        </option>
-                        }
-                    </select>
-                </div>
-                <div class="field">
-                    <label>Classe</label><select [(ngModel)]="form.classGroupId">
-                        <option [ngValue]="null">Toutes</option>
-                        @for (c of classes(); track c.id) {
-                        @if (c.schoolYearId === form.schoolYearId) {
-                        <option [ngValue]="c.id">{{ c.name }}</option>
-                        }
-                        }
-                    </select>
-                </div>
-                <div class="field">
-                    <label>Campus</label><select [(ngModel)]="form.campusId">
-                        <option [ngValue]="null">Tous</option>
-                        @for (c of campuses(); track c.id) {
-                        <option [ngValue]="c.id">
-                            {{ c.name }}
-                        </option>
-                        }
-                    </select>
-                </div>
-                <div class="field">
-                    <label>Montant *</label><input type="number" min="0" step="0.01" [(ngModel)]="form.amount" />
-                </div>
-                <div class="field">
-                    <label>Fréquence *</label><select [(ngModel)]="form.billingFrequency">
-                        <option value="ONE_TIME">Unique</option>
-                        <option value="MONTHLY">Mensuel</option>
-                        <option value="QUARTERLY">Trimestriel</option>
-                        <option value="ANNUAL">Annuel</option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label>Début *</label><input type="date" [(ngModel)]="form.validFrom" />
-                </div>
-                <div class="field">
-                    <label>Fin</label><input type="date" [(ngModel)]="form.validUntil" />
-                </div>
-            </div>
-            <label><input type="checkbox" [(ngModel)]="form.active" /> Actif</label>
-            <div class="actions" style="margin-top: 18px">
-                <button class="btn btn-soft" (click)="modal.set(false)">
-                    Annuler</button><button class="btn btn-primary" (click)="save()">Enregistrer</button>
-            </div>
+          <div class="field">
+            <label>Type de frais *</label>
+            <select [(ngModel)]="form.feeTypeId">
+              @if (!feeTypes().length) {
+                <option [ngValue]="0" disabled>Aucun type de frais disponible</option>
+              }
+              @for (f of feeTypes(); track f.id) {
+                <option [ngValue]="f.id">{{ f.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Cycle</label>
+            <select [(ngModel)]="form.cycleId" (change)="onCycleChange()">
+              <option [ngValue]="null">Tous les cycles</option>
+              @for (c of cycles(); track c.id) {
+                @if (c.active) {
+                  <option [ngValue]="c.id">{{ c.name }}</option>
+                }
+              }
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Niveau</label>
+            <select [(ngModel)]="form.levelId" (change)="onLevelChange()">
+              <option [ngValue]="null">Tous les niveaux</option>
+              @for (l of filteredLevels(); track l.id) {
+                @if (l.active) {
+                  <option [ngValue]="l.id">{{ l.name }}</option>
+                }
+              }
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Classe</label>
+            <select [(ngModel)]="form.classGroupId" (change)="onClassChange()">
+              <option [ngValue]="null">Toutes les classes</option>
+              @for (c of filteredClasses(); track c.id) {
+                <option [ngValue]="c.id">{{ c.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Campus</label>
+            <select [(ngModel)]="form.campusId" (change)="form.classGroupId = null">
+              <option [ngValue]="null">Tous les campus</option>
+              @for (c of campuses(); track c.id) {
+                @if (c.active) {
+                  <option [ngValue]="c.id">{{ c.name }}</option>
+                }
+              }
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Montant *</label>
+            <input type="number" min="0" step="0.01" [(ngModel)]="form.amount" />
+          </div>
+
+          <div class="field">
+            <label>Fréquence *</label>
+            <select [(ngModel)]="form.billingFrequency">
+              <option value="ONE_TIME">Unique</option>
+              <option value="MONTHLY">Mensuel</option>
+              <option value="QUARTERLY">Trimestriel</option>
+              <option value="ANNUAL">Annuel</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Début *</label>
+            <input type="date" [(ngModel)]="form.validFrom" />
+          </div>
+
+          <div class="field">
+            <label>Fin</label>
+            <input type="date" [(ngModel)]="form.validUntil" />
+          </div>
         </div>
+
+        <label class="active-check">
+          <input type="checkbox" [(ngModel)]="form.active" />
+          Tarif actif
+        </label>
+
+        <div class="actions" style="margin-top: 18px">
+          <button class="btn btn-soft" (click)="modal.set(false)">Annuler</button>
+          <button class="btn btn-primary" (click)="save()" [disabled]="!form.schoolYearId || !form.feeTypeId || form.amount < 0">
+            Enregistrer
+          </button>
+        </div>
+      </div>
     </div>
-    }
+  }
 </div>

@@ -1,83 +1,160 @@
-<div class="finance-page">@if(detail();as d){<div class="page-head">
-        <div>
-            <div class="eyebrow">Paiement</div>
-            <h1>{{d.payment.paymentNumber}}</h1>
-            <div class="muted">{{d.payment.paymentDate|date:'dd/MM/yyyy HH:mm'}} · {{method(d.payment.paymentMethodId)}}
-            </div>
-        </div>
-        <div class="actions"><span class="badge {{d.payment.status}}">{{d.payment.status}}</span><button class="btn btn-primary" (click)="openReceipt()"><i class="bi bi-printer"></i>Reçu</button><a class="btn btn-soft" routerLink="/finance/payments">Retour</a></div>
-    </div>@if(error()){<div class="alert alert-error">{{error()}}</div>}<div class="grid-3">
-        <div class="stat">
-            <div class="muted">Montant</div>
-            <div class="value">{{d.payment.totalAmount|number:'1.2-2'}}</div>
-        </div>
-        <div class="stat">
-            <div class="muted">Ventilé</div>
-            <div class="value">{{allocatedTotal()|number:'1.2-2'}}</div>
-            <div class="sub">{{d.allocations.length}} ventilation(s)</div>
-        </div>
-        <div class="stat">
-            <div class="muted">Crédit généré</div>
-            <div class="value">{{(d.generatedCredit?.remainingAmount ?? 0)|number:'1.2-2'}}</div>
-        </div>
+<div class="finance-page">
+  @if (detail(); as d) {
+    <div class="page-head">
+      <div>
+        <div class="eyebrow">Paiement</div>
+        <h1>{{ d.payment.paymentNumber }}</h1>
+        <div class="muted">{{ d.payment.paymentDate | date:'dd/MM/yyyy HH:mm' }} · {{ method(d.payment.paymentMethodId) }}</div>
+      </div>
+      <div class="actions">
+        <span class="badge {{ d.payment.status }}">{{ d.payment.status }}</span>
+        <button class="btn btn-primary" (click)="openReceipt()"><i class="bi bi-printer"></i> Reçu</button>
+        <a class="btn btn-soft" routerLink="/finance/payments">Retour</a>
+      </div>
     </div>
-    <div class="card">
-        <h2 class="section-title">Ventilations</h2>
-        <div class="table-wrap">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Créance</th>
-                        <th>Montant</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-                <tbody>@for(a of d.allocations;track a.id){<tr>
-                        <td>Affectation de créance</td>
-                        <td class="money">{{a.amount|number:'1.2-2'}}</td>
-                        <td>{{a.createdAt|date:'dd/MM/yyyy HH:mm'}}</td>
-                    </tr>}@if(!d.allocations.length){<tr>
-                        <td colspan="3">
-                            <div class="empty">Aucune ventilation.</div>
-                        </td>
-                    </tr>}</tbody>
-            </table>
-        </div>
+
+    @if (error()) { <div class="alert alert-error">{{ error() }}</div> }
+    @if (success()) { <div class="alert alert-success">{{ success() }}</div> }
+
+    <div class="grid-3">
+      <div class="stat">
+        <div class="muted">Montant reçu</div>
+        <div class="value">{{ d.payment.totalAmount | number:'1.2-2' }} DA</div>
+      </div>
+      <div class="stat">
+        <div class="muted">Ventilé aux créances</div>
+        <div class="value">{{ allocatedTotal() | number:'1.2-2' }} DA</div>
+        <div class="sub">{{ d.allocations.length }} ventilation(s)</div>
+      </div>
+      <div class="stat">
+        <div class="muted">Avoir disponible</div>
+        <div class="value">{{ (d.generatedCredit?.remainingAmount ?? 0) | number:'1.2-2' }} DA</div>
+      </div>
     </div>
+
+    @if (refundedTotal() > 0) {
+      <div class="refund-summary">
+        <div><span>Remboursé</span><strong>{{ refundedTotal() | number:'1.2-2' }} DA</strong></div>
+        <div><span>Retiré de l'avoir</span><strong>{{ creditReversedTotal() | number:'1.2-2' }} DA</strong></div>
+        <div><span>Créances réouvertes</span><strong>{{ allocationReversedTotal() | number:'1.2-2' }} DA</strong></div>
+        <div><span>Encore remboursable</span><strong>{{ refundableAmount() | number:'1.2-2' }} DA</strong></div>
+      </div>
+    }
+
     <div class="card">
-        <h2 class="section-title">Remboursements</h2>@for(r of refundItems();track r.id){<div class="search-row">
-            <div>
-                <div class="name">{{r.amount|number:'1.2-2'}} · {{method(r.paymentMethodId)}}</div>
-                <div class="sub">{{r.reason}} · {{r.refundDate|date:'dd/MM/yyyy HH:mm'}}</div>
-            </div><span class="badge {{r.status}}">{{r.status}}</span>
-        </div>}@if(!refundItems().length){<div class="empty">Aucun remboursement.</div>}<div class="actions"
-            style="margin-top:14px">
-            @if(auth.hasPermission('REMBOURSEMENT_CREER')&&d.payment.status!=='CANCELLED'){<button
-                class="btn btn-danger" (click)="openRefund()">Créer un
-                remboursement</button>}@if(auth.hasPermission('PAIEMENT_ANNULER')&&!d.allocations.length&&d.payment.status!=='CANCELLED'){<button
-                class="btn btn-danger" (click)="cancelModal.set(true)">Annuler le paiement</button>}</div>
-    </div>@if(cancelModal()){<div class="modal-backdrop">
-        <div class="modal">
-            <h2>Annuler le paiement</h2>
-            <p class="muted">L'annulation directe n'est possible que pour un paiement non ventilé.</p>
-            <div class="field"><label>Motif *</label><textarea rows="4" [(ngModel)]="cancelReason"></textarea></div>
-            <div class="actions"><button class="btn btn-soft" (click)="cancelModal.set(false)">Retour</button><button
-                    class="btn btn-danger" (click)="cancel()">Confirmer</button></div>
-        </div>
-    </div>}@if(refundModal()){<div class="modal-backdrop">
-        <div class="modal">
-            <h2>Nouveau remboursement</h2>
-            <div class="grid-2">
-                <div class="field"><label>Montant *</label><input type="number" min="0.01" step="0.01"
-                        [(ngModel)]="refundAmount"></div>
-                <div class="field"><label>Mode *</label><select [(ngModel)]="refundMethodId">@for(m of methods();track
-                        m.id){@if(m.active){<option [ngValue]="m.id">{{m.name}}</option>}}</select></div>
-                <div class="field"><label>Session de caisse</label><input type="number"
-                        [(ngModel)]="refundCashSessionId"></div>
+      <h2 class="section-title">Ventilations d'origine</h2>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Créance</th><th>Montant initialement ventilé</th><th>Date</th></tr></thead>
+          <tbody>
+            @for (a of d.allocations; track a.id) {
+              <tr><td>Affectation de créance #{{ a.studentChargeId }}</td><td class="money">{{ a.amount | number:'1.2-2' }} DA</td><td>{{ a.createdAt | date:'dd/MM/yyyy HH:mm' }}</td></tr>
+            }
+            @if (!d.allocations.length) { <tr><td colspan="3"><div class="empty">Aucune ventilation.</div></td></tr> }
+          </tbody>
+        </table>
+      </div>
+      @if (refundedTotal() > 0) {
+        <div class="info-note">Les ventilations d'origine restent visibles pour conserver l'historique. Les montants contre-passés par remboursement sont pris en compte dans le solde courant des créances.</div>
+      }
+    </div>
+
+    <div class="card">
+      <div class="section-head">
+        <div><h2 class="section-title">Remboursements</h2><div class="muted">Chaque remboursement indique l'impact sur l'avoir familial et sur les créances.</div></div>
+        @if (auth.hasPermission('REMBOURSEMENT_CREER') && d.payment.status !== 'CANCELLED' && refundableAmount() > 0) {
+          <button class="btn btn-danger" (click)="openRefund()"><i class="bi bi-arrow-counterclockwise"></i> Nouveau remboursement</button>
+        }
+      </div>
+
+      @for (r of refundItems(); track r.id) {
+        <div class="refund-row">
+          <div>
+            <div class="name">{{ r.amount | number:'1.2-2' }} DA · {{ method(r.paymentMethodId) }}</div>
+            <div class="sub">{{ r.reason }} · {{ r.refundDate | date:'dd/MM/yyyy HH:mm' }}</div>
+            <div class="refund-impact">
+              @if (r.creditReversedAmount > 0) { <span><i class="bi bi-wallet2"></i> Avoir retiré : {{ r.creditReversedAmount | number:'1.2-2' }} DA</span> }
+              @if (r.allocationReversedAmount > 0) { <span><i class="bi bi-receipt"></i> Créances réouvertes : {{ r.allocationReversedAmount | number:'1.2-2' }} DA</span> }
             </div>
-            <div class="field"><label>Motif *</label><textarea rows="4" [(ngModel)]="refundReason"></textarea></div>
-            <div class="actions"><button class="btn btn-soft" (click)="refundModal.set(false)">Retour</button><button
-                    class="btn btn-danger" (click)="createRefund()">Rembourser</button></div>
+          </div>
+          <span class="badge {{ r.status }}">{{ r.status }}</span>
         </div>
-    </div>}}@else{<div class="empty">Chargement du paiement...</div>}
-@if(receiptModal() && receipt();as r){<div class="modal-backdrop"><div class="modal"><div class="page-head"><div><div class="eyebrow">Reçu</div><h2>{{r.paymentNumber}}</h2><div class="muted">{{r.paymentDate|date:'dd/MM/yyyy HH:mm'}} · {{r.paymentMethodName}}</div></div><button class="btn btn-primary" (click)="printReceipt()"><i class="bi bi-printer"></i>Imprimer</button></div><div class="grid-2"><div class="stat"><div class="muted">Responsable</div><div class="name">{{r.guardianLastName}} {{r.guardianFirstName}}</div><div class="sub">{{r.guardianPhone || '—'}} · {{r.guardianEmail || '—'}}</div></div><div class="stat"><div class="muted">Montant</div><div class="value">{{r.totalAmount|number:'1.2-2'}}</div></div></div><div class="table-wrap" style="margin-top:16px"><table class="data-table"><thead><tr><th>Élève</th><th>Créance</th><th>Montant</th></tr></thead><tbody>@for(a of r.allocations;track a.chargeId){<tr><td><div class="name">{{a.studentLastName}} {{a.studentFirstName}}</div><div class="sub">{{a.studentNumber}}</div></td><td>{{a.chargeLabel}}</td><td class="money">{{a.amount|number:'1.2-2'}}</td></tr>}@if(!r.allocations.length){<tr><td colspan="3"><div class="empty">Aucune ventilation.</div></td></tr>}</tbody></table></div><div class="actions" style="margin-top:16px"><button class="btn btn-soft" (click)="receiptModal.set(false)">Fermer</button></div></div></div>}</div>
+      }
+      @if (!refundItems().length) { <div class="empty">Aucun remboursement.</div> }
+
+      @if (auth.hasPermission('PAIEMENT_ANNULER') && !d.allocations.length && d.payment.status !== 'CANCELLED') {
+        <div class="actions" style="margin-top:14px"><button class="btn btn-danger" (click)="cancelModal.set(true)">Annuler le paiement</button></div>
+      }
+    </div>
+
+    @if (cancelModal()) {
+      <div class="modal-backdrop"><div class="modal">
+        <h2>Annuler le paiement</h2>
+        <p class="muted">L'annulation directe n'est possible que pour un paiement non ventilé.</p>
+        <div class="field"><label>Motif *</label><textarea rows="4" [(ngModel)]="cancelReason"></textarea></div>
+        <div class="actions"><button class="btn btn-soft" (click)="cancelModal.set(false)">Retour</button><button class="btn btn-danger" (click)="cancel()">Confirmer</button></div>
+      </div></div>
+    }
+
+    @if (refundModal()) {
+      <div class="modal-backdrop"><div class="modal refund-modal">
+        <div class="eyebrow">Remboursement</div>
+        <h2>Nouveau remboursement</h2>
+        <div class="refund-cap"><span>Maximum encore remboursable</span><strong>{{ refundableAmount() | number:'1.2-2' }} DA</strong></div>
+        <div class="grid-2">
+          <div class="field"><label>Montant *</label><input type="number" min="0.01" [max]="refundableAmount()" step="0.01" [(ngModel)]="refundAmount"></div>
+          <div class="field"><label>Mode *</label><select [(ngModel)]="refundMethodId">@for (m of methods(); track m.id) {@if (m.active) {<option [ngValue]="m.id">{{ m.name }}</option>}}</select></div>
+        </div>
+        @if (refundRequiresCashSession()) {
+          @if (currentSession()) {
+            <div class="cash-session-ok"><i class="bi bi-check-circle-fill"></i><div><strong>Session de caisse ouverte</strong><span>Session #{{ currentSession()!.id }} utilisée automatiquement.</span></div></div>
+          } @else {
+            <div class="alert alert-error">Une session de caisse ouverte est obligatoire pour ce mode de remboursement.</div>
+          }
+        } @else {
+          <div class="info-note">Le virement ne nécessite pas de session de caisse physique.</div>
+        }
+        <div class="field"><label>Motif *</label><textarea rows="4" [(ngModel)]="refundReason" placeholder="Ex. remboursement des livres annulés"></textarea></div>
+        <div class="info-note">Le backend utilisera d'abord l'avoir encore disponible du paiement. Le solde du remboursement réouvrira automatiquement les créances qui avaient été réglées.</div>
+        <div class="actions"><button class="btn btn-soft" (click)="refundModal.set(false)">Retour</button><button class="btn btn-danger" [disabled]="!canCreateRefund()" (click)="createRefund()"><i class="bi bi-arrow-counterclockwise"></i> Rembourser</button></div>
+      </div></div>
+    }
+  } @else {
+    <div class="empty">Chargement du paiement...</div>
+  }
+
+  @if (receiptModal() && receipt(); as r) {
+    <div class="modal-backdrop"><div class="modal receipt-modal">
+      <div class="page-head">
+        <div><div class="eyebrow">Reçu de paiement</div><h2>{{ r.paymentNumber }}</h2><div class="muted">{{ r.paymentDate | date:'dd/MM/yyyy HH:mm' }} · {{ r.paymentMethodName }}</div></div>
+        <button class="btn btn-primary" (click)="printReceipt()"><i class="bi bi-printer"></i> Imprimer</button>
+      </div>
+
+      <div class="receipt-responsible"><div><span>Responsable</span><strong>{{ r.guardianLastName }} {{ r.guardianFirstName }}</strong><small>{{ r.guardianPhone || '—' }} · {{ r.guardianEmail || '—' }}</small></div></div>
+
+      <div class="receipt-totals">
+        <div><span>Montant reçu</span><strong>{{ r.totalAmount | number:'1.2-2' }} DA</strong></div>
+        <div><span>Total des créances réglées</span><strong>{{ r.allocatedAmount | number:'1.2-2' }} DA</strong></div>
+        <div><span>Avoir créé</span><strong>{{ r.creditCreatedAmount | number:'1.2-2' }} DA</strong></div>
+      </div>
+
+      @if (r.creditCreatedAmount > 0) {
+        <div class="credit-note"><i class="bi bi-wallet2"></i><div><strong>{{ r.creditCreatedAmount | number:'1.2-2' }} DA placés dans l'avoir familial</strong><span>Avoir encore disponible : {{ r.creditRemainingAmount | number:'1.2-2' }} DA.</span></div></div>
+      }
+      @if (r.refundedAmount > 0) {
+        <div class="refund-note"><i class="bi bi-arrow-counterclockwise"></i><div><strong>{{ r.refundedAmount | number:'1.2-2' }} DA remboursés</strong><span>Montant net encaissé après remboursement : {{ r.netReceivedAmount | number:'1.2-2' }} DA.</span></div></div>
+      }
+
+      <div class="table-wrap" style="margin-top:16px"><table class="data-table">
+        <thead><tr><th>Élève</th><th>Créance</th><th>Affecté</th><th>Remboursé</th><th>Net</th></tr></thead>
+        <tbody>
+          @for (a of r.allocations; track a.chargeId) {
+            <tr><td><div class="name">{{ a.studentLastName }} {{ a.studentFirstName }}</div><div class="sub">{{ a.studentNumber }}</div></td><td>{{ a.chargeLabel }}</td><td class="money">{{ a.amount | number:'1.2-2' }}</td><td class="money">{{ a.refundedAmount | number:'1.2-2' }}</td><td class="money"><strong>{{ a.netAmount | number:'1.2-2' }}</strong></td></tr>
+          }
+          @if (!r.allocations.length) { <tr><td colspan="5"><div class="empty">Aucune ventilation.</div></td></tr> }
+        </tbody>
+      </table></div>
+      <div class="actions" style="margin-top:16px"><button class="btn btn-soft" (click)="receiptModal.set(false)">Fermer</button></div>
+    </div></div>
+  }
+</div>

@@ -1,0 +1,347 @@
+<div class="finance-page">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Facturation</div>
+      <h1>Créer des créances</h1>
+      <div class="muted">
+        Sélectionnez une tarification déjà configurée, choisissez les élèves concernés puis prévisualisez avant création.
+      </div>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  }
+  @if (success()) {
+    <div class="alert alert-success">{{ success() }}</div>
+  }
+
+  <div class="billing-layout">
+    <div class="billing-main">
+      <div class="card step-card">
+        <div class="step-head">
+          <span class="step-number">1</span>
+          <div>
+            <h2>Tarification à appliquer</h2>
+            <p>La tarification définit le type de frais, le montant, la fréquence et le périmètre autorisé.</p>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>Année scolaire *</label>
+            <select [(ngModel)]="schoolYearId" (change)="loadTariffs()">
+              @for (y of years(); track y.id) {
+                <option [ngValue]="y.id">{{ y.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Tarification *</label>
+            <select [(ngModel)]="tariffId" (change)="onTariffChange()" [disabled]="loadingTariffs()">
+              <option [ngValue]="null">Sélectionner une tarification</option>
+              @for (t of tariffs(); track t.id) {
+                <option [ngValue]="t.id">
+                  {{ feeName(t.feeTypeId) }} — {{ t.amount | number: '1.2-2' }} DA — {{ frequency(t.billingFrequency) }}
+                </option>
+              }
+            </select>
+          </div>
+        </div>
+
+        @if (selectedTariff(); as t) {
+          <div class="tariff-summary">
+            <div>
+              <span>Frais</span>
+              <strong>{{ feeName(t.feeTypeId) }}</strong>
+            </div>
+            <div>
+              <span>Montant</span>
+              <strong>{{ t.amount | number: '1.2-2' }} DA</strong>
+            </div>
+            <div>
+              <span>Fréquence</span>
+              <strong>{{ frequency(t.billingFrequency) }}</strong>
+            </div>
+            <div>
+              <span>Périmètre</span>
+              <strong>
+                {{ cycleName(t.cycleId) }} · {{ levelName(t.levelId) }} · {{ className(t.classGroupId) }} · {{ campusName(t.campusId) }}
+              </strong>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="card step-card" [class.disabled-card]="!tariffId">
+        <div class="step-head">
+          <span class="step-number">2</span>
+          <div>
+            <h2>Élèves concernés</h2>
+            <p>La cible choisie doit rester compatible avec le périmètre de la tarification.</p>
+          </div>
+        </div>
+
+        <div class="target-grid">
+          @for (option of targetOptions; track option.value) {
+            <label class="target-option" [class.active]="targetType === option.value">
+              <input
+                type="radio"
+                name="targetType"
+                [value]="option.value"
+                [(ngModel)]="targetType"
+                (change)="onTargetTypeChange()"
+                [disabled]="!tariffId"
+              />
+              <span><i [class]="option.icon"></i> {{ option.label }}</span>
+            </label>
+          }
+        </div>
+
+        @if (targetType === 'STUDENT' || targetType === 'SELECTED_STUDENTS') {
+          <div class="student-picker">
+            <div class="field">
+              <label>{{ targetType === 'STUDENT' ? 'Rechercher l’élève' : 'Ajouter des élèves' }}</label>
+              <div class="search-box">
+                <input
+                  [(ngModel)]="studentSearch"
+                  (keyup.enter)="searchStudents()"
+                  placeholder="Nom, prénom ou matricule..."
+                  [disabled]="!tariffId"
+                />
+                <button class="btn btn-soft" (click)="searchStudents()" [disabled]="!studentSearch.trim()">
+                  <i class="bi bi-search"></i> Rechercher
+                </button>
+              </div>
+            </div>
+
+            @if (studentResults().length) {
+              <div class="student-results">
+                @for (student of studentResults(); track student.id) {
+                  <button type="button" class="student-result" (click)="chooseStudent(student)">
+                    <div>
+                      <strong>{{ student.person?.lastName }} {{ student.person?.firstName }}</strong>
+                      <span>{{ student.studentNumber }} · {{ student.status }}</span>
+                    </div>
+                    <i class="bi bi-plus-circle"></i>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (selectedStudents().length) {
+              <div class="selected-students">
+                @for (student of selectedStudents(); track student.id) {
+                  <div class="student-chip">
+                    <i class="bi bi-person-check"></i>
+                    <span>{{ studentLabel(student) }}</span>
+                    <button type="button" (click)="removeStudent(student.id)" aria-label="Retirer">
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        @if (targetType === 'CLASS_GROUP') {
+          <div class="field target-field">
+            <label>Classe *</label>
+            <select [(ngModel)]="targetId" [disabled]="!tariffId">
+              <option [ngValue]="null">Sélectionner une classe</option>
+              @for (c of filteredClasses(); track c.id) {
+                <option [ngValue]="c.id">{{ c.name }}</option>
+              }
+            </select>
+          </div>
+        }
+
+        @if (targetType === 'LEVEL') {
+          <div class="field target-field">
+            <label>Niveau *</label>
+            <select [(ngModel)]="targetId" [disabled]="!tariffId">
+              <option [ngValue]="null">Sélectionner un niveau</option>
+              @for (l of filteredLevels(); track l.id) {
+                <option [ngValue]="l.id">{{ l.name }}</option>
+              }
+            </select>
+          </div>
+        }
+
+        @if (targetType === 'CYCLE') {
+          <div class="field target-field">
+            <label>Cycle *</label>
+            <select [(ngModel)]="targetId" [disabled]="!tariffId">
+              <option [ngValue]="null">Sélectionner un cycle</option>
+              @for (c of filteredCycles(); track c.id) {
+                <option [ngValue]="c.id">{{ c.name }}</option>
+              }
+            </select>
+          </div>
+        }
+
+        @if (isOneTime() && tariffId) {
+          <div class="field target-field due-date-field">
+            <label>Échéance personnalisée</label>
+            <input type="date" [(ngModel)]="dueDate" />
+            <span class="field-hint">Facultatif pour un frais unique ou annuel. À défaut, la date du tarif est utilisée.</span>
+          </div>
+        }
+      </div>
+
+      <div class="card step-card">
+        <div class="step-head preview-head">
+          <div class="step-head-left">
+            <span class="step-number">3</span>
+            <div>
+              <h2>Prévisualisation</h2>
+              <p>Aucune créance n'est créée tant que vous n'avez pas validé l'étape finale.</p>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" (click)="previewBilling()" [disabled]="!canPreview() || loadingPreview()">
+            <i class="bi bi-eye"></i>
+            {{ loadingPreview() ? 'Calcul...' : 'Prévisualiser' }}
+          </button>
+        </div>
+
+        @if (preview(); as p) {
+          <div class="preview-stats">
+            <div class="preview-stat">
+              <span>Élèves concernés</span>
+              <strong>{{ p.studentCount }}</strong>
+            </div>
+            <div class="preview-stat">
+              <span>Créances à créer</span>
+              <strong>{{ p.chargeCount }}</strong>
+            </div>
+            <div class="preview-stat warning">
+              <span>Doublons ignorés</span>
+              <strong>{{ p.duplicateCount }}</strong>
+            </div>
+            <div class="preview-stat total">
+              <span>Total à facturer</span>
+              <strong>{{ p.totalAmount | number: '1.2-2' }} DA</strong>
+            </div>
+          </div>
+
+          <div class="table-wrap preview-table-wrap">
+            <table class="data-table preview-table">
+              <thead>
+                <tr>
+                  <th>Élève</th>
+                  <th>Classe</th>
+                  <th>Période</th>
+                  <th>Échéance</th>
+                  <th>Montant</th>
+                  <th>État</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (line of p.lines; track line.enrollmentId + '-' + line.periodStart) {
+                  <tr [class.duplicate-row]="line.alreadyExists">
+                    <td>
+                      <div class="name">{{ line.studentLastName }} {{ line.studentFirstName }}</div>
+                      <div class="sub">{{ line.studentNumber }}</div>
+                    </td>
+                    <td>
+                      <div>{{ line.classGroupName }}</div>
+                      <div class="sub">{{ line.levelName }} · {{ line.cycleName }}</div>
+                    </td>
+                    <td>
+                      {{ line.periodStart | date: 'dd/MM/yyyy' }}
+                      @if (line.periodEnd && line.periodEnd !== line.periodStart) {
+                        → {{ line.periodEnd | date: 'dd/MM/yyyy' }}
+                      }
+                    </td>
+                    <td>{{ line.dueDate | date: 'dd/MM/yyyy' }}</td>
+                    <td class="money">{{ line.amount | number: '1.2-2' }} DA</td>
+                    <td>
+                      @if (line.alreadyExists) {
+                        <span class="status-pill duplicate"><i class="bi bi-shield-check"></i> Déjà créée</span>
+                      } @else {
+                        <span class="status-pill ready"><i class="bi bi-check2-circle"></i> À créer</span>
+                      }
+                    </td>
+                  </tr>
+                }
+
+                @if (!p.lines.length) {
+                  <tr><td colspan="6"><div class="empty">Aucun élève correspondant à cette cible et à cette tarification.</div></td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <div class="preview-empty">
+            <i class="bi bi-receipt-cutoff"></i>
+            <strong>Prévisualisez la facturation avant de créer les créances.</strong>
+            <span>Le système contrôle automatiquement les élèves éligibles et les doublons.</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <aside class="billing-sidebar">
+      <div class="card recap-card">
+        <div class="recap-icon"><i class="bi bi-receipt"></i></div>
+        <h2>Récapitulatif</h2>
+
+        <div class="recap-line">
+          <span>Année</span>
+          <strong>{{ schoolYearId ? yearName(schoolYearId) : '—' }}</strong>
+        </div>
+        <div class="recap-line">
+          <span>Tarification</span>
+          <strong>{{ selectedTariff() ? feeName(selectedTariff()!.feeTypeId) : '—' }}</strong>
+        </div>
+        <div class="recap-line">
+          <span>Cible</span>
+          <strong>{{ targetLabel() }}</strong>
+        </div>
+
+        @if (preview(); as p) {
+          <div class="recap-total">
+            <span>Total à créer</span>
+            <strong>{{ p.totalAmount | number: '1.2-2' }} DA</strong>
+            <small>{{ p.chargeCount }} créance(s) · {{ p.studentCount }} élève(s)</small>
+          </div>
+
+          @if (p.duplicateCount > 0) {
+            <div class="duplicate-info">
+              <i class="bi bi-info-circle"></i>
+              {{ p.duplicateCount }} créance(s) existent déjà et seront ignorées.
+            </div>
+          }
+
+          @if (auth.hasPermission('CREANCE_GERER')) {
+            <button
+              class="btn btn-success create-button"
+              (click)="createBilling()"
+              [disabled]="creating() || p.chargeCount <= 0"
+            >
+              <i class="bi bi-check2-circle"></i>
+              {{ creating() ? 'Création...' : 'Créer les créances' }}
+            </button>
+          }
+        } @else {
+          <div class="recap-placeholder">
+            La validation sera disponible après la prévisualisation.
+          </div>
+        }
+      </div>
+
+      <div class="card rule-card">
+        <h3><i class="bi bi-shield-check"></i> Règles appliquées</h3>
+        <ul>
+          <li>Seuls les élèves avec une scolarisation active sont facturés.</li>
+          <li>Le périmètre cycle / niveau / classe / campus du tarif est respecté.</li>
+          <li>Les créances déjà générées sont automatiquement ignorées.</li>
+          <li>Les frais créés apparaissent ensuite dans les encaissements et la ventilation familiale.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</div>

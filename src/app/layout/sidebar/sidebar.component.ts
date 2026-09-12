@@ -149,10 +149,22 @@ export class SidebarComponent {
           permission: 'PAIEMENT_CREER',
         },
         {
+          label: 'Facturation',
+          icon: 'bi bi-receipt-cutoff',
+          route: '/finance/billing',
+          permission: 'CREANCE_GERER',
+        },
+        {
           label: 'Créances élèves',
           icon: 'bi bi-receipt',
           route: '/finance/charges',
           permission: 'CREANCE_CONSULTER',
+        },
+        {
+          label: 'Réductions',
+          icon: 'bi bi-percent',
+          route: '/finance/discounts',
+          permission: 'REDUCTION_CONSULTER',
         },
         {
           label: 'Situation familles',
@@ -167,8 +179,8 @@ export class SidebarComponent {
           permission: 'CREANCE_CONSULTER',
         },
         {
-          label: 'Mensualités',
-          icon: 'bi bi-calendar2-plus',
+          label: 'Mensualités / rattrapage',
+          icon: 'bi bi-calendar2-check',
           route: '/finance/installments',
           permission: 'CREANCE_GERER',
         },

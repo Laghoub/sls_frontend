@@ -1,3 +1,11 @@
+export interface CycleRef {
+  id: number;
+  code: string;
+  name: string;
+  displayOrder: number;
+  active: boolean;
+}
+
 export interface SchoolYearRef {
   id: number;
   code: string;
@@ -7,6 +15,7 @@ export interface SchoolYearRef {
   status: string;
   currentYear: boolean;
 }
+
 export interface LevelRef {
   id: number;
   cycleId: number;
@@ -16,6 +25,7 @@ export interface LevelRef {
   displayOrder: number;
   active: boolean;
 }
+
 export interface ClassGroupRef {
   id: number;
   schoolYearId: number;
@@ -26,6 +36,7 @@ export interface ClassGroupRef {
   capacity?: number | null;
   status: string;
 }
+
 export interface CampusRef {
   id: number;
   code: string;
@@ -33,6 +44,7 @@ export interface CampusRef {
   address?: string | null;
   active: boolean;
 }
+
 export interface PersonRef {
   id: number;
   lastName: string;
@@ -40,12 +52,14 @@ export interface PersonRef {
   phone: string | null;
   email: string | null;
 }
+
 export interface GuardianChoice {
   id: number;
   personId: number;
   status: string;
   person: PersonRef | null;
 }
+
 export interface RegistrationChoice {
   id: number;
   schoolYearId: number;
@@ -61,6 +75,7 @@ export interface RegistrationChoice {
   registrationDate: string;
   status: string;
 }
+
 export interface EnrollmentChoice {
   id: number;
   studentId: number;
@@ -70,4 +85,20 @@ export interface EnrollmentChoice {
   enrollmentDate: string;
   entryType: string;
   status: string;
+
+  /*
+   * Champs d'affichage enrichis côté frontend.
+   * Ils ne modifient pas le contrat backend de /api/enrollments.
+   */
+  studentLastName?: string | null;
+  studentFirstName?: string | null;
+  classGroupName?: string | null;
+}
+
+export interface StudentChoice {
+  id: number;
+  personId: number;
+  studentNumber: string;
+  status: string;
+  person: PersonRef | null;
 }

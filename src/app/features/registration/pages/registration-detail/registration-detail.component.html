@@ -188,22 +188,6 @@
 
 
             @if (
-              d.registration.status === 'EN_ATTENTE_PAIEMENT'
-              && auth.hasPermission('INSCRIPTION_PAIEMENT_CONFIRMER')
-            ) {
-
-              <button
-                class="btn btn-success"
-                [disabled]="busy()"
-                (click)="paid()"
-              >
-                Confirmer paiement (test)
-              </button>
-
-            }
-
-
-            @if (
               d.registration.status === 'PAYE_A_COMPLETER'
               && auth.hasPermission('INSCRIPTION_COMPLETER')
             ) {
@@ -252,11 +236,6 @@
             }
 
           </div>
-
-          <p class="muted">
-            La confirmation de paiement est temporaire.
-            Elle sera remplacée par le module Paiements & Caisse.
-          </p>
 
         </div>
 

@@ -91,12 +91,14 @@ export interface InstallmentGenerationResponse {
 
 export interface PaymentReceiptAllocation {
   chargeId: number;
-  studentId: number;
-  studentNumber: string;
-  studentLastName: string;
-  studentFirstName: string;
+  studentId: number | null;
+  studentNumber: string | null;
+  studentLastName: string | null;
+  studentFirstName: string | null;
   chargeLabel: string;
   amount: number;
+  refundedAmount: number;
+  netAmount: number;
 }
 
 export interface PaymentReceipt {
@@ -104,6 +106,11 @@ export interface PaymentReceipt {
   paymentNumber: string;
   paymentDate: string;
   totalAmount: number;
+  allocatedAmount: number;
+  creditCreatedAmount: number;
+  creditRemainingAmount: number;
+  refundedAmount: number;
+  netReceivedAmount: number;
   status: string;
   guardianId: number;
   guardianLastName: string;
