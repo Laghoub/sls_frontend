@@ -1,29 +1,316 @@
-<div class="finance-page">
-  <div class="page-head"><div><div class="eyebrow">Finance</div><h1>Paiements & Caisse</h1><div class="muted">Suivi des créances, encaissements, familles, retards et caisse.</div></div><div class="field" style="max-width:260px"><label>Année scolaire</label><select [(ngModel)]="schoolYearId" (ngModelChange)="loadDashboard()">@for(y of schoolYears();track y.id){<option [ngValue]="y.id">{{y.label}}</option>}</select></div></div>
-  @if(error()){<div class="alert alert-error">{{error()}}</div>}
-  @if(dashboard();as d){
-    <div class="grid-4">
-      <div class="stat"><div class="muted">Total facturé</div><div class="value">{{d.totalCharged|number:'1.2-2'}}</div></div>
-      <div class="stat"><div class="muted">Total encaissé</div><div class="value success-text">{{d.totalCollected|number:'1.2-2'}}</div></div>
-      <div class="stat"><div class="muted">Reste à recouvrer</div><div class="value">{{d.totalRemaining|number:'1.2-2'}}</div></div>
-      <div class="stat"><div class="muted">Montant en retard</div><div class="value danger-text">{{d.overdueAmount|number:'1.2-2'}}</div><div class="sub">{{d.overdueChargeCount}} créance(s)</div></div>
+<div class="finance-page dashboard-page">
+  <div class="page-head dashboard-head">
+    <div>
+      <div class="eyebrow">Finance & Caisse</div>
+      <h1>Tableau de bord financier</h1>
+      <div class="muted">Vision consolidée des créances, encaissements, impayés, remboursements, avoirs, caisse et communications financières.</div>
     </div>
-    <div class="grid-4">
-      <div class="stat"><div class="muted">À payer</div><div class="value">{{d.dueChargeCount}}</div></div>
-      <div class="stat"><div class="muted">Paiements partiels</div><div class="value">{{d.partiallyPaidChargeCount}}</div></div>
-      <div class="stat"><div class="muted">Créances payées</div><div class="value">{{d.paidChargeCount}}</div></div>
-      <div class="stat"><div class="muted">Avoirs disponibles</div><div class="value">{{d.availableFamilyCredit|number:'1.2-2'}}</div></div>
+    <div class="head-actions">
+      <button class="btn btn-soft" type="button" (click)="filtersExpanded.set(!filtersExpanded())">
+        <i class="bi bi-funnel"></i>
+        {{filtersExpanded() ? 'Masquer les filtres' : 'Afficher les filtres'}}
+      </button>
+      <button class="btn btn-primary" type="button" (click)="loadDashboard()" [disabled]="loading() || refsLoading()">
+        <i class="bi bi-arrow-clockwise" [class.spin]="loading()"></i>
+        Actualiser
+      </button>
     </div>
-  }
-  <div class="grid-3">
-    <a class="card quick-card" routerLink="/finance/situations"><i class="bi bi-people"></i><h2>Situation familles</h2><div class="muted">Payé, reste à payer, retards et détail par enfant.</div></a>
-    <a class="card quick-card" routerLink="/finance/overdue"><i class="bi bi-exclamation-triangle"></i><h2>Impayés & retards</h2><div class="muted">Suivre les échéances dépassées et les restes dus.</div></a>
-    <a class="card quick-card" routerLink="/finance/installments"><i class="bi bi-calendar2-check"></i><h2>Mensualités</h2><div class="muted">Génération automatique à la scolarisation et rattrapage manuel si nécessaire.</div></a>
-    <a class="card quick-card" routerLink="/finance/charges"><i class="bi bi-receipt"></i><h2>Créances</h2><div class="muted">Consulter les frais dus par dossier ou scolarisation.</div></a>
-    <a class="card quick-card" routerLink="/finance/payments"><i class="bi bi-cash-coin"></i><h2>Paiements</h2><div class="muted">Encaisser, ventiler et consulter les règlements.</div></a>
-    <a class="card quick-card" routerLink="/finance/cash"><i class="bi bi-safe2"></i><h2>Caisse</h2><div class="muted">Session active, mouvements et historique des sessions.</div></a>
-    <a class="card quick-card" routerLink="/finance/tariffs"><i class="bi bi-tags"></i><h2>Tarifs</h2><div class="muted">Grilles tarifaires par année, niveau, classe ou campus.</div></a>
-    <a class="card quick-card" routerLink="/finance/credits"><i class="bi bi-wallet2"></i><h2>Avoirs familles</h2><div class="muted">Consulter et utiliser les trop-perçus disponibles.</div></a>
-    <a class="card quick-card" routerLink="/finance/settings"><i class="bi bi-sliders"></i><h2>Paramétrage</h2><div class="muted">Modes de paiement et référentiels Finance.</div></a>
   </div>
+
+  @if(filtersExpanded()) {
+    <section class="card filters-card">
+      <div class="section-head compact">
+        <div>
+          <h2>Filtres d'analyse</h2>
+          <div class="muted">Tous les indicateurs et classements ci-dessous sont recalculés selon ces critères.</div>
+        </div>
+        <button class="btn btn-ghost" type="button" (click)="resetFilters()"><i class="bi bi-x-circle"></i> Réinitialiser</button>
+      </div>
+
+      <div class="filters-grid">
+        <div class="field">
+          <label>Année scolaire</label>
+          <select [(ngModel)]="filters.schoolYearId" (ngModelChange)="onSchoolYearChange()">
+            <option [ngValue]="null">Toutes les années</option>
+            @for (y of schoolYears(); track y.id) { <option [ngValue]="y.id">{{y.label}}</option> }
+          </select>
+        </div>
+        <div class="field">
+          <label>Cycle</label>
+          <select [(ngModel)]="filters.cycleId" (ngModelChange)="onCycleChange()">
+            <option [ngValue]="null">Tous les cycles</option>
+            @for (x of cycles(); track x.id) { <option [ngValue]="x.id">{{x.name}}</option> }
+          </select>
+        </div>
+        <div class="field">
+          <label>Niveau</label>
+          <select [(ngModel)]="filters.levelId" (ngModelChange)="onLevelChange()">
+            <option [ngValue]="null">Tous les niveaux</option>
+            @for (x of filteredLevels(); track x.id) { <option [ngValue]="x.id">{{x.name}}</option> }
+          </select>
+        </div>
+        <div class="field">
+          <label>Classe</label>
+          <select [(ngModel)]="filters.classGroupId">
+            <option [ngValue]="null">Toutes les classes</option>
+            @for (x of filteredClasses(); track x.id) { <option [ngValue]="x.id">{{x.name}}</option> }
+          </select>
+        </div>
+        <div class="field">
+          <label>Campus</label>
+          <select [(ngModel)]="filters.campusId" (ngModelChange)="onCampusChange()">
+            <option [ngValue]="null">Tous les campus</option>
+            @for (x of campuses(); track x.id) { <option [ngValue]="x.id">{{x.name}}</option> }
+          </select>
+        </div>
+        <div class="field">
+          <label>Type de frais</label>
+          <select [(ngModel)]="filters.feeTypeId">
+            <option [ngValue]="null">Tous les frais</option>
+            @for (x of feeTypes(); track x.id) { <option [ngValue]="x.id">{{x.name}}</option> }
+          </select>
+        </div>
+        <div class="field">
+          <label>Mode de paiement</label>
+          <select [(ngModel)]="filters.paymentMethodId">
+            <option [ngValue]="null">Tous les modes</option>
+            @for (x of paymentMethods(); track x.id) { <option [ngValue]="x.id">{{x.name}}</option> }
+          </select>
+        </div>
+        <div class="field">
+          <label>Du</label>
+          <input type="date" [(ngModel)]="filters.from" />
+        </div>
+        <div class="field">
+          <label>Au</label>
+          <input type="date" [(ngModel)]="filters.to" />
+        </div>
+        <div class="filter-action">
+          <button class="btn btn-primary" type="button" (click)="loadDashboard()" [disabled]="loading() || refsLoading()">
+            <i class="bi bi-search"></i> Appliquer les filtres
+          </button>
+        </div>
+      </div>
+    </section>
+  }
+
+  @if(error()) { <div class="alert alert-error"><i class="bi bi-exclamation-triangle"></i> {{error()}}</div> }
+
+  @if(loading() && !dashboard()) {
+    <div class="loading-panel"><i class="bi bi-arrow-clockwise spin"></i><span>Calcul des indicateurs financiers...</span></div>
+  }
+
+  @if(dashboard(); as d) {
+    <section class="hero-kpis">
+      <article class="kpi-card kpi-primary">
+        <div class="kpi-icon"><i class="bi bi-receipt-cutoff"></i></div>
+        <div><span>Facturé net</span><strong>{{money(d.kpis.netCharged) | number:'1.0-0'}} DA</strong><small>Brut {{money(d.kpis.originalCharged)|number:'1.0-0'}} · Réductions {{money(d.kpis.discountsGranted)|number:'1.0-0'}} DA</small></div>
+      </article>
+      <article class="kpi-card kpi-success">
+        <div class="kpi-icon"><i class="bi bi-cash-stack"></i></div>
+        <div><span>Encaissé sur créances</span><strong>{{money(d.kpis.collectedOnCharges) | number:'1.0-0'}} DA</strong><small>{{d.kpis.paymentCount}} paiement(s) · moyenne {{money(d.kpis.averagePayment)|number:'1.0-0'}} DA</small></div>
+      </article>
+      <article class="kpi-card kpi-warning">
+        <div class="kpi-icon"><i class="bi bi-hourglass-split"></i></div>
+        <div><span>Reste à recouvrer</span><strong>{{money(d.kpis.remainingToCollect) | number:'1.0-0'}} DA</strong><small>{{d.kpis.dueChargeCount + d.kpis.partiallyPaidChargeCount + d.kpis.overdueChargeCount}} créance(s) non soldée(s)</small></div>
+      </article>
+      <article class="kpi-card kpi-danger">
+        <div class="kpi-icon"><i class="bi bi-exclamation-octagon"></i></div>
+        <div><span>Impayés échus</span><strong>{{money(d.kpis.overdueAmount) | number:'1.0-0'}} DA</strong><small>{{d.kpis.overdueChargeCount}} créance(s) en retard</small></div>
+      </article>
+    </section>
+
+    <section class="overview-grid">
+      <article class="card collection-card">
+        <div class="section-head">
+          <div><div class="eyebrow">Recouvrement</div><h2>Taux de recouvrement</h2></div>
+          <span class="metric-badge">{{percent(d.kpis.collectionRate) | number:'1.1-1'}} %</span>
+        </div>
+        <div class="collection-layout">
+          <div class="ring" [style.--progress]="percent(d.kpis.collectionRate) + '%'">
+            <div class="ring-center"><strong>{{percent(d.kpis.collectionRate)|number:'1.0-1'}}%</strong><span>recouvré</span></div>
+          </div>
+          <div class="collection-stats">
+            <div><span>Créances</span><strong>{{d.kpis.chargeCount}}</strong></div>
+            <div><span>Élèves concernés</span><strong>{{d.kpis.studentCount}}</strong></div>
+            <div><span>Familles</span><strong>{{d.kpis.familyCount}}</strong></div>
+            <div><span>Avoirs disponibles</span><strong>{{money(d.kpis.familyCreditAvailable)|number:'1.0-0'}} DA</strong></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="section-head"><div><div class="eyebrow">Paiements</div><h2>Flux financiers</h2></div><a routerLink="/finance/payments" class="text-link">Voir les paiements <i class="bi bi-arrow-right"></i></a></div>
+        <div class="mini-kpi-grid">
+          <div class="mini-kpi"><span>Paiements bruts</span><strong>{{money(d.kpis.grossPayments)|number:'1.0-0'}} DA</strong></div>
+          <div class="mini-kpi positive"><span>Net encaissé</span><strong>{{money(d.kpis.netPayments)|number:'1.0-0'}} DA</strong></div>
+          <div class="mini-kpi negative"><span>Remboursements</span><strong>{{money(d.kpis.refunds)|number:'1.0-0'}} DA</strong><small>{{d.kpis.refundCount}} opération(s)</small></div>
+          <div class="mini-kpi"><span>Paiement moyen</span><strong>{{money(d.kpis.averagePayment)|number:'1.0-0'}} DA</strong></div>
+        </div>
+      </article>
+
+      <article class="card cash-summary">
+        <div class="section-head"><div><div class="eyebrow">Caisse</div><h2>Contrôle des sessions</h2></div><a routerLink="/finance/cash" class="text-link">Ouvrir la caisse <i class="bi bi-arrow-right"></i></a></div>
+        <div class="cash-grid">
+          <div><span>Fonds</span><strong>{{money(d.cash.openingFunds)|number:'1.0-0'}} DA</strong></div>
+          <div><span>Entrées</span><strong class="positive-text">+ {{money(d.cash.cashInflows)|number:'1.0-0'}} DA</strong></div>
+          <div><span>Sorties</span><strong class="negative-text">- {{money(d.cash.cashOutflows)|number:'1.0-0'}} DA</strong></div>
+          <div><span>Mouvement net</span><strong>{{money(d.cash.netCashMovement)|number:'1.0-0'}} DA</strong></div>
+          <div><span>Attendu</span><strong>{{money(d.cash.expectedClosingTotal)|number:'1.0-0'}} DA</strong></div>
+          <div><span>Réel</span><strong>{{money(d.cash.actualClosingTotal)|number:'1.0-0'}} DA</strong></div>
+        </div>
+        <div class="difference-line" [class.bad-difference]="money(d.cash.totalDifference) !== 0">
+          <span>Écart cumulé</span><strong>{{money(d.cash.totalDifference)|number:'1.0-0'}} DA</strong>
+          <small>{{d.cash.openSessionCount}} session(s) ouverte(s) · {{d.cash.closedSessionCount}} fermée(s)</small>
+        </div>
+      </article>
+    </section>
+
+    <section class="card trend-card">
+      <div class="section-head">
+        <div><div class="eyebrow">Évolution</div><h2>Facturation & encaissements par mois</h2><div class="muted">Comparaison du montant facturé avec le net réellement encaissé après remboursements.</div></div>
+      </div>
+      @if(d.monthlyTrend.length) {
+        <div class="trend-chart">
+          @for (m of d.monthlyTrend; track m.month) {
+            <div class="trend-col">
+              <div class="trend-bars">
+                <div class="trend-bar charged" [style.height.%]="barWidth(m.charged, maxTrend(d.monthlyTrend))" [title]="'Facturé : ' + (m.charged|number:'1.0-0') + ' DA'"></div>
+                <div class="trend-bar collected" [style.height.%]="barWidth(m.netCollected, maxTrend(d.monthlyTrend))" [title]="'Net encaissé : ' + (m.netCollected|number:'1.0-0') + ' DA'"></div>
+              </div>
+              <span>{{monthLabel(m.month)}}</span>
+            </div>
+          }
+        </div>
+        <div class="legend"><span><i class="dot charged-dot"></i>Facturé</span><span><i class="dot collected-dot"></i>Net encaissé</span></div>
+      } @else { <div class="empty">Aucune évolution disponible pour la période choisie.</div> }
+    </section>
+
+    <section class="two-col">
+      <article class="card">
+        <div class="section-head"><div><div class="eyebrow">Créances</div><h2>État des créances</h2></div><a routerLink="/finance/charges" class="text-link">Détails <i class="bi bi-arrow-right"></i></a></div>
+        <div class="status-list">
+          @for (s of d.chargeStatuses; track s.status) {
+            <div class="status-row">
+              <div class="status-main"><span class="status-dot" [attr.data-status]="s.status"></span><div><strong>{{statusLabel(s.status)}}</strong><small>{{s.count}} créance(s)</small></div></div>
+              <div class="status-money"><strong>{{money(s.remaining)|number:'1.0-0'}} DA</strong><small>reste / {{money(s.amount)|number:'1.0-0'}} DA</small></div>
+            </div>
+          }
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="section-head"><div><div class="eyebrow">Modes de paiement</div><h2>Répartition des encaissements</h2></div></div>
+        <div class="method-list">
+          @for (m of d.byPaymentMethod; track m.label) {
+            <div class="method-row">
+              <div class="method-top"><span>{{m.label}}</span><strong>{{money(m.amount)|number:'1.0-0'}} DA</strong></div>
+              <div class="progress"><span [style.width.%]="percent(m.sharePercent)"></span></div>
+              <div class="method-sub"><span>{{m.paymentCount}} paiement(s)</span><span>{{percent(m.sharePercent)|number:'1.1-1'}}%</span></div>
+            </div>
+          }
+          @if(!d.byPaymentMethod.length){<div class="empty">Aucun paiement sur cette période.</div>}
+        </div>
+      </article>
+    </section>
+
+    <section class="card breakdown-card">
+      <div class="section-head"><div><div class="eyebrow">Analyse</div><h2>Performance par type de frais</h2></div><a routerLink="/finance/fee-types" class="text-link">Types de frais <i class="bi bi-arrow-right"></i></a></div>
+      <div class="table-wrap">
+        <table class="data-table dashboard-table">
+          <thead><tr><th>Type de frais</th><th>Facturé</th><th>Encaissé</th><th>Reste</th><th>Retard</th><th>Créances</th><th>Recouvrement</th></tr></thead>
+          <tbody>
+            @for (r of d.byFeeType; track r.label) {
+              <tr>
+                <td><div class="name">{{r.label}}</div><div class="sub">{{r.code || '—'}}</div></td>
+                <td class="money">{{money(r.charged)|number:'1.0-0'}} DA</td>
+                <td class="money success-text">{{money(r.collected)|number:'1.0-0'}} DA</td>
+                <td class="money">{{money(r.remaining)|number:'1.0-0'}} DA</td>
+                <td class="money danger-text">{{money(r.overdue)|number:'1.0-0'}} DA</td>
+                <td>{{r.chargeCount}}</td>
+                <td class="ratio-cell"><div class="progress"><span [style.width.%]="r.charged ? percent((r.collected/r.charged)*100) : 0"></span></div><small>{{r.charged ? ((r.collected/r.charged)*100|number:'1.0-0') : 0}}%</small></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="two-col wide-left">
+      <article class="card">
+        <div class="section-head"><div><div class="eyebrow">Structure scolaire</div><h2>Recouvrement par cycle</h2></div></div>
+        <div class="ranking-list">
+          @for (r of d.byCycle; track r.label) {
+            <div class="ranking-row">
+              <div class="ranking-label"><strong>{{r.label}}</strong><small>{{r.chargeCount}} créance(s)</small></div>
+              <div class="ranking-bar"><span [style.width.%]="barWidth(r.collected, maxBreakdown(d.byCycle, 'charged'))"></span></div>
+              <div class="ranking-values"><strong>{{money(r.collected)|number:'1.0-0'}} DA</strong><small>reste {{money(r.remaining)|number:'1.0-0'}} DA</small></div>
+            </div>
+          }
+          @if(!d.byCycle.length){<div class="empty">Aucune donnée par cycle.</div>}
+        </div>
+      </article>
+
+      <article class="card debtors-card">
+        <div class="section-head"><div><div class="eyebrow">À surveiller</div><h2>Top 10 familles débitrices</h2></div><a routerLink="/finance/overdue" class="text-link">Tous les impayés <i class="bi bi-arrow-right"></i></a></div>
+        <div class="debtor-list">
+          @for (x of d.topDebtors; track x.guardianName; let i = $index) {
+            <div class="debtor-row">
+              <span class="rank">{{i+1}}</span>
+              <div class="debtor-name"><strong>{{x.guardianName}}</strong><small>{{x.studentCount}} enfant(s) · {{x.phone || 'Téléphone non renseigné'}}</small></div>
+              <div class="debtor-money"><strong>{{money(x.remaining)|number:'1.0-0'}} DA</strong><small [class.danger-text]="money(x.overdue)>0">dont {{money(x.overdue)|number:'1.0-0'}} DA échus</small></div>
+            </div>
+          }
+          @if(!d.topDebtors.length){<div class="empty">Aucune famille débitrice sur la sélection.</div>}
+        </div>
+      </article>
+    </section>
+
+    <section class="structure-grid">
+      <article class="card compact-analysis">
+        <div class="section-head"><div><h2>Par niveau</h2><div class="muted">Reste à recouvrer</div></div></div>
+        @for (r of d.byLevel | slice:0:8; track r.label) {
+          <div class="compact-row"><span>{{r.label}}</span><strong>{{money(r.remaining)|number:'1.0-0'}} DA</strong></div>
+        }
+        @if(!d.byLevel.length){<div class="empty">Aucune donnée.</div>}
+      </article>
+      <article class="card compact-analysis">
+        <div class="section-head"><div><h2>Par classe</h2><div class="muted">Montants encaissés</div></div></div>
+        @for (r of d.byClassGroup | slice:0:8; track r.label) {
+          <div class="compact-row"><span>{{r.label}}</span><strong>{{money(r.collected)|number:'1.0-0'}} DA</strong></div>
+        }
+        @if(!d.byClassGroup.length){<div class="empty">Aucune donnée.</div>}
+      </article>
+      <article class="card compact-analysis">
+        <div class="section-head"><div><h2>Par campus</h2><div class="muted">Facturation nette</div></div></div>
+        @for (r of d.byCampus | slice:0:8; track r.label) {
+          <div class="compact-row"><span>{{r.label}}</span><strong>{{money(r.charged)|number:'1.0-0'}} DA</strong></div>
+        }
+        @if(!d.byCampus.length){<div class="empty">Aucune donnée.</div>}
+      </article>
+    </section>
+
+    <section class="card email-card">
+      <div class="section-head"><div><div class="eyebrow">Communications</div><h2>Envoi des reçus financiers</h2></div></div>
+      <div class="email-stats">
+        <div class="email-stat sent"><i class="bi bi-envelope-check"></i><div><strong>{{d.emails.sent}}</strong><span>envoyé(s)</span></div></div>
+        <div class="email-stat pending"><i class="bi bi-clock-history"></i><div><strong>{{d.emails.pending}}</strong><span>en attente</span></div></div>
+        <div class="email-stat failed"><i class="bi bi-envelope-exclamation"></i><div><strong>{{d.emails.failedOrRetrying}}</strong><span>échec / nouvelle tentative</span></div></div>
+      </div>
+    </section>
+
+    <section class="quick-section">
+      <div class="section-head"><div><div class="eyebrow">Accès rapide</div><h2>Gestion Finance & Caisse</h2></div></div>
+      <div class="quick-grid">
+        <a class="quick-tile" routerLink="/finance/payments/new"><i class="bi bi-plus-circle"></i><span>Nouvel encaissement</span></a>
+        <a class="quick-tile" routerLink="/finance/situations"><i class="bi bi-people"></i><span>Situation familles</span></a>
+        <a class="quick-tile" routerLink="/finance/overdue"><i class="bi bi-exclamation-triangle"></i><span>Impayés & retards</span></a>
+        <a class="quick-tile" routerLink="/finance/billing"><i class="bi bi-receipt"></i><span>Facturation</span></a>
+        <a class="quick-tile" routerLink="/finance/cash"><i class="bi bi-safe2"></i><span>Caisse</span></a>
+        <a class="quick-tile" routerLink="/finance/discounts"><i class="bi bi-percent"></i><span>Réductions</span></a>
+        <a class="quick-tile" routerLink="/finance/credits"><i class="bi bi-wallet2"></i><span>Avoirs familles</span></a>
+        <a class="quick-tile" routerLink="/finance/tariffs"><i class="bi bi-tags"></i><span>Tarifs</span></a>
+      </div>
+    </section>
+  }
 </div>
