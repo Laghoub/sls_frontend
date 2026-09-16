@@ -181,6 +181,8 @@ export interface CashMovement {
   amount: number;
   paymentId: number | null;
   refundId: number | null;
+  salaryPaymentId: number | null;
+  providerPaymentId: number | null;
   reference: string | null;
   description: string | null;
   createdBy: number;

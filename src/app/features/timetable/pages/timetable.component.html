@@ -1,0 +1,91 @@
+<div class="timetable-page">
+  <header class="page-head">
+    <div>
+      <div class="eyebrow">Organisation pédagogique</div>
+      <h1>Emploi du temps</h1>
+      <p>Construisez la semaine d'une classe à partir des affectations pédagogiques validées.</p>
+    </div>
+    <div class="head-actions">
+      @if(classId){
+        <button type="button" class="btn btn-primary print-btn" (click)="exportPdf()">
+          <i class="bi bi-file-earmark-pdf"></i>
+          Exporter PDF
+        </button>
+      }
+      <div class="head-badge"><i class="bi bi-calendar-week"></i><span>Dimanche — Jeudi</span></div>
+    </div>
+  </header>
+
+  @if(error&&!modal){<div class="notice error"><i class="bi bi-exclamation-triangle"></i>{{error}}</div>}
+  @if(success){<div class="notice success"><i class="bi bi-check-circle"></i>{{success}}</div>}
+
+  <section class="card filters-card">
+    <div class="filters">
+      <div class="field">
+        <label>Année scolaire</label>
+        <select [(ngModel)]="yearId" (ngModelChange)="onYear()">
+          <option [ngValue]="null">Sélectionner</option>
+          @for(y of years;track y.id){<option [ngValue]="y.id">{{y.label}}</option>}
+        </select>
+      </div>
+      <div class="field">
+        <label>Classe</label>
+        <select [(ngModel)]="classId" (ngModelChange)="onClass()" [disabled]="!yearId">
+          <option [ngValue]="null">Sélectionner une classe</option>
+          @for(c of filteredClasses;track c.id){<option [ngValue]="c.id">{{c.name}}</option>}
+        </select>
+      </div>
+      <div class="context">
+        @if(selectedClass){<span>Campus</span><strong>{{selectedClass?.campusName || '—'}}</strong>}
+        @else{<span>Grille</span><strong>Sélectionnez une classe</strong>}
+      </div>
+    </div>
+  </section>
+
+  @if(!classId){
+    <section class="empty-state card"><i class="bi bi-calendar3"></i><h2>Choisissez une classe</h2><p>L'emploi du temps s'affichera ici avec tous les créneaux actifs.</p></section>
+  } @else if(loading){
+    <section class="card loading"><i class="bi bi-arrow-repeat spin"></i> Chargement de l'emploi du temps…</section>
+  } @else {
+    <section class="card schedule-card">
+      <div class="section-head">
+        <div><h2>{{selectedClass?.name}}</h2><span>{{eligible.length}} affectation(s) pédagogique(s) disponible(s)</span></div>
+        <div class="legend"><span><i class="dot filled"></i>Cours</span><span><i class="dot empty-dot"></i>Libre</span></div>
+      </div>
+      @if(!eligible.length){<div class="notice warn"><i class="bi bi-info-circle"></i>Aucune affectation pédagogique active pour cette classe. Créez d'abord les affectations enseignant / matière.</div>}
+      <div class="grid-wrap">
+        <table class="schedule">
+          <thead><tr><th class="time-head">Créneau</th>@for(d of days;track d.key){<th>{{d.label}}</th>}</tr></thead>
+          <tbody>
+            @for(s of slots;track s.id){
+              <tr>
+                <th class="slot"><strong>{{s.startTime.slice(0,5)}} — {{s.endTime.slice(0,5)}}</strong><small>{{s.code}}</small></th>
+                @for(d of days; track d.key){
+                  <td>
+                    <div class="cell" [class.has-course]="!!cell(d.key, s.id)" [class.disabled]="!eligible.length && !cell(d.key, s.id)" (click)="(eligible.length || cell(d.key, s.id)) && open(d.key, s)">
+                      @if(cell(d.key, s.id); as entry){
+                        <strong>{{entry.subjectName}}</strong>
+                        <span><i class="bi bi-person"></i>{{entry.teacherName}}</span>
+                        @if(entry.roomName){<small><i class="bi bi-door-open"></i>{{entry.roomName}}</small>}
+                        <button type="button" class="cell-delete" title="Retirer" (click)="askDelete(entry, $event)"><i class="bi bi-x"></i></button>
+                      } @else {
+                        <span class="add"><i class="bi bi-plus-lg"></i> Ajouter</span>
+                      }
+                    </div>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="schedule-actions">
+        <div class="print-help"><i class="bi bi-file-earmark-pdf"></i><span>Le PDF contient <strong>2 emplois du temps complets sur une seule page A4</strong>, prêts à découper.</span></div>
+        <button type="button" class="btn btn-primary" (click)="exportPdf()"><i class="bi bi-file-earmark-pdf"></i> Exporter PDF</button>
+      </div>
+    </section>
+  }
+
+  @if(modal){<div class="modal-backdrop" (click)="close()"><div class="modal" (click)="$event.stopPropagation()"><div class="modal-head"><div><span>{{editing?'Modifier le cours':'Ajouter un cours'}}</span><strong>{{dayLabel(form.dayOfWeek)}} · {{slotLabel(form.timeSlotId)}}</strong></div><button (click)="close()"><i class="bi bi-x-lg"></i></button></div><div class="modal-body">@if(error){<div class="notice error">{{error}}</div>}<div class="field"><label>Enseignant / matière *</label><select [(ngModel)]="form.teachingAssignmentId"><option [ngValue]="0">Sélectionner</option>@for(a of eligible;track a.teachingAssignmentId){<option [ngValue]="a.teachingAssignmentId">{{a.subjectName}} — {{a.teacherName}}</option>}</select></div><div class="field"><label>Salle</label><select [(ngModel)]="form.roomId"><option [ngValue]="null">Aucune salle</option>@for(r of availableRooms;track r.id){<option [ngValue]="r.id">{{r.name}} ({{r.code}})</option>}</select></div><div class="date-grid"><div class="field"><label>Valide à partir du *</label><input type="date" [(ngModel)]="form.validFrom"></div><div class="field"><label>Valide jusqu'au</label><input type="date" [(ngModel)]="form.validUntil"></div></div><p class="hint"><i class="bi bi-shield-check"></i>Le serveur vérifie automatiquement les conflits de classe, enseignant et salle.</p></div><div class="modal-foot"><button class="btn btn-light" (click)="close()">Annuler</button><button class="btn btn-primary" (click)="save()" [disabled]="saving||!form.teachingAssignmentId"><i class="bi bi-check2"></i>{{saving?'Enregistrement…':'Enregistrer'}}</button></div></div></div>}
+  @if(deleteTarget){<div class="modal-backdrop"><div class="modal modal-sm"><div class="confirm"><div class="danger-icon"><i class="bi bi-trash3"></i></div><h2>Retirer ce cours ?</h2><p><strong>{{deleteTarget.subjectName}}</strong> avec {{deleteTarget.teacherName}} sera retiré de la grille.</p><div class="confirm-actions"><button class="btn btn-light" (click)="deleteTarget=null">Annuler</button><button class="btn btn-danger" (click)="confirmDelete()" [disabled]="saving">Retirer</button></div></div></div></div>}
+</div>

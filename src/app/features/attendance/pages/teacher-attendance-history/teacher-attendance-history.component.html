@@ -1,0 +1,58 @@
+<section class="attendance-page">
+  <header class="page-head">
+    <div><div class="eyebrow">Assiduité</div><h1>Historique enseignants</h1><div class="muted">Consultez et filtrez les présences, absences et retards enregistrés.</div></div>
+    <div class="toolbar"><a class="btn btn-primary" routerLink="/attendance/teachers"><i class="bi bi-pencil-square"></i> Saisir l'assiduité</a></div>
+  </header>
+
+  @if(message()){<div class="notice success"><i class="bi bi-check-circle"></i>{{message()}}</div>}
+  @if(error()){<div class="notice error"><i class="bi bi-exclamation-triangle"></i>{{error()}}</div>}
+
+  <div class="card">
+    <div class="filters history-filters">
+      <div class="filter-field"><label>Du</label><input type="date" [(ngModel)]="from" /></div>
+      <div class="filter-field"><label>Au</label><input type="date" [(ngModel)]="to" /></div>
+      <div class="filter-field"><label>Enseignant</label><select [(ngModel)]="teacherId"><option [ngValue]="null">Tous</option>@for(t of teachers();track t.id){<option [ngValue]="t.id">{{t.firstName}} {{t.lastName}}</option>}</select></div>
+      <div class="filter-field"><label>Statut</label><select [(ngModel)]="status"><option [ngValue]="null">Tous</option><option value="PRESENT">Présent</option><option value="ABSENT">Absent</option><option value="RETARD">Retard</option></select></div>
+      <div class="filter-actions"><button class="btn btn-primary" (click)="load(true)"><i class="bi bi-search"></i> Filtrer</button><button class="btn btn-light" (click)="resetFilters()"><i class="bi bi-arrow-counterclockwise"></i> Réinitialiser</button></div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><span>Total</span><strong>{{summary().total}}</strong></div>
+    <div class="stat present"><span>Présents</span><strong>{{summary().present}}</strong></div>
+    <div class="stat absent"><span>Absents</span><strong>{{summary().absent}}</strong></div>
+    <div class="stat late"><span>Retards</span><strong>{{summary().late}}</strong></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>Historique des saisies</h2><span class="count">{{totalElements}} résultat(s)</span></div>
+    @if(loading()){
+      <div class="loading"><i class="bi bi-arrow-repeat"></i> Chargement...</div>
+    } @else if(!items().length){
+      <div class="empty"><i class="bi bi-inbox"></i><strong>Aucune assiduité trouvée</strong><div>Modifiez les filtres ou commencez une saisie.</div></div>
+    } @else {
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Date / créneau</th><th>Enseignant</th><th>Classe / matière</th><th>Assiduité</th><th>Motif / notes</th></tr></thead>
+          <tbody>
+            @for(item of items();track item.id){
+              <tr>
+                <td class="teacher-cell"><strong>{{item.date | date:'dd/MM/yyyy'}}</strong><small>{{item.startTime.slice(0,5)}} — {{item.endTime.slice(0,5)}} · {{item.timeSlotCode}}</small></td>
+                <td class="teacher-cell"><strong>{{item.teacherName}}</strong><small>Saisie : {{item.recordedBy || '—'}}</small></td>
+                <td class="teacher-cell"><strong>{{item.classGroupName}}</strong><small>{{item.subjectName}}</small></td>
+                <td>
+                  @if(item.attendanceStatus==='PRESENT'){<span class="badge present">Présent</span>}
+                  @else if(item.attendanceStatus==='ABSENT'){<span class="badge absent">Absent</span>}
+                  @else {<span class="badge late">Retard · {{item.lateMinutes}} min</span>}
+                </td>
+                <td class="teacher-cell"><strong>{{item.reason || '—'}}</strong><small>{{item.notes || ''}}</small></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="pager"><div>Page {{page + 1}} / {{totalPages || 1}}</div><div class="pager-actions"><button class="btn btn-light" (click)="prev()" [disabled]="page===0"><i class="bi bi-chevron-left"></i> Précédent</button><button class="btn btn-light" (click)="next()" [disabled]="page+1>=totalPages">Suivant <i class="bi bi-chevron-right"></i></button></div></div>
+    }
+  </div>
+</section>
+

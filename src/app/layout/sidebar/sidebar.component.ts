@@ -127,6 +127,35 @@ export class SidebarComponent {
     },
 
     {
+      label: 'Personnel & Enseignants',
+      icon: 'bi bi-person-workspace',
+      children: [
+        { label: 'Tableau de bord RH', icon: 'bi bi-speedometer2', route: '/hr', permission: 'PERSONNEL_DASHBOARD' },
+        { label: 'Personnel', icon: 'bi bi-people', route: '/hr/employees', permission: 'PERSONNEL_CONSULTER' },
+        { label: 'Enseignants', icon: 'bi bi-person-video3', route: '/hr/teachers', permission: 'ENSEIGNANT_CONSULTER' },
+        { label: 'Affectations', icon: 'bi bi-diagram-3', route: '/hr/assignments', permission: 'ENSEIGNANT_AFFECTER' },
+        { label: 'Rémunération', icon: 'bi bi-cash-coin', route: '/hr/compensation', permission: 'REMUNERATION_CONSULTER' },
+        { label: 'Matières', icon: 'bi bi-journal-text', route: '/hr/subjects', permission: 'MATIERE_CONSULTER' },
+        { label: 'Postes & fonctions', icon: 'bi bi-briefcase', route: '/hr/job-positions', permission: 'POSTE_CONSULTER' },
+      ],
+    },
+    {
+      label: 'Emploi du temps',
+      icon: 'bi bi-calendar-week',
+      route: '/timetable',
+      permission: 'EMPLOI_DU_TEMPS_CONSULTER',
+    },
+    {
+      label: 'Assiduité',
+      icon: 'bi bi-clipboard2-check',
+      children: [
+        { label: 'Enseignants', icon: 'bi bi-person-check', route: '/attendance/teachers', permission: 'ASSIDUITE_ENSEIGNANT_CONSULTER' },
+        { label: 'Historique enseignants', icon: 'bi bi-clock-history', route: '/attendance/teachers/history', permission: 'ASSIDUITE_ENSEIGNANT_CONSULTER' },
+        { label: 'Élèves', icon: 'bi bi-mortarboard', route: '/attendance/students', permission: 'ASSIDUITE_ELEVE_CONSULTER' },
+        { label: 'Historique élèves', icon: 'bi bi-clock-history', route: '/attendance/students/history', permission: 'ASSIDUITE_ELEVE_CONSULTER' },
+      ],
+    },
+    {
       label: 'Finance & Caisse',
       icon: 'bi bi-cash-stack',
       children: [
@@ -207,6 +236,12 @@ export class SidebarComponent {
           icon: 'bi bi-list-check',
           route: '/finance/fee-types',
           permission: 'TARIF_CONSULTER',
+        },
+        {
+          label: 'Paie enseignants',
+          icon: 'bi bi-person-vcard',
+          route: '/payroll/teachers',
+          permission: 'PAIE_ENSEIGNANT_CONSULTER',
         },
         {
           label: 'Paramètres',

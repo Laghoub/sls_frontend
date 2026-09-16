@@ -1,0 +1,82 @@
+<section class="attendance-page">
+  <header class="page-head">
+    <div>
+      <div class="eyebrow">Assiduité</div>
+      <h1>Assiduité des enseignants</h1>
+      <div class="muted">Affiche uniquement les enseignants réellement attendus selon l'emploi du temps.</div>
+    </div>
+    <div class="toolbar">
+      <a class="btn btn-light" routerLink="/attendance/teachers/history"><i class="bi bi-clock-history"></i> Historique</a>
+      <button class="btn btn-primary" type="button" (click)="save()" [disabled]="saving() || !rows().length || !auth.hasPermission('ASSIDUITE_ENSEIGNANT_SAISIR')">
+        <i class="bi bi-check2-circle"></i> {{ saving() ? 'Enregistrement...' : 'Enregistrer' }}
+      </button>
+    </div>
+  </header>
+
+  @if(message()){<div class="notice success"><i class="bi bi-check-circle"></i>{{message()}}</div>}
+  @if(error()){<div class="notice error"><i class="bi bi-exclamation-triangle"></i>{{error()}}</div>}
+
+  <div class="card">
+    <div class="filters entry-filters">
+      <div class="filter-field">
+        <label>Date</label>
+        <input type="date" [(ngModel)]="selectedDate" (ngModelChange)="loadExpected()" />
+      </div>
+      <div class="filter-field">
+        <label>Créneau</label>
+        <select [(ngModel)]="selectedTimeSlotId" (ngModelChange)="loadExpected()">
+          @for(slot of timeSlots(); track slot.id){
+            <option [ngValue]="slot.id">{{slot.code}} · {{slot.startTime.slice(0,5)}} — {{slot.endTime.slice(0,5)}}</option>
+          }
+        </select>
+      </div>
+      <div class="selection-info">
+        <span>Enseignants attendus</span><strong>{{rows().length}}</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats compact-stats">
+    <div class="stat"><span>Attendus</span><strong>{{rows().length}}</strong></div>
+    <div class="stat present"><span>Présents</span><strong>{{countStatus('PRESENT')}}</strong></div>
+    <div class="stat absent"><span>Absents</span><strong>{{countStatus('ABSENT')}}</strong></div>
+    <div class="stat late"><span>Retards</span><strong>{{countStatus('RETARD')}}</strong></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div><h2>Feuille d'assiduité du créneau</h2><div class="muted">Choisissez Présent, Absent ou Retard puis enregistrez. Une saisie existante peut être corrigée et enregistrée à nouveau.</div></div>
+      <span class="count">{{rows().length}} cours</span>
+    </div>
+
+    @if(loading()){
+      <div class="loading"><i class="bi bi-arrow-repeat"></i> Chargement...</div>
+    } @else if(!rows().length){
+      <div class="empty"><i class="bi bi-calendar2-x"></i><strong>Aucun enseignant attendu</strong><div>Aucun cours actif n'est prévu pour cette date et ce créneau.</div></div>
+    } @else {
+      <div class="table-wrap">
+        <table class="data-table attendance-entry-table">
+          <thead><tr><th>Enseignant</th><th>Cours</th><th>Statut</th><th>Retard</th><th>Motif</th><th>Notes</th></tr></thead>
+          <tbody>
+            @for(row of rows(); track row.scheduleEntryId){
+              <tr>
+                <td class="teacher-cell"><strong>{{row.teacherName}}</strong><small>{{row.timeSlotCode}} · {{row.startTime.slice(0,5)}}—{{row.endTime.slice(0,5)}}</small></td>
+                <td class="teacher-cell"><strong>{{row.subjectName}}</strong><small>{{row.classGroupName}} @if(row.roomName){ · {{row.roomName}} }</small></td>
+                <td>
+                  <div class="status-pills">
+                    <button type="button" class="status-btn present" [class.active]="row.editStatus==='PRESENT'" (click)="setStatus(row,'PRESENT')">Présent</button>
+                    <button type="button" class="status-btn absent" [class.active]="row.editStatus==='ABSENT'" (click)="setStatus(row,'ABSENT')">Absent</button>
+                    <button type="button" class="status-btn late" [class.active]="row.editStatus==='RETARD'" (click)="setStatus(row,'RETARD')">Retard</button>
+                  </div>
+                </td>
+                <td><input class="inline-input" type="number" min="1" [(ngModel)]="row.editLateMinutes" [disabled]="row.editStatus!=='RETARD'" /></td>
+                <td><input class="wide-input" type="text" placeholder="Motif si nécessaire" [(ngModel)]="row.editReason" /></td>
+                <td><input class="wide-input" type="text" placeholder="Observation" [(ngModel)]="row.editNotes" /></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>

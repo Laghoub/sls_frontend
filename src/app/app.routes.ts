@@ -109,6 +109,29 @@ export const routes: Routes = [
           ),
       },
 
+      {
+        path: 'hr',
+        loadChildren: () =>
+          import('./features/hr/hr.routes').then(
+            (m) => m.HR_ROUTES,
+          ),
+      },
+
+      {
+        path: 'timetable',
+        loadChildren: () => import('./features/timetable/timetable.routes').then((m) => m.TIMETABLE_ROUTES),
+      },
+
+      {
+        path: 'attendance',
+        loadChildren: () => import('./features/attendance/attendance.routes').then((m) => m.ATTENDANCE_ROUTES),
+      },
+
+      {
+        path: 'payroll',
+        loadChildren: () => import('./features/payroll/payroll.routes').then((m) => m.PAYROLL_ROUTES),
+      },
+
       /*
        * Route par défaut
        */

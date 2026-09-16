@@ -1,0 +1,4 @@
+export type SchoolDay = 'SUNDAY'|'MONDAY'|'TUESDAY'|'WEDNESDAY'|'THURSDAY';
+export interface EligibleAssignment { teachingAssignmentId:number; teacherId:number; teacherName:string; subjectId:number; subjectName:string; classGroupId:number; classGroupName:string; }
+export interface ScheduleEntry { id:number; schoolYearId:number; schoolYear:string; classGroupId:number; classGroupName:string; teachingAssignmentId:number; teacherId:number; teacherName:string; subjectId:number; subjectName:string; dayOfWeek:SchoolDay; timeSlotId:number; timeSlotCode:string; startTime:string; endTime:string; roomId:number|null; roomName:string|null; validFrom:string; validUntil:string|null; status:string; }
+export interface ScheduleEntryRequest { teachingAssignmentId:number; dayOfWeek:SchoolDay; timeSlotId:number; roomId:number|null; validFrom:string; validUntil:string|null; }

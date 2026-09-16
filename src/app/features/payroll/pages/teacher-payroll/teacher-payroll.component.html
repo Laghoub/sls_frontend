@@ -1,0 +1,227 @@
+<div class="payroll-page">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Finance · Rémunération</div>
+      <h1>Paie des enseignants</h1>
+      <div class="muted">Calcul, contrôle, paiement, reçu et notification e-mail de la rémunération.</div>
+    </div>
+    <div class="toolbar">
+      <button class="btn btn-light" type="button" (click)="refreshPeriods()"><i class="bi bi-arrow-clockwise"></i> Actualiser</button>
+      @if (selectedPayroll) {
+        <button class="btn btn-light" type="button" (click)="printPayslip()"><i class="bi bi-printer"></i> Imprimer le bulletin</button>
+      }
+    </div>
+  </div>
+
+  @if (error) { <div class="notice error"><i class="bi bi-exclamation-triangle-fill"></i>{{ error }}</div> }
+  @if (success) { <div class="notice success"><i class="bi bi-check-circle-fill"></i>{{ success }}</div> }
+
+  @if (auth.hasPermission('PAIE_ENSEIGNANT_CALCULER')) {
+    <section class="card">
+      <div class="card-head">
+        <div><h2>Calculer une rémunération</h2><div class="muted">Le calcul utilise le plan de rémunération, les tarifs spécifiques et l'assiduité validée.</div></div>
+      </div>
+      <div class="filters">
+        <div class="field">
+          <label>Année scolaire</label>
+          <select [(ngModel)]="selectedSchoolYearId">
+            <option [ngValue]="null">Sélectionner</option>
+            @for (y of schoolYears; track y.id) { <option [ngValue]="y.id">{{ y.label }}</option> }
+          </select>
+        </div>
+        <div class="field">
+          <label>Enseignant</label>
+          <select [(ngModel)]="selectedTeacherId">
+            <option [ngValue]="null">Sélectionner</option>
+            @for (t of teachers; track t.id) { <option [ngValue]="t.id">{{ t.lastName }} {{ t.firstName }} · {{ t.employeeNumber }}</option> }
+          </select>
+        </div>
+        <div class="field"><label>Année civile</label><input type="number" min="2000" max="2100" [(ngModel)]="calcYear"></div>
+        <div class="field">
+          <label>Mois</label>
+          <select [(ngModel)]="calcMonth">@for (m of months; track m.value) { <option [ngValue]="m.value">{{ m.label }}</option> }</select>
+        </div>
+        <div class="field">
+          <label>Retenue absence mensuel (DA) <span class="muted">— optionnel</span></label>
+          <input type="number" min="0" step="0.01" [(ngModel)]="absenceDeduction" placeholder="0 = aucune retenue">
+          <small class="muted">Pour un enseignant mensuel/mixte absent : laissez vide ou 0 pour ne rien déduire.</small>
+        </div>
+        <button class="btn btn-primary" type="button" [disabled]="calculating || !selectedTeacherId || !selectedSchoolYearId" (click)="calculate()">
+          @if (calculating) { <i class="bi bi-hourglass-split"></i> Calcul... } @else { <i class="bi bi-calculator"></i> Calculer la paie }
+        </button>
+      </div>
+    </section>
+  }
+
+  <section class="card">
+    <div class="card-head">
+      <div><h2>Période de paie</h2><div class="muted">Sélectionnez une période déjà calculée pour afficher les enseignants.</div></div>
+      @if (selectedPeriod()) { <span class="count">{{ selectedPeriod()?.status }}</span> }
+    </div>
+    <div class="filters" style="grid-template-columns:minmax(260px,520px) auto;justify-content:start">
+      <div class="field">
+        <label>Période</label>
+        <select [(ngModel)]="selectedPeriodId" (ngModelChange)="loadPeriod()">
+          <option [ngValue]="null">Sélectionner une période</option>
+          @for (p of periods; track p.id) { <option [ngValue]="p.id">{{ periodLabel(p) }}</option> }
+        </select>
+      </div>
+      <button class="btn btn-light" type="button" [disabled]="!selectedPeriodId" (click)="loadPeriod()"><i class="bi bi-search"></i> Charger</button>
+    </div>
+  </section>
+
+  @if (selectedPeriodId) {
+    <div class="stats">
+      <div class="stat"><span>Enseignants calculés</span><strong>{{ items.length }}</strong></div>
+      <div class="stat success"><span>Payés</span><strong>{{ paidCount }}</strong></div>
+      <div class="stat warning"><span>Partiellement payés</span><strong>{{ partialCount }}</strong></div>
+      <div class="stat blue"><span>Net total</span><strong>{{ totalNet | number:'1.0-0' }} DA</strong></div>
+      <div class="stat success"><span>Total versé</span><strong>{{ totalPaid | number:'1.0-0' }} DA</strong></div>
+      <div class="stat danger"><span>Reste à payer</span><strong>{{ totalRemaining | number:'1.0-0' }} DA</strong></div>
+    </div>
+  }
+
+  <div class="split">
+    <section class="card">
+      <div class="card-head"><h2>Rémunérations calculées</h2><span class="count">{{ items.length }}</span></div>
+      @if (loading) {
+        <div class="loading"><i class="bi bi-arrow-repeat"></i> Chargement...</div>
+      } @else if (!selectedPeriodId) {
+        <div class="empty"><i class="bi bi-calendar2-week"></i>Sélectionnez une période.</div>
+      } @else if (!items.length) {
+        <div class="empty"><i class="bi bi-wallet2"></i>Aucune paie calculée pour cette période.</div>
+      } @else {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Enseignant</th><th>Type</th><th>Base</th><th>Heures</th><th>Part horaire</th><th>Net</th><th>Versé</th><th>Reste</th><th>Statut</th><th></th></tr></thead>
+            <tbody>
+              @for (p of items; track p.id) {
+                <tr>
+                  <td class="teacher-cell"><strong>{{ p.teacherName }}</strong><small>{{ p.employeeNumber }} · Version {{ p.versionNumber }}</small></td>
+                  <td><span class="badge" [ngClass]="compensationClass(p.compensationType)">{{ compensationLabel(p.compensationType) }}</span></td>
+                  <td class="money">{{ p.baseSalary | number:'1.2-2' }} DA</td>
+                  <td>{{ p.regularHours | number:'1.0-2' }} h</td>
+                  <td class="money">{{ p.hourlyAmount | number:'1.2-2' }} DA</td>
+                  <td class="money">{{ p.netSalary | number:'1.2-2' }} DA</td>
+                  <td class="money">{{ p.paidAmount | number:'1.2-2' }} DA</td>
+                  <td class="money">{{ p.remainingAmount | number:'1.2-2' }} DA</td>
+                  <td><span class="badge" [ngClass]="statusClass(p.status)">{{ statusLabel(p.status) }}</span></td>
+                  <td>
+                    <div class="row-actions">
+                      <button class="icon-action" title="Détail" type="button" (click)="openDetail(p)"><i class="bi bi-eye"></i></button>
+                      @if (auth.hasPermission('PAIE_ENSEIGNANT_PAYER') && p.remainingAmount > 0) {
+                        <button class="icon-action success" title="Enregistrer un paiement" type="button" (click)="openPayment(p)"><i class="bi bi-cash-coin"></i></button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    @if (selectedPayroll) {
+      <aside class="card detail-card">
+        <div class="detail-title">
+          <div><h3>{{ selectedPayroll.teacherName }}</h3><small>{{ selectedPayroll.employeeNumber }} · {{ monthName(selectedPayroll.month) }} {{ selectedPayroll.year }}</small></div>
+          <span class="badge" [ngClass]="statusClass(selectedPayroll.status)">{{ statusLabel(selectedPayroll.status) }}</span>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-box"><span>Type</span><strong>{{ compensationLabel(selectedPayroll.compensationType) }}</strong></div>
+          <div class="detail-box"><span>Version</span><strong>V{{ selectedPayroll.versionNumber }}</strong></div>
+          <div class="detail-box"><span>Présences</span><strong>{{ selectedPayroll.presentSessions }}</strong></div>
+          <div class="detail-box"><span>Absences</span><strong>{{ selectedPayroll.absentSessions }}</strong></div>
+          <div class="detail-box"><span>Retards</span><strong>{{ selectedPayroll.lateSessions }} · {{ selectedPayroll.totalLateMinutes }} min</strong></div>
+          <div class="detail-box"><span>Heures rémunérées</span><strong>{{ selectedPayroll.regularHours | number:'1.0-2' }} h</strong></div>
+        </div>
+        <div class="money-summary">
+          <div class="money-line"><span>Salaire de base</span><strong>{{ selectedPayroll.baseSalary | number:'1.2-2' }} DA</strong></div>
+          <div class="money-line"><span>Part fixe</span><strong>{{ selectedPayroll.fixedPart | number:'1.2-2' }} DA</strong></div>
+          <div class="money-line"><span>Part horaire</span><strong>{{ selectedPayroll.hourlyAmount | number:'1.2-2' }} DA</strong></div>
+          <div class="money-line"><span>Primes</span><strong>{{ selectedPayroll.bonusTotal | number:'1.2-2' }} DA</strong></div>
+          <div class="money-line"><span>Retenue absence</span><strong>{{ selectedPayroll.absenceDeduction | number:'1.2-2' }} DA</strong></div>
+          <div class="money-line"><span>Retenues totales</span><strong>{{ selectedPayroll.deductionTotal | number:'1.2-2' }} DA</strong></div>
+          <div class="money-line total"><span>Net à payer</span><strong>{{ selectedPayroll.netSalary | number:'1.2-2' }} DA</strong></div>
+          <div class="money-line"><span>Déjà versé</span><strong>{{ selectedPayroll.paidAmount | number:'1.2-2' }} DA</strong></div>
+          <div class="money-line remaining"><span>Reste à payer</span><strong>{{ selectedPayroll.remainingAmount | number:'1.2-2' }} DA</strong></div>
+        </div>
+        <div class="toolbar" style="margin-top:14px">
+          <button class="btn btn-light" type="button" (click)="printPayslip()"><i class="bi bi-printer"></i> Bulletin</button>
+          @if (auth.hasPermission('PAIE_ENSEIGNANT_PAYER') && selectedPayroll.remainingAmount > 0) {
+            <button class="btn btn-success" type="button" (click)="openPayment()"><i class="bi bi-cash-coin"></i> Payer</button>
+          }
+        </div>
+      </aside>
+    }
+  </div>
+
+  @if (selectedAttendanceLines.length) {
+    <section class="card">
+      <div class="card-head"><div><h2>Détail des séances rémunérées</h2><div class="muted">Le retard réduit les minutes rémunérées. Une absence vaut 0 minute.</div></div><span class="count">{{ selectedAttendanceLines.length }}</span></div>
+      <div class="table-wrap"><table class="data-table"><thead><tr><th>Date</th><th>Classe</th><th>Matière</th><th>Horaire</th><th>Assiduité</th><th>Retard</th><th>Prévu</th><th>Rémunéré</th><th>Taux</th><th>Montant</th></tr></thead><tbody>
+        @for (x of selectedAttendanceLines; track x.attendanceId) {
+          <tr><td>{{ formatDate(x.date) }}</td><td>{{ x.className }}</td><td>{{ x.subjectName }}</td><td>{{ x.timeRange }}</td><td>{{ attendanceLabel(x.attendanceStatus) }}</td><td>{{ x.lateMinutes }} min</td><td>{{ x.scheduledMinutes }} min</td><td>{{ x.paidMinutes }} min</td><td class="money">{{ x.appliedHourlyRate | number:'1.2-2' }} DA/h</td><td class="money">{{ x.amount | number:'1.2-2' }} DA</td></tr>
+        }
+      </tbody></table></div>
+    </section>
+  }
+</div>
+
+@if (paymentModal && selectedPayroll) {
+  <div class="modal-backdrop" (click)="closePayment()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-head"><h3>Enregistrer le paiement du salaire</h3><button class="close" type="button" (click)="closePayment()"><i class="bi bi-x-lg"></i></button></div>
+      <div class="modal-body">
+        <div class="notice info"><i class="bi bi-envelope-check"></i>Après le paiement, un e-mail récapitulatif sera envoyé automatiquement à l'enseignant.</div>
+        <div class="detail-grid">
+          <div class="detail-box"><span>Enseignant</span><strong>{{ selectedPayroll.teacherName }}</strong></div>
+          <div class="detail-box"><span>Reste à payer</span><strong>{{ selectedPayroll.remainingAmount | number:'1.2-2' }} DA</strong></div>
+        </div>
+        <div class="field"><label>Montant versé (DA)</label><input type="number" min="0.01" step="0.01" [(ngModel)]="paymentAmount"></div>
+        <div class="field" style="margin-top:12px"><label>Mode de paiement</label><select [(ngModel)]="paymentMethodId"><option [ngValue]="null">Sélectionner</option>@for (m of paymentMethods; track m.id) { <option [ngValue]="m.id">{{ m.name }}</option> }</select></div>
+        <div class="field" style="margin-top:12px"><label>Référence / numéro d'opération</label><input type="text" [(ngModel)]="paymentReference" placeholder="Optionnel"></div>
+        @if (isCashSelected()) {
+          <div class="session-info">
+            @if (currentCashSession) { <i class="bi bi-cash-register"></i> Session de caisse ouverte #{{ currentCashSession.id }} — elle sera utilisée automatiquement. }
+            @else { <i class="bi bi-exclamation-triangle"></i> Aucune session de caisse ouverte : le paiement en espèces sera refusé. }
+          </div>
+        }
+      </div>
+      <div class="modal-foot"><button class="btn btn-light" type="button" (click)="closePayment()">Annuler</button><button class="btn btn-success" type="button" [disabled]="paying" (click)="submitPayment()">@if (paying) { <i class="bi bi-hourglass-split"></i> Enregistrement... } @else { <i class="bi bi-check2-circle"></i> Valider le paiement }</button></div>
+    </div>
+  </div>
+}
+
+@if (receiptModal && receipt) {
+  <div class="modal-backdrop" (click)="closeReceipt()">
+    <div class="modal large" (click)="$event.stopPropagation()">
+      <div class="modal-head"><h3>Reçu de paiement</h3><button class="close" type="button" (click)="closeReceipt()"><i class="bi bi-x-lg"></i></button></div>
+      <div class="modal-body">
+        <div class="receipt">
+          <div class="receipt-brand"><img src="assets/logo.png" alt="Logo"><div><h2>Groupe Scolaire Sciences et Lettres</h2><p>Reçu de paiement de salaire enseignant</p></div><div class="receipt-number"><span>Reçu</span><strong>{{ receipt.receiptNumber }}</strong></div></div>
+          <div class="receipt-grid">
+            <div class="receipt-row"><span>Enseignant</span><strong>{{ receipt.teacherName }}</strong></div>
+            <div class="receipt-row"><span>Matricule</span><strong>{{ receipt.employeeNumber }}</strong></div>
+            <div class="receipt-row"><span>Période</span><strong>{{ monthName(receipt.month) }} {{ receipt.year }}</strong></div>
+            <div class="receipt-row"><span>Type de rémunération</span><strong>{{ compensationLabel(receipt.compensationType) }}</strong></div>
+            <div class="receipt-row"><span>Mode de paiement</span><strong>{{ receipt.paymentMethod }}</strong></div>
+            <div class="receipt-row"><span>Référence</span><strong>{{ receipt.paymentReference || '—' }}</strong></div>
+            <div class="receipt-row"><span>Date de paiement</span><strong>{{ formatDateTime(receipt.paymentDate) }}</strong></div>
+            <div class="receipt-row"><span>Bulletin</span><strong>{{ receipt.payslipNumber || '—' }}</strong></div>
+          </div>
+          <div class="receipt-total">
+            <div class="money-line"><span>Salaire de base</span><strong>{{ receipt.baseSalary | number:'1.2-2' }} DA</strong></div>
+            <div class="money-line"><span>Part horaire</span><strong>{{ receipt.hourlyAmount | number:'1.2-2' }} DA</strong></div>
+            <div class="money-line"><span>Retenue absence</span><strong>{{ receipt.absenceDeduction | number:'1.2-2' }} DA</strong></div>
+            <div class="money-line"><span>Net calculé</span><strong>{{ receipt.netSalary | number:'1.2-2' }} DA</strong></div>
+            <div class="money-line"><span>Montant versé</span><strong>{{ receipt.paymentAmount | number:'1.2-2' }} DA</strong></div>
+            <div class="money-line"><span>Reste à payer</span><strong>{{ receipt.remainingAmount | number:'1.2-2' }} DA</strong></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot"><button class="btn btn-light" type="button" (click)="closeReceipt()">Fermer</button><button class="btn btn-primary" type="button" (click)="printReceipt()"><i class="bi bi-printer"></i> Imprimer le reçu</button></div>
+    </div>
+  </div>
+}
