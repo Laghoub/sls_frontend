@@ -3,7 +3,8 @@ export type DiscountStatus = 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED' | 'CAN
 export type DiscountConditionType = 'ALWAYS' | 'FAMILY_CHILD_RANK';
 
 export interface StudentDiscountRequest {
-  studentEnrollmentId: number;
+  studentEnrollmentId: number | null;
+  registrationCaseId: number | null;
   feeTypeId: number | null;
   discountType: DiscountType;
   value: number;
@@ -14,7 +15,8 @@ export interface StudentDiscountRequest {
 
 export interface StudentDiscount {
   id: number;
-  studentEnrollmentId: number;
+  studentEnrollmentId: number | null;
+  registrationCaseId: number | null;
   feeTypeId: number | null;
   discountType: DiscountType;
   value: number;

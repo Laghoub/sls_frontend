@@ -96,7 +96,15 @@ export class AuthService {
       return false;
     }
 
-    return user.roles.includes(role);
+    const wanted = role.replace(/^ROLE_/, '').toUpperCase();
+    return user.roles.some(r => r.replace(/^ROLE_/, '').toUpperCase() === wanted);
+  }
+
+  homeRoute(): string {
+    if (this.hasRole('PARENT')) return '/parent-space';
+    if (this.hasRole('ELEVE')) return '/student-space';
+    if (this.hasRole('ENSEIGNANT')) return '/my-space';
+    return '/dashboard';
   }
 
   clearUser(): void {

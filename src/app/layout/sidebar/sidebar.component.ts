@@ -26,13 +26,29 @@ export class SidebarComponent {
   @Output() closeMobile = new EventEmitter<void>();
 
   pinned = false;
-  openedGroups = new Set<string>(['École']);
+  openedGroups = new Set<string>(['École', 'Administration']);
 
   menuItems: SidebarItem[] = [
     {
       label: 'Tableau de bord',
       icon: 'bi bi-grid-1x2-fill',
       route: '/dashboard',
+    },
+    { label: 'Espace parent', icon: 'bi bi-house-heart', route: '/parent-space', permission: 'PORTAIL_PARENT_ACCEDER' },
+    { label: 'Espace élève', icon: 'bi bi-mortarboard', route: '/student-space', permission: 'PORTAIL_ELEVE_ACCEDER' },
+    {
+      label: 'Espace enseignant',
+      icon: 'bi bi-person-circle',
+      permission: 'PORTAIL_ENSEIGNANT_ACCEDER',
+      children: [
+        { label: 'Tableau de bord', icon: 'bi bi-speedometer2', route: '/my-space', permission: 'PORTAIL_ENSEIGNANT_ACCEDER' },
+        { label: 'Mes classes & élèves', icon: 'bi bi-people', route: '/my-space/classes', permission: 'PORTAIL_ENSEIGNANT_CLASSES' },
+        { label: 'Mon emploi du temps', icon: 'bi bi-calendar-week', route: '/my-space/timetable', permission: 'PORTAIL_ENSEIGNANT_EMPLOI_DU_TEMPS' },
+        { label: 'Mon assiduité', icon: 'bi bi-clipboard-check', route: '/my-space/attendance', permission: 'PORTAIL_ENSEIGNANT_ASSIDUITE' },
+        { label: 'Mes rémunérations', icon: 'bi bi-cash-coin', route: '/my-space/payroll', permission: 'PORTAIL_ENSEIGNANT_REMUNERATION' },
+        { label: 'Mes exercices', icon: 'bi bi-journal-text', route: '/my-space/exercises', permission: 'PORTAIL_ENSEIGNANT_EXERCICES' },
+        { label: 'Mes évaluations', icon: 'bi bi-ui-checks-grid', route: '/my-space/evaluations', permission: 'PORTAIL_ENSEIGNANT_EVALUATIONS' },
+      ],
     },
     {
       label: 'École',
@@ -156,6 +172,13 @@ export class SidebarComponent {
       ],
     },
     {
+      label: 'Administration',
+      icon: 'bi bi-shield-lock',
+      children: [
+        { label: "Profils & droits d'accès", icon: 'bi bi-person-lock', route: '/access-management', permission: 'ROLE_CONSULTER' },
+      ],
+    },
+    {
       label: 'Finance & Caisse',
       icon: 'bi bi-cash-stack',
       children: [
@@ -199,6 +222,12 @@ export class SidebarComponent {
           label: 'Situation familles',
           icon: 'bi bi-people',
           route: '/finance/situations',
+          permission: 'CREANCE_CONSULTER',
+        },
+        {
+          label: 'Situation globale',
+          icon: 'bi bi-table',
+          route: '/finance/global-situation',
           permission: 'CREANCE_CONSULTER',
         },
         {
@@ -253,7 +282,28 @@ export class SidebarComponent {
     },
   ];
 
+  /**
+   * Un enseignant utilise uniquement son espace personnel.
+   * Les menus administratifs (tableau de bord global, emploi du temps global,
+   * assiduité administrative, etc.) ne doivent pas apparaître même si une
+   * ancienne permission est encore présente sur son compte.
+   */
+  get visibleMenuItems(): SidebarItem[] {
+    if (this.auth.hasRole('PARENT')) return this.menuItems.filter(item => item.label === 'Espace parent');
+    if (this.auth.hasRole('ELEVE')) return this.menuItems.filter(item => item.label === 'Espace élève');
+    if (this.auth.hasRole('ENSEIGNANT')) return this.menuItems.filter(item => item.label === 'Espace enseignant');
+    return this.menuItems;
+  }
+
   hasAccess(item: SidebarItem): boolean {
+    // Garde-fou : l'administrateur global doit toujours pouvoir revenir
+    // à la gestion des profils et droits afin d'éviter un verrouillage
+    // accidentel de l'administration. Tous les autres menus restent
+    // pilotés par les permissions effectives.
+    if (item.route === '/access-management' && this.auth.hasRole('ADMIN')) {
+      return true;
+    }
+
     if (item.children?.length) {
       return item.children.some((child) => this.hasAccess(child));
     }

@@ -29,6 +29,7 @@ import {
 import {
   PersonService
 } from '../../services/person.service';
+import { AccountActivationService } from '../../../../core/services/account-activation.service';
 
 
 @Component({
@@ -59,6 +60,8 @@ export class GuardianListComponent {
 
   readonly auth =
     inject(AuthService);
+
+  private readonly accountActivation = inject(AccountActivationService);
 
 
   // =========================================================
@@ -915,4 +918,14 @@ export class GuardianListComponent {
 
     return fallback;
   }
+
+  activateAccount(g: GuardianView): void {
+    if (!g.personId) return;
+    this.saving.set(true); this.error.set(''); this.success.set('');
+    this.accountActivation.activate(g.personId, 'PARENT').subscribe({
+      next: r => { this.saving.set(false); this.success.set(r.emailSent ? `Invitation envoyée à ${r.email}. Matricule : ${r.matricule}` : `Compte préparé (${r.matricule}), mais l’e-mail n’a pas pu être envoyé.`); },
+      error: e => { this.saving.set(false); this.error.set(e?.error?.message || e?.error?.detail || `Impossible d'activer le compte.`); }
+    });
+  }
+
 }

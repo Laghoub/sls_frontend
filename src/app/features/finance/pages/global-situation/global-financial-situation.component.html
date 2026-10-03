@@ -1,0 +1,69 @@
+<div class="global-page">
+  <header class="page-head no-print">
+    <div>
+      <div class="eyebrow">Finance & Caisse</div>
+      <h1>Situation globale</h1>
+      <p>Suivi consolidé des frais d'inscription et des mensualités de septembre à juin.</p>
+    </div>
+    <div class="head-actions">
+      <button class="btn secondary" type="button" (click)="load()" [disabled]="loading()"><i class="bi bi-arrow-clockwise"></i> Actualiser</button>
+      <button class="btn primary" type="button" (click)="exportPdf()" [disabled]="!data()"><i class="bi bi-file-earmark-pdf"></i> Exporter PDF</button>
+    </div>
+  </header>
+
+  <div class="print-title print-only">
+    <h1>Situation globale des paiements</h1>
+    <p>Année scolaire {{yearLabel()}} · Situation arrêtée à {{cutoffLabel()}}</p>
+  </div>
+
+  <section class="filters no-print">
+    <div class="field"><label>Année scolaire</label><select [(ngModel)]="filters.schoolYearId" (ngModelChange)="onYearChange()"><option *ngFor="let y of schoolYears()" [ngValue]="y.id">{{y.label}}</option></select></div>
+    <div class="field"><label>Classe</label><select [(ngModel)]="filters.classGroupId"><option [ngValue]="null">Toutes les classes</option><option *ngFor="let c of visibleClasses()" [ngValue]="c.id">{{c.name}}</option></select></div>
+    <div class="field parent-search"><label>Parent / famille</label><input [(ngModel)]="filters.parent" (keyup.enter)="load()" placeholder="Nom, prénom ou téléphone" /></div>
+    <div class="field"><label>Situation arrêtée à</label><select [(ngModel)]="filters.cutoffMonth"><option *ngFor="let m of months" [ngValue]="m.value">{{m.label}}</option></select></div>
+    <div class="field"><label>Statut</label><select [(ngModel)]="filters.status"><option value="">Tous</option><option value="PAID">À jour</option><option value="PARTIAL">Partiel</option><option value="UNPAID">Impayé</option></select></div>
+    <div class="filter-actions"><button class="btn ghost" type="button" (click)="reset()">Réinitialiser</button><button class="btn primary" type="button" (click)="load()"><i class="bi bi-search"></i> Appliquer</button></div>
+  </section>
+
+  <div class="alert" *ngIf="error()"><i class="bi bi-exclamation-triangle"></i> {{error()}}</div>
+  <div class="loading" *ngIf="loading()"><i class="bi bi-arrow-clockwise spin"></i> Calcul de la situation globale...</div>
+
+  <ng-container *ngIf="data() as d">
+    <section class="kpis">
+      <article><span>Attendu annuel</span><strong>{{money(d.summary.expectedAnnual) | number:'1.0-0'}} DA</strong><small>Montant total de l'année</small></article>
+      <article><span>Attendu à date</span><strong>{{money(d.summary.expectedToDate) | number:'1.0-0'}} DA</strong><small>Jusqu'à {{cutoffLabel()}}</small></article>
+      <article class="success"><span>Total encaissé</span><strong>{{money(d.summary.collected) | number:'1.0-0'}} DA</strong><small>{{money(d.summary.collectionRate) | number:'1.1-1'}} % de recouvrement</small></article>
+      <article class="warning"><span>Reste à couvrir</span><strong>{{money(d.summary.remainingToDate) | number:'1.0-0'}} DA</strong><small>{{d.summary.familiesWithDebt}} famille(s) concernée(s)</small></article>
+      <article class="danger"><span>Impayés / retards</span><strong>{{money(d.summary.overdue) | number:'1.0-0'}} DA</strong><small>Montants échus non soldés</small></article>
+      <article><span>Avoirs disponibles</span><strong>{{money(d.summary.availableCredits) | number:'1.0-0'}} DA</strong><small>{{d.summary.familiesUpToDate}} famille(s) à jour</small></article>
+    </section>
+
+    <section class="table-card">
+      <div class="table-meta"><strong>{{d.summary.familiesCount}} famille(s)</strong><span>Les montants sont consolidés pour les enfants affichés selon les filtres actifs.</span></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th class="sticky parent-col">Parent</th><th class="sticky children-col">Enfant(s)</th><th>Inscription</th><th *ngFor="let m of months">{{m.label}}</th><th>Total à date</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let f of d.families">
+              <td class="sticky parent-col"><div class="parent-name">{{f.guardianLastName}} {{f.guardianFirstName}}</div><small>{{f.phone || '—'}}</small><span class="family-status" [class.ok]="f.globalStatus === 'PAID'">{{statusLabel(f.globalStatus)}}</span></td>
+              <td class="sticky children-col"><div class="child" *ngFor="let c of f.children"><strong>{{c.firstName}} {{c.lastName}}</strong><small>{{c.className || 'Sans classe'}} · {{c.studentNumber}}</small></div></td>
+              <td><ng-container *ngTemplateOutlet="paymentCell; context: {$implicit: f.registration}"></ng-container></td>
+              <td *ngFor="let cell of f.months"><ng-container *ngTemplateOutlet="paymentCell; context: {$implicit: cell}"></ng-container></td>
+              <td class="total-cell"><strong>{{money(f.paidToDate) | number:'1.0-0'}} DA</strong><small>sur {{money(f.expectedToDate) | number:'1.0-0'}} DA</small><em *ngIf="f.remainingToDate > 0">Reste {{money(f.remainingToDate) | number:'1.0-0'}} DA</em></td>
+            </tr>
+            <tr *ngIf="!d.families.length"><td colspan="14" class="empty">Aucune famille ne correspond aux filtres sélectionnés.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <ng-template #paymentCell let-cell>
+      <div class="payment-cell" [ngClass]="statusClass(cell)">
+        <span class="status"><i class="bi" [ngClass]="{'bi-check-circle-fill':cell.status==='PAID','bi-circle-half':cell.status==='PARTIAL','bi-x-circle-fill':cell.status==='UNPAID','bi-clock':cell.status==='UPCOMING','bi-dash-circle':cell.status==='NOT_APPLICABLE'}"></i> {{statusLabel(cell.status)}}</span>
+        <strong *ngIf="cell.status !== 'NOT_APPLICABLE'">{{money(cell.paid) | number:'1.0-0'}} DA</strong>
+        <small *ngIf="cell.status !== 'NOT_APPLICABLE'">/ {{money(cell.expected) | number:'1.0-0'}} DA</small>
+        <em *ngIf="cell.remaining > 0 && cell.status !== 'UPCOMING'">Reste {{money(cell.remaining) | number:'1.0-0'}} DA</em>
+      </div>
+    </ng-template>
+  </ng-container>
+</div>

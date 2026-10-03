@@ -15,6 +15,7 @@ import {
   ClassGroupRef,
   CycleRef,
   EnrollmentChoice,
+  RegistrationChoice,
   LevelRef,
   SchoolYearRef,
 } from '../../models/finance-reference.model';
@@ -47,6 +48,7 @@ export class DiscountsComponent {
   campuses = signal<CampusRef[]>([]);
   feeTypes = signal<FeeType[]>([]);
   enrollments = signal<EnrollmentChoice[]>([]);
+  registrations = signal<RegistrationChoice[]>([]);
   items = signal<StudentDiscount[]>([]);
   rules = signal<DiscountRule[]>([]);
 
@@ -68,6 +70,7 @@ export class DiscountsComponent {
   filterStatus = '';
   schoolYearId: number | null = null;
   enrollmentSearch = '';
+  selectedTarget = '';
   rejectionReason = '';
 
   form: StudentDiscountRequest = this.emptyDiscountForm();
@@ -100,7 +103,8 @@ export class DiscountsComponent {
 
   private emptyDiscountForm(): StudentDiscountRequest {
     return {
-      studentEnrollmentId: 0,
+      studentEnrollmentId: null,
+      registrationCaseId: null,
       feeTypeId: null,
       discountType: 'PERCENTAGE',
       value: 0,
@@ -149,8 +153,15 @@ export class DiscountsComponent {
       this.enrollments.set([]);
       return;
     }
-    this.refs.enrollments(this.schoolYearId, 0, 100).subscribe({
-      next: (r) => this.enrollments.set(r.content),
+    forkJoin({
+      enrollments: this.refs.enrollments(this.schoolYearId, 0, 200),
+      registrations: this.refs.registrations('', this.schoolYearId, null, 0, 200),
+    }).subscribe({
+      next: (r) => {
+        this.enrollments.set(r.enrollments.content);
+        // On conserve aussi les dossiers de préinscription qui n'ont pas encore de scolarisation.
+        this.registrations.set(r.registrations.content);
+      },
       error: (e) => this.error.set(this.msg(e)),
     });
   }
@@ -184,13 +195,15 @@ export class DiscountsComponent {
 
   openCreate() {
     this.form = this.emptyDiscountForm();
-    this.form.studentEnrollmentId = this.filteredEnrollments()[0]?.id ?? 0;
+    this.selectedTarget = this.filteredTargets()[0]?.key ?? '';
+    this.syncSelectedTarget();
     this.modal.set(true);
   }
 
   saveDiscount() {
-    if (!this.form.studentEnrollmentId || this.form.value < 0) {
-      this.error.set('Scolarisation et valeur de réduction sont obligatoires.');
+    this.syncSelectedTarget();
+    if ((!this.form.studentEnrollmentId && !this.form.registrationCaseId) || this.form.value < 0) {
+      this.error.set('Élève et valeur de réduction sont obligatoires.');
       return;
     }
     if (this.form.discountType === 'PERCENTAGE' && this.form.value > 100) {
@@ -256,6 +269,10 @@ export class DiscountsComponent {
   }
 
   reapply(x: StudentDiscount) {
+    if (x.studentEnrollmentId == null) {
+      this.error.set("Le recalcul manuel concerne uniquement les élèves déjà scolarisés. Pour une préinscription, la réduction est appliquée aux frais d'inscription lors de sa validation.");
+      return;
+    }
     this.discounts.reapplyEnrollment(x.studentEnrollmentId).subscribe({
       next: (r) => this.success.set(
         `Réductions recalculées : ${r.chargesUpdated} créance(s), ${this.money(r.totalReductionApplied)} de réduction, ${this.money(r.familyCreditCreated)} d’avoir créé.`,
@@ -373,14 +390,54 @@ export class DiscountsComponent {
     });
   }
 
-  filteredEnrollments() {
+  filteredTargets() {
+    const enrolledStudentIds = new Set(this.enrollments().map(e => e.studentId));
+    const enrollmentTargets = this.enrollments().map(e => ({
+      key: `E:${e.id}`, type: 'ENROLLMENT' as const, id: e.id,
+      name: `${e.studentLastName ?? ''} ${e.studentFirstName ?? ''}`.trim(),
+      number: e.studentNumber ?? '', meta: e.classGroupName ?? 'Scolarisé',
+    }));
+    const registrationTargets = this.registrations()
+      .filter(r => !enrolledStudentIds.has(r.studentId))
+      .map(r => ({
+        key: `R:${r.id}`, type: 'REGISTRATION' as const, id: r.id,
+        name: `${r.studentLastName ?? ''} ${r.studentFirstName ?? ''}`.trim(),
+        number: r.studentNumber ?? '', meta: `Préinscription · ${r.status}`,
+      }));
+    const all = [...registrationTargets, ...enrollmentTargets];
     const q = this.enrollmentSearch.trim().toLowerCase();
-    if (!q) return this.enrollments();
-    return this.enrollments().filter((e) =>
-      `${e.studentLastName ?? ''} ${e.studentFirstName ?? ''} ${e.studentNumber ?? ''} ${e.classGroupName ?? ''}`
-        .toLowerCase()
-        .includes(q),
-    );
+    return q ? all.filter(x => `${x.name} ${x.number} ${x.meta}`.toLowerCase().includes(q)) : all;
+  }
+
+  syncSelectedTarget() {
+    this.form.studentEnrollmentId = null;
+    this.form.registrationCaseId = null;
+    if (!this.selectedTarget) return;
+    const [type, rawId] = this.selectedTarget.split(':');
+    const id = Number(rawId);
+    if (type === 'E') this.form.studentEnrollmentId = id;
+    if (type === 'R') this.form.registrationCaseId = id;
+  }
+
+
+  discountStudentName(x: StudentDiscount) {
+    if (x.studentEnrollmentId != null) return this.enrollmentName(x.studentEnrollmentId);
+    if (x.registrationCaseId != null) {
+      const r = this.registrations().find(v => v.id === x.registrationCaseId);
+      if (!r) return `Préinscription #${x.registrationCaseId}`;
+      return `${r.studentLastName ?? ''} ${r.studentFirstName ?? ''}`.trim() || r.studentNumber || `Préinscription #${x.registrationCaseId}`;
+    }
+    return 'Élève non renseigné';
+  }
+
+  discountStudentMeta(x: StudentDiscount) {
+    if (x.studentEnrollmentId != null) return this.enrollmentMeta(x.studentEnrollmentId);
+    if (x.registrationCaseId != null) {
+      const r = this.registrations().find(v => v.id === x.registrationCaseId);
+      if (!r) return `Préinscription #${x.registrationCaseId}`;
+      return [r.studentNumber, 'Préinscription', r.status].filter(Boolean).join(' · ');
+    }
+    return '—';
   }
 
   enrollmentName(id: number) {

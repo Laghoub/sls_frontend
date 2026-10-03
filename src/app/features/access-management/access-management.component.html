@@ -1,0 +1,20 @@
+<div class="access-page">
+ <div class="page-head"><div><div class="eyebrow">ADMINISTRATION</div><h1>Profils & droits d’accès</h1><p>Configurez précisément ce que chaque profil peut consulter et modifier dans l’application.</p></div><button class="primary" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Nouveau profil</button></div>
+ <div *ngIf="error" class="alert error">{{error}}</div><div *ngIf="message" class="alert success">{{message}}</div>
+ <div class="layout" *ngIf="!loading; else wait">
+  <aside class="roles-card"><div class="card-title"><span>Profils</span><span class="count">{{roles.length}}</span></div>
+   <button class="role" *ngFor="let r of roles" [class.active]="selected?.id===r.id" (click)="select(r)"><span class="role-icon"><i class="bi bi-person-badge"></i></span><span class="role-text"><b>{{r.name}}</b><small>{{r.code}}</small></span><span class="dot" [class.off]="!r.active"></span></button>
+  </aside>
+  <main class="permissions-card" *ngIf="selected; else choose">
+   <div class="profile-head"><div><div class="profile-title"><h2>{{selected.name}}</h2><span class="badge" *ngIf="selected.systemRole">Profil système</span></div><p>{{selected.description || 'Aucune description.'}}</p></div><button class="secondary" (click)="openEdit()"><i class="bi bi-pencil"></i> Modifier le profil</button></div>
+   <div class="toolbar"><div class="search"><i class="bi bi-search"></i><input [(ngModel)]="search" placeholder="Rechercher une permission..." /></div><div class="selected-count"><b>{{selectedCodes.size}}</b> droits accordés</div></div>
+   <section class="module" *ngFor="let m of modules()"><div class="module-head"><div><h3>{{m}}</h3><span>{{perms(m).length}} permissions</span></div><label class="all"><input type="checkbox" [checked]="moduleAll(m)" (change)="toggleModule(m)"> Tout autoriser</label></div>
+    <div class="permission-grid"><label class="permission" *ngFor="let p of perms(m)" [class.on]="checked(p.code)"><input type="checkbox" [checked]="checked(p.code)" (change)="toggle(p.code)"><span class="check"><i class="bi bi-check-lg"></i></span><span><b>{{p.name || p.code}}</b><small>{{p.description || p.code}}</small></span></label></div>
+   </section>
+   <div class="savebar"><span><i class="bi bi-shield-check"></i> Les modifications s’appliqueront aux utilisateurs de ce profil.</span><button class="primary" [disabled]="saving" (click)="savePermissions()">{{saving?'Enregistrement...':'Enregistrer les droits'}}</button></div>
+  </main>
+ </div>
+ <ng-template #choose><main class="permissions-card empty"><i class="bi bi-shield-lock"></i><h2>Sélectionnez un profil</h2><p>Choisissez un profil à gauche pour consulter et modifier ses droits.</p></main></ng-template>
+ <ng-template #wait><div class="loading"><div class="spinner"></div>Chargement des droits d’accès...</div></ng-template>
+</div>
+<div class="overlay" *ngIf="modal" (click)="modal=false"><div class="modal" (click)="$event.stopPropagation()"><div class="modal-head"><div><h2>{{editing?'Modifier le profil':'Nouveau profil'}}</h2><p>Définissez l’identité du profil. Les droits seront configurés ensuite.</p></div><button (click)="modal=false"><i class="bi bi-x-lg"></i></button></div><div class="field"><label>Nom du profil *</label><input [(ngModel)]="form.name" placeholder="Ex. Responsable des inscriptions"></div><div class="field"><label>Code *</label><input [(ngModel)]="form.code" [disabled]="editing && !!selected?.systemRole" placeholder="RESPONSABLE_INSCRIPTIONS"></div><div class="field"><label>Description</label><textarea [(ngModel)]="form.description" rows="3"></textarea></div><label class="active-line"><input type="checkbox" [(ngModel)]="form.active"> Profil actif</label><div class="modal-actions"><button class="secondary" (click)="modal=false">Annuler</button><button class="primary" [disabled]="saving||!form.name||!form.code" (click)="saveRole()">Enregistrer</button></div></div></div>

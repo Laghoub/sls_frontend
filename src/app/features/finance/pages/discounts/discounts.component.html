@@ -65,7 +65,7 @@
             <tbody>
               @for(x of items(); track x.id) {
                 <tr>
-                  <td><div class="name">{{ enrollmentName(x.studentEnrollmentId) }}</div><div class="sub">{{ enrollmentMeta(x.studentEnrollmentId) }}</div></td>
+                  <td><div class="name">{{ discountStudentName(x) }}</div><div class="sub">{{ discountStudentMeta(x) }}</div></td>
                   <td>{{ feeName(x.feeTypeId) }}</td>
                   <td><div class="discount-value">{{ valueLabel(x.discountType, x.value) }}</div><div class="sub">{{ typeLabel(x.discountType) }}</div></td>
                   <td><div>{{ x.startDate | date:'dd/MM/yyyy' }}</div><div class="sub">{{ x.endDate ? ('jusqu’au ' + (x.endDate | date:'dd/MM/yyyy')) : 'sans date de fin' }}</div></td>
@@ -80,7 +80,7 @@
                         <button class="btn-icon danger" title="Refuser" (click)="openReject(x)"><i class="bi bi-x-lg"></i></button>
                       }
                       @if(x.status === 'APPROVED' && auth.hasPermission('REDUCTION_VALIDER')) {
-                        <button class="btn-icon" title="Recalculer les créances" (click)="reapply(x)"><i class="bi bi-arrow-repeat"></i></button>
+                        @if(x.studentEnrollmentId != null){<button class="btn-icon" title="Recalculer les créances" (click)="reapply(x)"><i class="bi bi-arrow-repeat"></i></button>}
                       }
                     </div>
                   </td>
@@ -143,8 +143,8 @@
       <div class="modal discount-modal" (click)="$event.stopPropagation()">
         <div class="modal-head"><div><div class="eyebrow">Demande de réduction</div><h2>Nouvelle réduction</h2></div><button class="close-btn" (click)="modal.set(false)"><i class="bi bi-x-lg"></i></button></div>
         <div class="modal-help"><i class="bi bi-info-circle"></i><span>Si vous êtes administrateur avec la permission de validation, la réduction sera validée immédiatement. Sinon elle restera en attente.</span></div>
-        <div class="field"><label>Rechercher un élève scolarisé</label><input [(ngModel)]="enrollmentSearch" placeholder="Nom, prénom, matricule ou classe"></div>
-        <div class="field"><label>Élève *</label><select [(ngModel)]="form.studentEnrollmentId"><option [ngValue]="0">Sélectionner</option>@for(e of filteredEnrollments(); track e.id){<option [ngValue]="e.id">{{ e.studentLastName }} {{ e.studentFirstName }} — {{ e.studentNumber }} @if(e.classGroupName){· {{ e.classGroupName }}}</option>}</select></div>
+        <div class="field"><label>Rechercher un élève (préinscrit ou scolarisé)</label><input [(ngModel)]="enrollmentSearch" placeholder="Nom, prénom, matricule ou classe"></div>
+        <div class="field"><label>Élève *</label><select [(ngModel)]="selectedTarget" (ngModelChange)="syncSelectedTarget()"><option value="">Sélectionner</option>@for(e of filteredTargets(); track e.key){<option [value]="e.key">{{ e.name }} — {{ e.number }} · {{ e.meta }}</option>}</select><small>Les dossiers de préinscription apparaissent ici même avant le paiement des frais d’inscription.</small></div>
         <div class="grid-2">
           <div class="field"><label>Appliquer à</label><select [(ngModel)]="form.feeTypeId"><option [ngValue]="null">Tous les frais</option>@for(f of feeTypes(); track f.id){<option [ngValue]="f.id">{{ f.name }}</option>}</select></div>
           <div class="field"><label>Type de réduction *</label><select [(ngModel)]="form.discountType"><option value="PERCENTAGE">Pourcentage</option><option value="FIXED_AMOUNT">Montant fixe à déduire</option><option value="NEW_AMOUNT">Nouveau montant final</option></select></div>

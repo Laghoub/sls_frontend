@@ -223,6 +223,12 @@
 
               <td>
 
+                @if (auth.hasPermission('COMPTE_ACTIVER')) {
+                  <button type="button" class="icon-btn" title="Activer le compte et envoyer l’invitation" (click)="activateAccount(guardian)">
+                    <i class="bi bi-envelope-check"></i>
+                  </button>
+                }
+
                 @if (
                   auth.hasPermission(
                     'RESPONSABLE_MODIFIER'

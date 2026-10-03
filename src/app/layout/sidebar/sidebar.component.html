@@ -33,7 +33,7 @@
   </div>
 
   <nav class="sidebar-menu">
-    @for (item of menuItems; track item.label) {
+    @for (item of visibleMenuItems; track item.label) {
       @if (hasAccess(item)) {
         @if (item.children?.length) {
           <div class="menu-group">

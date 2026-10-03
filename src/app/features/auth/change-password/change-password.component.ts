@@ -119,9 +119,7 @@ export class ChangePasswordComponent {
 
         this.loading.set(false);
 
-        this.router.navigate([
-          '/dashboard'
-        ]);
+        this.router.navigate([this.authService.homeRoute()]);
       },
 
       error: () => {

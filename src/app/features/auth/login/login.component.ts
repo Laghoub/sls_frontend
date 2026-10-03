@@ -76,11 +76,8 @@ export class LoginComponent {
             return;
           }
 
-          // Mot de passe déjà modifié :
-          // accès normal à l'application
-          this.router.navigate([
-            '/dashboard'
-          ]);
+          // Redirection selon le rôle connecté.
+          this.router.navigate([this.authService.homeRoute()]);
         },
 
         error: error => {

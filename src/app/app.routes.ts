@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 import { authGuard } from './core/guards/auth.guard';
 import { changePasswordGuard } from './core/guards/change-password.guard';
+import { dashboardAccessGuard } from './core/guards/dashboard-access.guard';
 
 export const routes: Routes = [
   /*
@@ -9,6 +10,12 @@ export const routes: Routes = [
    * AUTHENTIFICATION
    * =========================
    */
+
+
+  {
+    path: 'activation',
+    loadComponent: () => import('./features/auth/activation/activation.component').then(m => m.ActivationComponent),
+  },
 
   {
     path: 'login',
@@ -52,6 +59,8 @@ export const routes: Routes = [
        */
       {
         path: 'dashboard',
+
+        canActivate: [dashboardAccessGuard],
 
         loadComponent: () =>
           import('./features/dashboard/dashboard.component').then(
@@ -130,6 +139,25 @@ export const routes: Routes = [
       {
         path: 'payroll',
         loadChildren: () => import('./features/payroll/payroll.routes').then((m) => m.PAYROLL_ROUTES),
+      },
+
+      {
+        path: 'my-space',
+        loadChildren: () => import('./features/employee-portal/employee-portal.routes').then((m) => m.EMPLOYEE_PORTAL_ROUTES),
+      },
+
+      {
+        path: 'access-management',
+        loadComponent: () => import('./features/access-management/access-management.component').then(m => m.AccessManagementComponent),
+      },
+
+      {
+        path: 'parent-space',
+        loadComponent: () => import('./features/parent-portal/parent-portal.component').then(m => m.ParentPortalComponent),
+      },
+      {
+        path: 'student-space',
+        loadComponent: () => import('./features/student-portal/student-portal.component').then(m => m.StudentPortalComponent),
       },
 
       /*
