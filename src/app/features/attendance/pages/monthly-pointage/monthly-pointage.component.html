@@ -1,0 +1,23 @@
+<section class="monthly">
+ <header class="heading"><div><h2>Tableau mensuel de pointage</h2><p>Heures des enseignants par jour et par classe</p></div>
+ <div class="actions"><button type="button" (click)="download('pdf')" [disabled]="exporting()">Exporter PDF</button><button type="button" (click)="download('csv')" [disabled]="exporting()">Exporter Excel (CSV)</button></div></header>
+ <form class="filters" (ngSubmit)="load()">
+ <label>Du <input type="date" name="from" [(ngModel)]="filters.from" required></label>
+ <label>Au <input type="date" name="to" [(ngModel)]="filters.to" required></label>
+ <label>Cycle <select name="cycle" [(ngModel)]="filters.cycle"><option value="">Tous</option><option value="PR">Primaire</option><option value="CO">Collège</option><option value="LY">Lycée</option></select></label>
+ <label>Année scolaire (ID) <input type="number" min="1" name="schoolYearId" [(ngModel)]="filters.schoolYearId"></label>
+ <label>Classe (ID) <input type="number" min="1" name="classId" [(ngModel)]="filters.classId"></label>
+ <label>Enseignant (ID) <input type="number" min="1" name="teacherId" [(ngModel)]="filters.teacherId"></label>
+ <label>Matière (ID) <input type="number" min="1" name="subjectId" [(ngModel)]="filters.subjectId"></label>
+ <button type="submit" [disabled]="loading()">Rechercher</button>
+ </form>
+ <div class="tabs"><button type="button" [class.active]="mode==='global'" (click)="switchMode('global')">Vue globale</button><button type="button" [class.active]="mode==='detail'" (click)="switchMode('detail')">Vue détaillée</button></div>
+ <p class="alert" *ngIf="error()">{{error()}}</p><p *ngIf="loading()">Chargement…</p>
+ <div class="scroll" *ngIf="!loading() && mode==='global'">
+ <table><thead><tr><th>Enseignant</th><th>Classe</th><th *ngFor="let d of days" [title]="d">{{d.slice(8)}}</th><th>Total</th></tr></thead>
+ <tbody><tr *ngFor="let row of rows()"><td>{{row.teacherName}}</td><td>{{row.className}}</td><td *ngFor="let d of days">{{row.hoursByDay[d] || '—'}}</td><td><strong>{{row.totalHours}} h</strong></td></tr><tr *ngIf="!rows().length"><td [attr.colspan]="days.length+3">Aucun pointage trouvé.</td></tr></tbody></table>
+ </div>
+ <div class="scroll" *ngIf="!loading() && mode==='detail'"><table><thead><tr><th>Date</th><th>Enseignant</th><th>Classe</th><th>Matière</th><th>Prévues</th><th>Effectuées</th><th>Statut</th></tr></thead>
+ <tbody><tr *ngFor="let row of details()"><td>{{row.date}}</td><td>{{row.teacherName}}</td><td>{{row.className}}</td><td>{{row.subjectName}}</td><td>{{row.plannedHours}} h</td><td>{{row.performedHours}} h</td><td>{{row.status}}</td></tr><tr *ngIf="!details().length"><td colspan="7">Aucun pointage trouvé.</td></tr></tbody></table></div>
+ <p class="note">Les cours regroupés peuvent apparaître dans plusieurs classes : ne pas additionner ces lignes pour calculer une rémunération. Les séances sans pointage ne sont pas encore incluses dans les résultats.</p>
+</section>

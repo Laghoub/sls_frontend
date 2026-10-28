@@ -14,7 +14,7 @@
 
       <h1>
         Bonjour,
-        {{ currentUser()?.username || 'Administrateur' }}
+        {{ currentUser()?.username || 'Utilisateur' }}
       </h1>
 
       <p>
@@ -68,6 +68,7 @@
   <section class="stats-grid">
 
     <!-- ÉLÈVES -->
+    @if (hasPermission('ELEVE_CONSULTER')) {
 
     <article class="stat-card">
 
@@ -94,7 +95,9 @@
     </article>
 
 
+    }
     <!-- CLASSES -->
+    @if (hasPermission('CLASSE_CONSULTER')) {
 
     <article class="stat-card">
 
@@ -125,7 +128,9 @@
     </article>
 
 
+    }
     <!-- CAMPUS -->
+    @if (hasPermission('CAMPUS_CONSULTER')) {
 
     <article class="stat-card">
 
@@ -156,32 +161,7 @@
     </article>
 
 
-    <!-- ENSEIGNANTS -->
-
-    <article class="stat-card">
-
-      <div class="stat-icon amber">
-        <i class="bi bi-person-badge"></i>
-      </div>
-
-      <div class="stat-content">
-
-        <span>
-          Enseignants
-        </span>
-
-        <strong>
-          —
-        </strong>
-
-        <small>
-          Données à venir
-        </small>
-
-      </div>
-
-    </article>
-
+    }
   </section>
 
 
@@ -220,6 +200,11 @@
 
 
       <div class="quick-access-grid">
+        @if (hasPermission('ELEVE_CONSULTER')) { <a routerLink="/student/students" class="quick-access-item"><div class="quick-icon"><i class="bi bi-mortarboard"></i></div><div><strong>Élèves</strong><span>Consulter les élèves</span></div><i class="bi bi-chevron-right arrow"></i></a> }
+        @if (hasPermission('EMPLOI_DU_TEMPS_CONSULTER')) { <a routerLink="/timetable" class="quick-access-item"><div class="quick-icon"><i class="bi bi-calendar-week"></i></div><div><strong>Emploi du temps</strong><span>Consulter les horaires</span></div><i class="bi bi-chevron-right arrow"></i></a> }
+        @if (hasPermission('ASSIDUITE_ELEVE_CONSULTER')) { <a routerLink="/attendance/students" class="quick-access-item"><div class="quick-icon"><i class="bi bi-clipboard-check"></i></div><div><strong>Assiduité élèves</strong><span>Absences et retards</span></div><i class="bi bi-chevron-right arrow"></i></a> }
+        @if (hasPermission('ASSIDUITE_ENSEIGNANT_CONSULTER')) { <a routerLink="/attendance/teachers" class="quick-access-item"><div class="quick-icon"><i class="bi bi-person-check"></i></div><div><strong>Assiduité enseignants</strong><span>Suivi des présences</span></div><i class="bi bi-chevron-right arrow"></i></a> }
+
 
         @if (hasPermission('ANNEE_SCOLAIRE_CONSULTER')) {
 
@@ -409,6 +394,7 @@
          ACTIVITÉ / CALENDRIER
     ========================== -->
 
+    @if (hasPermission('CALENDRIER_SCOLAIRE_CONSULTER')) {
     <article class="dashboard-card activity-card">
 
       <header class="card-header">
@@ -534,6 +520,7 @@
 
     </article>
 
+    }
   </section>
 
 
@@ -541,6 +528,7 @@
        STRUCTURE SCOLAIRE
   ========================== -->
 
+  @if (hasPermission('CYCLE_CONSULTER') || hasPermission('NIVEAU_CONSULTER') || hasPermission('CAMPUS_CONSULTER') || hasPermission('SALLE_CONSULTER')) {
   <section class="dashboard-card structure-card">
 
     <header class="card-header">
@@ -645,4 +633,5 @@
 
   </section>
 
+  }
 </div>

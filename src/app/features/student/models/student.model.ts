@@ -12,6 +12,10 @@ export interface Student {
 
   studentNumber: string;
 
+  /** Champs enrichis renvoyés par le backend V32. */
+  firstName?: string | null;
+  lastName?: string | null;
+
   initialAdmissionDate: string | null;
 
   status: string;

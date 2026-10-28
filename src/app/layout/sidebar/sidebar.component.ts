@@ -87,7 +87,7 @@ export class SidebarComponent {
         {
           label: 'Classes',
           icon: 'bi bi-people',
-          route: '/school/class-groups',
+          route: '/school/classes',
           permission: 'CLASSE_CONSULTER',
         },
         {
@@ -99,7 +99,7 @@ export class SidebarComponent {
         {
           label: 'Calendrier scolaire',
           icon: 'bi bi-calendar-event',
-          route: '/school/calendar-exceptions',
+          route: '/school/calendar',
           permission: 'CALENDRIER_SCOLAIRE_CONSULTER',
         },
       ],
@@ -167,8 +167,16 @@ export class SidebarComponent {
       children: [
         { label: 'Enseignants', icon: 'bi bi-person-check', route: '/attendance/teachers', permission: 'ASSIDUITE_ENSEIGNANT_CONSULTER' },
         { label: 'Historique enseignants', icon: 'bi bi-clock-history', route: '/attendance/teachers/history', permission: 'ASSIDUITE_ENSEIGNANT_CONSULTER' },
+        { label: 'Pointage mensuel', icon: 'bi bi-calendar3', route: '/attendance/teachers/monthly', permission: 'POINTAGE_MENSUEL_CONSULTER' },
         { label: 'Élèves', icon: 'bi bi-mortarboard', route: '/attendance/students', permission: 'ASSIDUITE_ELEVE_CONSULTER' },
         { label: 'Historique élèves', icon: 'bi bi-clock-history', route: '/attendance/students/history', permission: 'ASSIDUITE_ELEVE_CONSULTER' },
+      ],
+    },
+    {
+      label: 'Transport',
+      icon: 'bi bi-bus-front-fill',
+      children: [
+        { label: 'Gestion transport', icon: 'bi bi-signpost-split', route: '/transport', permission: 'TRANSPORT_CONSULTER' },
       ],
     },
     {
@@ -176,6 +184,7 @@ export class SidebarComponent {
       icon: 'bi bi-shield-lock',
       children: [
         { label: "Profils & droits d'accès", icon: 'bi bi-person-lock', route: '/access-management', permission: 'ROLE_CONSULTER' },
+        { label: 'Traçabilité', icon: 'bi bi-clock-history', route: '/audit', permission: 'AUDIT_CONSULTER' },
       ],
     },
     {

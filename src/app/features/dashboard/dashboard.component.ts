@@ -89,7 +89,7 @@ export class DashboardComponent {
 
     this.loading.set(true);
 
- this.loadStudentCount();
+ if (this.hasPermission('ELEVE_CONSULTER')) this.loadStudentCount();
 
     const schoolYears$ =
       this.hasPermission('ANNEE_SCOLAIRE_CONSULTER')

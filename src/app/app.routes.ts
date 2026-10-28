@@ -147,6 +147,16 @@ export const routes: Routes = [
       },
 
       {
+        path: 'transport',
+        loadChildren: () => import('./features/transport/transport.routes').then((m) => m.TRANSPORT_ROUTES),
+      },
+
+      {
+        path: 'audit',
+        loadComponent: () => import('./features/audit/audit.component').then(m => m.AuditComponent),
+      },
+
+      {
         path: 'access-management',
         loadComponent: () => import('./features/access-management/access-management.component').then(m => m.AccessManagementComponent),
       },

@@ -2,6 +2,10 @@ import { Routes } from '@angular/router';
 
 export const ATTENDANCE_ROUTES: Routes = [
   {
+    path: 'teachers/monthly',
+    loadComponent: () => import('./pages/monthly-pointage/monthly-pointage.component').then(m => m.MonthlyPointageComponent),
+  },
+  {
     path: 'teachers',
     loadComponent: () => import('./pages/teacher-attendance/teacher-attendance.component').then((m) => m.TeacherAttendanceComponent),
   },

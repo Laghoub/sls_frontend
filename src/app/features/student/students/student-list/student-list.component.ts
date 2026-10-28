@@ -255,7 +255,9 @@ export class StudentListComponent {
 
                       person:
                         persons[index]
-                        ?? null
+                        ?? ((student as any).firstName || (student as any).lastName
+                          ? ({ firstName: (student as any).firstName ?? '', lastName: (student as any).lastName ?? '' } as StudentView['person'])
+                          : null)
 
                     })
                   );
@@ -285,7 +287,9 @@ export class StudentListComponent {
 
                       ...student,
 
-                      person: null
+                      person: ((student as any).firstName || (student as any).lastName
+                        ? ({ firstName: (student as any).firstName ?? '', lastName: (student as any).lastName ?? '' } as StudentView['person'])
+                        : null)
 
                     })
                   );

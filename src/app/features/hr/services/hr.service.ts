@@ -18,6 +18,7 @@ export class HrService {
   createEmployee(request:EmployeeRequest){return this.http.post<Employee>(`${this.root}/employees`,request)}
   updateEmployee(id:number,request:EmployeeRequest){return this.http.put<Employee>(`${this.root}/employees/${id}`,request)}
   changeEmployeeStatus(id:number,status:EmploymentStatus){return this.http.patch<void>(`${this.root}/employees/${id}/status/${status}`,{})}
+  sendEmployeeActivation(id:number){return this.http.post<any>(`${this.root}/employees/${id}/account/activate`,{})}
   employeeProfile(id:number){return this.http.get<EmployeeProfile>(`${this.root}/employees/${id}/profile`)}
   addQualification(id:number,request:QualificationRequest){return this.http.post<any>(`${this.root}/employees/${id}/qualifications`,request)}
   addHistory(id:number,request:HistoryRequest){return this.http.post<any>(`${this.root}/employees/${id}/history`,request)}
@@ -29,6 +30,7 @@ export class HrService {
   teachers(){return this.http.get<Teacher[]>(`${this.root}/teachers`)}
   teacher(id:number){return this.http.get<Teacher>(`${this.root}/teachers/${id}`)}
   createTeacher(request:TeacherRequest){return this.http.post<Teacher>(`${this.root}/teachers`,request)}
+  sendTeacherActivation(id:number){return this.http.post<any>(`${this.root}/teachers/${id}/account/activate`,{})}
   changeTeacherStatus(id:number,status:TeacherStatus){return this.http.patch<Teacher>(`${this.root}/teachers/${id}/status/${status}`,{})}
   addSubject(teacherId:number,subjectId:number){return this.http.post<void>(`${this.root}/teachers/${teacherId}/subjects/${subjectId}`,{})}
   removeSubject(teacherId:number,subjectId:number){return this.http.delete<void>(`${this.root}/teachers/${teacherId}/subjects/${subjectId}`)}
