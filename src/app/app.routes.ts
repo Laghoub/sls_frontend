@@ -5,6 +5,7 @@ import { changePasswordGuard } from './core/guards/change-password.guard';
 import { dashboardAccessGuard } from './core/guards/dashboard-access.guard';
 
 export const routes: Routes = [
+  { path: '', pathMatch: 'full', loadComponent: () => import('./features/website/public-website.component').then(m => m.PublicWebsiteComponent) },
   /*
    * =========================
    * AUTHENTIFICATION
@@ -54,6 +55,7 @@ export const routes: Routes = [
       ),
 
     children: [
+      { path: 'website-admin', loadComponent: () => import('./features/website/website-admin.component').then(m => m.WebsiteAdminComponent) },
       /*
        * Dashboard
        */
@@ -181,11 +183,7 @@ export const routes: Routes = [
       /*
        * Route par défaut
        */
-      {
-        path: '',
-        pathMatch: 'full',
-        redirectTo: 'dashboard',
-      },
+
     ],
   },
 
@@ -197,6 +195,6 @@ export const routes: Routes = [
 
   {
     path: '**',
-    redirectTo: 'dashboard',
+    redirectTo: '',
   },
 ];

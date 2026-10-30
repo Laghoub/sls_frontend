@@ -39,6 +39,10 @@ export class PayrollService {
     );
   }
 
+  receiptPdf(paymentId: number) {
+    return this.http.get(`${this.root}/payments/${paymentId}/receipt.pdf`, { responseType: 'blob' });
+  }
+
   receipt(paymentId: number) {
     return this.http.get<SalaryPaymentReceipt>(
       `${this.root}/payments/${paymentId}/receipt`,

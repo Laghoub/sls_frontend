@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 export const FINANCE_ROUTES: Routes = [
   { path: '', loadComponent: () => import('./pages/finance-home/finance-home.component').then(m => m.FinanceHomeComponent) },
+  { path: 'staff-payroll', loadComponent: () => import('../staff-payroll/staff-payroll.component').then(m => m.StaffPayrollComponent) },
   { path: 'situations', loadComponent: () => import('./pages/situations/financial-situations.component').then(m => m.FinancialSituationsComponent) },
   { path: 'global-situation', loadComponent: () => import('./pages/global-situation/global-financial-situation.component').then(m => m.GlobalFinancialSituationComponent) },
   { path: 'overdue', loadComponent: () => import('./pages/overdue/overdue.component').then(m => m.OverdueComponent) },

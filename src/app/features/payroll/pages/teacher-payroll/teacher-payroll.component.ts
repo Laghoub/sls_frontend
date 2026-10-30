@@ -237,16 +237,18 @@ export class TeacherPayrollComponent {
 
   printReceipt(): void {
     if (!this.receipt) return;
-    const r = this.receipt;
-    const html = `<!doctype html><html><head><meta charset="utf-8"><title>${this.escape(r.receiptNumber)}</title><style>
-      @page{size:A4;margin:16mm}body{font-family:Arial,sans-serif;color:#0f2742;margin:0}.head{display:flex;align-items:center;border-bottom:2px solid #0f2742;padding-bottom:12px}.logo{width:70px;height:70px;object-fit:contain;margin-right:14px}.brand h1{font-size:18px;margin:0}.brand p{font-size:12px;color:#64748b;margin:4px 0}.receipt-no{margin-left:auto;text-align:right}.receipt-no b{display:block;font-size:16px}.title{text-align:center;margin:26px 0 18px;font-size:22px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 28px}.item span{font-size:10px;color:#64748b;text-transform:uppercase;font-weight:bold;display:block;margin-bottom:4px}.item b{font-size:13px}.box{margin-top:22px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px}.line{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e2e8f0;font-size:13px}.line:last-child{border:0;font-size:16px;font-weight:bold}.footer{margin-top:35px;border-top:1px solid #e2e8f0;padding-top:12px;font-size:11px;color:#64748b;text-align:center}.signature{display:flex;justify-content:space-between;margin-top:45px;font-size:12px}.signature div{width:38%;text-align:center;border-top:1px solid #64748b;padding-top:8px}</style></head><body>
-      <div class="head"><img class="logo" src="${location.origin}/assets/logo.png"><div class="brand"><h1>Groupe Scolaire Sciences et Lettres</h1><p>Reçu de paiement de salaire</p></div><div class="receipt-no"><span>Reçu</span><b>${this.escape(r.receiptNumber)}</b></div></div>
-      <div class="title">Reçu de rémunération enseignant</div>
-      <div class="grid"><div class="item"><span>Enseignant</span><b>${this.escape(r.teacherName)}</b></div><div class="item"><span>Matricule</span><b>${this.escape(r.employeeNumber)}</b></div><div class="item"><span>Période</span><b>${this.monthName(r.month)} ${r.year}</b></div><div class="item"><span>Type</span><b>${this.compensationLabel(r.compensationType)}</b></div><div class="item"><span>Mode de paiement</span><b>${this.escape(r.paymentMethod)}</b></div><div class="item"><span>Référence</span><b>${this.escape(r.paymentReference || '—')}</b></div><div class="item"><span>Date de paiement</span><b>${this.formatDateTime(r.paymentDate)}</b></div><div class="item"><span>Bulletin</span><b>${this.escape(r.payslipNumber || '—')}</b></div></div>
-      <div class="box"><div class="line"><span>Salaire de base</span><b>${this.money(r.baseSalary)} DA</b></div><div class="line"><span>Part fixe</span><b>${this.money(r.fixedPart)} DA</b></div><div class="line"><span>Heures rémunérées</span><b>${this.num(r.regularHours)} h</b></div><div class="line"><span>Part horaire</span><b>${this.money(r.hourlyAmount)} DA</b></div><div class="line"><span>Retenue absence</span><b>${this.money(r.absenceDeduction)} DA</b></div><div class="line"><span>Net calculé</span><b>${this.money(r.netSalary)} DA</b></div><div class="line"><span>Montant versé</span><b>${this.money(r.paymentAmount)} DA</b></div><div class="line"><span>Total déjà versé</span><b>${this.money(r.totalPaid)} DA</b></div><div class="line"><span>Reste à payer</span><b>${this.money(r.remainingAmount)} DA</b></div></div>
-      <div class="signature"><div>Signature du bénéficiaire</div><div>Cachet / signature établissement</div></div><div class="footer">Document généré par le système de gestion scolaire — Groupe Scolaire Sciences et Lettres</div>
-      <script>window.onload=()=>{setTimeout(()=>window.print(),250)};<\/script></body></html>`;
-    this.printHtml(html);
+    const paymentId = this.receipt.salaryPaymentId;
+    if (!paymentId) { this.error = 'Identifiant du paiement introuvable.'; return; }
+    this.payroll.receiptPdf(paymentId).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(new Blob([blob], {type: 'application/pdf'}));
+        const w = window.open(url, '_blank');
+        if (!w) { this.error = "Autorisez les fenêtres contextuelles pour afficher le reçu PDF et l’imprimer."; URL.revokeObjectURL(url); return; }
+        // The PDF opens in the browser viewer, with its native Print action.
+        setTimeout(() => URL.revokeObjectURL(url), 120000);
+      },
+      error: () => { this.error = 'Impossible de charger le reçu PDF.'; }
+    });
   }
 
   printPayslip(): void {

@@ -34,6 +34,7 @@ export class SidebarComponent {
       icon: 'bi bi-grid-1x2-fill',
       route: '/dashboard',
     },
+    { label: 'Gestion du site web', icon: 'bi bi-globe2', route: '/website-admin', permission: 'SITE_WEB_CONSULTER' },
     { label: 'Espace parent', icon: 'bi bi-house-heart', route: '/parent-space', permission: 'PORTAIL_PARENT_ACCEDER' },
     { label: 'Espace élève', icon: 'bi bi-mortarboard', route: '/student-space', permission: 'PORTAIL_ELEVE_ACCEDER' },
     {
@@ -148,6 +149,7 @@ export class SidebarComponent {
       icon: 'bi bi-person-workspace',
       children: [
         { label: 'Tableau de bord RH', icon: 'bi bi-speedometer2', route: '/hr', permission: 'PERSONNEL_DASHBOARD' },
+        { label: 'Pointage du personnel', icon: 'bi bi-calendar-check', route: '/hr/staff-attendance', permission: 'PERSONNEL_ASSIDUITE_CONSULTER' },
         { label: 'Personnel', icon: 'bi bi-people', route: '/hr/employees', permission: 'PERSONNEL_CONSULTER' },
         { label: 'Enseignants', icon: 'bi bi-person-video3', route: '/hr/teachers', permission: 'ENSEIGNANT_CONSULTER' },
         { label: 'Affectations', icon: 'bi bi-diagram-3', route: '/hr/assignments', permission: 'ENSEIGNANT_AFFECTER' },
@@ -277,6 +279,7 @@ export class SidebarComponent {
           route: '/finance/fee-types',
           permission: 'TARIF_CONSULTER',
         },
+        { label: 'Paie du personnel', icon: 'bi bi-cash-coin', route: '/finance/staff-payroll', permission: 'PERSONNEL_PAIE_CONSULTER' },
         {
           label: 'Paie enseignants',
           icon: 'bi bi-person-vcard',

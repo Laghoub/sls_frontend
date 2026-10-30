@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 export const HR_ROUTES: Routes = [
   { path: '', loadComponent: () => import('./pages/dashboard/hr-dashboard.component').then(m => m.HrDashboardComponent) },
+  { path: 'staff-attendance', loadComponent: () => import('../staff-payroll/staff-attendance.component').then(m => m.StaffAttendanceComponent) },
   { path: 'employees', loadComponent: () => import('./pages/employees/employees.component').then(m => m.EmployeesComponent) },
   { path: 'employees/:id', loadComponent: () => import('./pages/employee-detail/employee-detail.component').then(m => m.EmployeeDetailComponent) },
   { path: 'teachers', loadComponent: () => import('./pages/teachers/teachers.component').then(m => m.TeachersComponent) },
