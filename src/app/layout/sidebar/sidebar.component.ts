@@ -48,6 +48,7 @@ export class SidebarComponent {
         { label: 'Mes rémunérations', icon: 'bi bi-cash-coin', route: '/my-space/payroll', permission: 'PORTAIL_ENSEIGNANT_REMUNERATION' },
         { label: 'Mes exercices', icon: 'bi bi-journal-text', route: '/my-space/exercises', permission: 'PORTAIL_ENSEIGNANT_EXERCICES' },
         { label: 'Mes évaluations', icon: 'bi bi-ui-checks-grid', route: '/my-space/evaluations', permission: 'PORTAIL_ENSEIGNANT_EVALUATIONS' },
+        { label: 'Évaluations trimestrielles', icon: 'bi bi-clipboard2-check', route: '/my-space/term-evaluations', permission: 'EVALUATION_TRIMESTRIELLE_SAISIR' },
       ],
     },
     {
@@ -184,6 +185,7 @@ export class SidebarComponent {
       icon: 'bi bi-shield-lock',
       children: [
         { label: "Profils & droits d'accès", icon: 'bi bi-person-lock', route: '/access-management', permission: 'ROLE_CONSULTER' },
+        { label: 'Évaluations trimestrielles', icon: 'bi bi-journal-check', route: '/term-evaluations', permission: 'EVALUATION_TRIMESTRIELLE_CAMPAGNE_GERER' },
         { label: 'Traçabilité', icon: 'bi bi-clock-history', route: '/audit', permission: 'AUDIT_CONSULTER' },
       ],
     },

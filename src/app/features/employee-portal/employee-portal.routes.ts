@@ -6,5 +6,6 @@ export const EMPLOYEE_PORTAL_ROUTES: Routes = [
  {path:'attendance',loadComponent:()=>import('./pages/attendance/teacher-portal-attendance.component').then(m=>m.TeacherPortalAttendanceComponent)},
  {path:'payroll',loadComponent:()=>import('./pages/payroll/teacher-portal-payroll.component').then(m=>m.TeacherPortalPayrollComponent)},
  {path:'exercises',loadComponent:()=>import('./pages/exercises/exercises.component').then(m=>m.TeacherExercisesComponent)},
+ {path:'term-evaluations',loadComponent:()=>import('../term-evaluations/teacher-term-evaluations.component').then(m=>m.TeacherTermEvaluationsComponent)},
  {path:'evaluations',loadComponent:()=>import('./pages/evaluations/teacher-evaluations.component').then(m=>m.TeacherEvaluationsComponent)}
 ];

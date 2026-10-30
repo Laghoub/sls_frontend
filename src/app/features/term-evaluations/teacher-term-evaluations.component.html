@@ -1,0 +1,21 @@
+<section class="term-teacher">
+ <h1>Évaluations trimestrielles</h1><p>Évaluez vos élèves avant les examens. Les réponses ne sont visibles par les parents qu'après publication.</p>
+ <div *ngIf="error" class="alert alert-danger">{{error}}</div><div *ngIf="message" class="alert alert-success">{{message}}</div>
+ <div class="selectors">
+  <label>Campagne<select class="form-select" [(ngModel)]="campaignId" (ngModelChange)="loadStudents()"><option [ngValue]="0">Sélectionner une campagne</option><option *ngFor="let c of campaigns" [ngValue]="c.id">{{c.title}} — échéance {{c.closes_at | date:'dd/MM/yyyy HH:mm'}}</option></select></label>
+  <label>Classe et matière<select class="form-select" [(ngModel)]="assignmentId" (ngModelChange)="loadStudents()"><option [ngValue]="0">Sélectionner une affectation</option><option *ngFor="let a of assignments" [ngValue]="a.assignmentId">{{a.classGroupName}} — {{a.subjectName}}</option></select></label>
+ </div>
+ <div class="workspace" *ngIf="campaignId && assignmentId">
+  <aside><h2>Élèves ({{students.length}})</h2><p *ngIf="loading">Chargement…</p><button type="button" *ngFor="let s of students" class="student" [class.active]="selected?.student_id===s.student_id" (click)="choose(s)"><span>{{s.last_name}} {{s.first_name}}</span><small>{{s.evaluation_status || 'Non commencé'}}</small></button><p *ngIf="!loading && !students.length">Aucun élève disponible.</p></aside>
+  <main *ngIf="selected"><p *ngIf="loading">Chargement du brouillon enregistré…</p><h2>{{selected.last_name}} {{selected.first_name}}</h2><p>Statut : <strong>{{selected.evaluation_status || 'Non commencé'}}</strong></p>
+   <div class="section" *ngFor="let sec of sections"><h3>{{sec.id}}. {{sec.label}} <small dir="rtl">{{sec.ar}}</small></h3>
+    <div class="criterion" *ngFor="let c of criteriaFor(sec.id)"><label>{{c.label_fr}} <span dir="rtl">{{c.label_ar}}</span></label>
+     <select *ngIf="c.options?.length" class="form-select" [disabled]="!canEdit()" [(ngModel)]="answers[c.id].optionId"><option [ngValue]="null">Choisir…</option><option *ngFor="let o of c.options" [ngValue]="o.id">{{o.label_fr}} — {{o.label_ar}}</option></select>
+     <select *ngIf="!c.options?.length" class="form-select" [disabled]="!canEdit()" [(ngModel)]="answers[c.id].freeText"><option value="">Choisir une appréciation…</option><option *ngFor="let choice of defaultChoices" [value]="choice">{{choice}}</option></select>
+    </div>
+   </div>
+   <div class="section"><h3>Observations et recommandations</h3><label>Observations<textarea class="form-control" [(ngModel)]="observations" [disabled]="!canEdit()"></textarea></label><label>Difficulté principale<select class="form-select" [(ngModel)]="difficulties" [disabled]="!canEdit()"><option value="">Sélectionner…</option><option *ngFor="let choice of difficultyChoices" [value]="choice">{{choice}}</option></select></label><label>Plan d'amélioration<select class="form-select" [(ngModel)]="recommendations" [disabled]="!canEdit()"><option value="">Sélectionner…</option><option *ngFor="let choice of recommendationChoices" [value]="choice">{{choice}}</option></select></label></div>
+   <div class="actions" *ngIf="canEdit()"><button class="btn btn-outline-primary" [disabled]="saving || loading" (click)="save(false)">Enregistrer le brouillon</button><button class="btn btn-primary" [disabled]="saving || loading" (click)="save(true)">Soumettre l'évaluation</button></div>
+  </main><main *ngIf="!selected"><p>Sélectionnez un élève pour commencer.</p></main>
+ </div>
+</section>

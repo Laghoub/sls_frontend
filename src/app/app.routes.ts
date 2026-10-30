@@ -162,6 +162,14 @@ export const routes: Routes = [
       },
 
       {
+        path: 'term-evaluations/statistics',
+        loadComponent: () => import('./features/term-evaluations/evaluation-statistics.component').then(m => m.EvaluationStatisticsComponent),
+      },
+      {
+        path: 'term-evaluations',
+        loadComponent: () => import('./features/term-evaluations/term-evaluations.component').then(m => m.TermEvaluationsComponent),
+      },
+      {
         path: 'parent-space',
         loadComponent: () => import('./features/parent-portal/parent-portal.component').then(m => m.ParentPortalComponent),
       },
