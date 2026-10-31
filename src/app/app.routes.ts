@@ -66,6 +66,10 @@ export const routes: Routes = [
       ),
 
     children: [
+      { path: 'canteen', loadComponent: () => import('./features/canteen/canteen-admin.component').then(m => m.CanteenAdminComponent) },
+      { path: 'assessment-planning', loadComponent: () => import('./features/assessment-planning/assessment-planning-admin.component').then(m => m.AssessmentPlanningAdminComponent) },
+      { path: 'assessment-planning/teacher', loadComponent: () => import('./features/assessment-planning/assessment-planning-portal.component').then(m => m.AssessmentPlanningPortalComponent), data: { audience: 'teacher' } },
+      { path: 'assessment-planning/parent', loadComponent: () => import('./features/assessment-planning/assessment-planning-portal.component').then(m => m.AssessmentPlanningPortalComponent), data: { audience: 'parent' } },
       { path: 'access-denied', loadComponent: () => import('./features/access-denied/access-denied.component').then(m => m.AccessDeniedComponent) },
       { path: 'website-admin', loadComponent: () => import('./features/website/website-admin.component').then(m => m.WebsiteAdminComponent) },
       /*

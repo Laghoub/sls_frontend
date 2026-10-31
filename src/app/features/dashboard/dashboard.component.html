@@ -65,6 +65,9 @@
        STATISTIQUES
   ========================== -->
 
+  @if (noGrantedPermissions) {
+    <div class="permissions-notice">Aucun droit d’accès effectif n’a été retourné pour ce compte. Vérifiez les permissions du profil dans Administration → Profils & droits d’accès, puis reconnectez-vous.</div>
+  }
   <section class="stats-grid">
 
     <!-- ÉLÈVES -->
@@ -200,6 +203,14 @@
 
 
       <div class="quick-access-grid">
+        @for (shortcut of authorizedShortcuts; track shortcut.route) {
+          <a [routerLink]="shortcut.route" class="quick-access-item">
+            <div class="quick-icon"><i [class]="shortcut.icon"></i></div>
+            <div><strong>{{shortcut.label}}</strong><span>Accéder à la rubrique</span></div>
+            <i class="bi bi-chevron-right arrow"></i>
+          </a>
+        }
+
         @if (hasPermission('ELEVE_CONSULTER')) { <a routerLink="/student/students" class="quick-access-item"><div class="quick-icon"><i class="bi bi-mortarboard"></i></div><div><strong>Élèves</strong><span>Consulter les élèves</span></div><i class="bi bi-chevron-right arrow"></i></a> }
         @if (hasPermission('EMPLOI_DU_TEMPS_CONSULTER')) { <a routerLink="/timetable" class="quick-access-item"><div class="quick-icon"><i class="bi bi-calendar-week"></i></div><div><strong>Emploi du temps</strong><span>Consulter les horaires</span></div><i class="bi bi-chevron-right arrow"></i></a> }
         @if (hasPermission('ASSIDUITE_ELEVE_CONSULTER')) { <a routerLink="/attendance/students" class="quick-access-item"><div class="quick-icon"><i class="bi bi-clipboard-check"></i></div><div><strong>Assiduité élèves</strong><span>Absences et retards</span></div><i class="bi bi-chevron-right arrow"></i></a> }

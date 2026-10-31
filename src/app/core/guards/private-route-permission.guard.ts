@@ -4,6 +4,7 @@ import { AuthService } from '../config/auth/services/auth.service';
 
 /** Correspondance des routes privées avec les permissions déjà utilisées par le menu. */
 const RULES: ReadonlyArray<{pattern: RegExp; permission: string}> = [
+  { pattern: /^\/canteen\/?$/, permission: 'CANTINE_MENU_CONSULTER' },
   { pattern: /^\/attendance\/teachers\/catchup\/?$/, permission: 'ASSIDUITE_ENSEIGNANT_CONSULTER' },
   { pattern: new RegExp('^/attendance/teachers/history/?$'), permission: 'ASSIDUITE_ENSEIGNANT_CONSULTER' },
   { pattern: new RegExp('^/attendance/teachers/monthly/?$'), permission: 'POINTAGE_MENSUEL_CONSULTER' },
@@ -83,14 +84,18 @@ export const privateRoutePermissionGuard: CanActivateChildFn = (_route, state) =
   // Les trois espaces personnels restent isolés, même en présence d'anciennes permissions.
   if (auth.hasRole('PARENT') && path !== '/parent-space') return router.createUrlTree(['/parent-space']);
   if (auth.hasRole('ELEVE') && path !== '/student-space') return router.createUrlTree(['/student-space']);
-  if (auth.hasRole('ENSEIGNANT') && !(/^\/my-space(?:\/|$)/).test(path)) return router.createUrlTree(['/my-space']);
+  if (auth.hasRole('ENSEIGNANT') && path !== '/assessment-planning/teacher' && !(/^\/my-space(?:\/|$)/).test(path)) return router.createUrlTree(['/my-space']);
   if (path === '/access-denied') return true;
+  if (path === '/assessment-planning/teacher') return auth.hasRole('ENSEIGNANT') || auth.hasPermission('PORTAIL_ENSEIGNANT_ACCEDER');
+  if (path === '/assessment-planning/parent') return auth.hasRole('PARENT') || auth.hasPermission('PORTAIL_PARENT_ACCEDER');
+  if (path === '/assessment-planning') return auth.hasRole('ADMIN') || auth.hasPermission('PLANNING_EVALUATION_CONSULTER');
   // L'administrateur global accède aux routes privées administratives.
   if (auth.hasRole('ADMIN')) return true;
   if (path === '/dashboard') {
     // Le dashboard possède son propre dashboardAccessGuard.
     return true;
   }
+  if (path === '/canteen' && (auth.hasPermission('CANTINE_MENU_CONSULTER') || auth.hasPermission('CANTINE_MENU_GERER') || auth.hasPermission('CANTINE_MENU_PUBLIER'))) return true;
   const rule = RULES.find(item => item.pattern.test(path));
   if (rule && (auth.hasPermission(rule.permission) ||
       (path === '/access-management' && auth.hasRole('ADMIN')))) return true;

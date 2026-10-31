@@ -36,6 +36,30 @@ export class DashboardComponent {
   private readonly calendarService = inject(SchoolCalendarExceptionService);
 
   readonly currentUser = this.authService.currentUser;
+  // Raccourcis disponibles indépendamment du nom du profil (Comptable, Assistante, etc.).
+  readonly permissionShortcuts: ReadonlyArray<{permission:string;label:string;route:string;icon:string}> = [
+    {permission:'PAIEMENT_CONSULTER',label:'Encaissements',route:'/finance/payments',icon:'bi bi-credit-card'},
+    {permission:'PAIEMENT_CREER',label:'Nouvel encaissement',route:'/finance/payments/new',icon:'bi bi-plus-circle'},
+    {permission:'CREANCE_CONSULTER',label:'Situation des familles',route:'/finance/global-situation',icon:'bi bi-table'},
+    {permission:'CREANCE_GERER',label:'Facturation',route:'/finance/billing',icon:'bi bi-receipt'},
+    {permission:'CAISSE_CONSULTER',label:'Caisse',route:'/finance/cash',icon:'bi bi-safe2'},
+    {permission:'DEPENSES_CONSULTER',label:'Dépenses et fournisseurs',route:'/finance/expenses',icon:'bi bi-receipt-cutoff'},
+    {permission:'REDUCTION_CONSULTER',label:'Réductions',route:'/finance/discounts',icon:'bi bi-percent'},
+    {permission:'INSCRIPTION_CONSULTER',label:'Dossiers d’inscription',route:'/registration',icon:'bi bi-folder2-open'},
+    {permission:'INSCRIPTION_CREER',label:'Nouvelle inscription',route:'/registration/new',icon:'bi bi-person-plus'},
+    {permission:'RESPONSABLE_CONSULTER',label:'Parents',route:'/student/guardians',icon:'bi bi-people'},
+    {permission:'PERSONNEL_CONSULTER',label:'Personnel',route:'/hr/employees',icon:'bi bi-people-fill'},
+    {permission:'ENSEIGNANT_CONSULTER',label:'Enseignants',route:'/hr/teachers',icon:'bi bi-person-video3'},
+    {permission:'PLANNING_EVALUATION_CONSULTER',label:'Devoirs et examens',route:'/assessment-planning',icon:'bi bi-calendar2-week'},
+    {permission:'TRANSPORT_CONSULTER',label:'Transport',route:'/transport',icon:'bi bi-bus-front'},
+    {permission:'ROLE_CONSULTER',label:'Profils et droits',route:'/access-management',icon:'bi bi-person-lock'},
+    {permission:'PERSONNEL_PAIE_CONSULTER',label:'Paie du personnel',route:'/finance/staff-payroll',icon:'bi bi-cash-coin'},
+    {permission:'PAIE_ENSEIGNANT_CONSULTER',label:'Paie des enseignants',route:'/payroll/teachers',icon:'bi bi-wallet2'},
+    {permission:'AUDIT_CONSULTER',label:'Traçabilité',route:'/audit',icon:'bi bi-clock-history'},
+  ];
+  get authorizedShortcuts() {return this.permissionShortcuts.filter(item=>this.hasPermission(item.permission));}
+  get noGrantedPermissions() {return !(this.currentUser()?.permissions?.length);}
+
 
   readonly loading = signal(true);
   studentCount = signal<number | null>(null);

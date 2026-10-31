@@ -64,20 +64,18 @@ export class LoginComponent {
 
         next: response => {
 
-          this.loading.set(false);
-
-          // Changement de mot de passe obligatoire
-          if (response.user.mustChangePassword) {
-
-            this.router.navigate([
-              '/change-password'
-            ]);
-
-            return;
-          }
-
-          // Redirection selon le rôle connecté.
-          this.router.navigate([this.authService.homeRoute()]);
+          // La V56 renvoie les droits effectifs via /auth/me.
+          // Recharger avant de construire le menu et de naviguer.
+          this.authService.loadCurrentUser().subscribe({
+            next: user => {
+              this.loading.set(false);
+              this.router.navigate([user.mustChangePassword ? '/change-password' : this.authService.homeRoute()]);
+            },
+            error: () => {
+              this.loading.set(false);
+              this.errorMessage.set('Impossible de récupérer vos droits d’accès. Veuillez réessayer.');
+            }
+          });
         },
 
         error: error => {

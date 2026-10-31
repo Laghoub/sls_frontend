@@ -11,3 +11,23 @@
 .term-download{background:#172554;color:white;border:1px solid #172554;border-radius:12px;padding:11px 17px;font-weight:600;cursor:pointer}.term-download:hover{background:#1d4ed8;border-color:#1d4ed8}
 .term-empty,.term-info{padding:22px;text-align:center;color:#64748b;background:#f8fafc;border-radius:14px}
 @media(max-width:560px){.term-item-action{width:100%}.term-download{width:100%}}
+
+.home-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:18px 0 28px}.home-actions button{background:#eff6ff;border:1px solid #bfdbfe;border-radius:14px;padding:20px 12px;color:#172554;font-weight:700;cursor:pointer;text-align:left}.home-actions button:hover{background:#dbeafe}
+
+.portal-navigation{margin:18px 0}.portal-menu{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:7px;padding:12px;background:#f1f5f9;border-radius:16px}.portal-menu button{text-align:left;background:white;border:1px solid #dbe3ef;border-radius:10px;padding:12px;cursor:pointer;color:#334155;font-weight:600}.portal-menu button.active{background:#172554;color:white}.mobile-menu-toggle{display:none}
+.timetable-container{overflow-x:auto;border:1px solid #e2e8f0;border-radius:14px}.timetable-table{min-width:560px}.timetable-table td{white-space:normal}.timetable-table td:nth-child(3){font-weight:650}
+@media(max-width:680px){.portal{padding:12px}.hero{padding:17px;border-radius:16px;flex-direction:column;align-items:stretch}.hero h1{font-size:22px}.student-select{min-width:0;width:100%}.child{flex-wrap:wrap}section{padding:14px;border-radius:14px}.home-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.home-actions button{padding:14px 9px;font-size:13px}.mobile-menu-toggle{display:flex;width:100%;align-items:center;justify-content:space-between;border:1px solid #cbd5e1;background:white;border-radius:12px;padding:14px;font-size:15px;font-weight:700;color:#172554;cursor:pointer}.portal-menu{display:none;grid-template-columns:1fr;gap:3px;margin-top:6px;padding:6px;max-height:65vh;overflow:auto}.portal-menu.is-open{display:grid}.portal-menu button{padding:13px}.timetable-container{border:0;overflow:visible}.timetable-table{min-width:0;width:100%;display:block}.timetable-table thead{display:none}.timetable-table tbody{display:grid;gap:9px}.timetable-table tr{display:block;border:1px solid #dbe3ef;border-radius:13px;padding:9px 12px;background:#f8fafc}.timetable-table td{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #e2e8f0;text-align:right;white-space:normal;font-size:13px}.timetable-table td:last-child{border-bottom:0}.timetable-table td:before{content:attr(data-label);font-weight:700;color:#475569;text-align:left}.timetable-table td[colspan]:before{display:none}}
+
+.meal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}.meal-card{padding:18px;border:1px solid #e2e8f0;border-radius:12px;background:white}.meal-card h3{color:#173b71}.meal-card strong{display:block;font-size:.8rem;color:#64748b}.meal-card p{margin:10px 0}.empty-canteen{padding:20px;background:#f1f5f9;border-radius:10px}
+/* Emploi du temps parent : cinq journées, sans cartes par enseignant. */
+.weekly-timetable{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:14px 0 20px}
+.weekly-day{min-width:0;border:1px solid #dce5f2;border-radius:14px;background:#fff;overflow:hidden}
+.weekly-day h3{margin:0;padding:13px 12px;background:#edf3fc;color:#183b73;font-size:15px;text-align:center}
+.weekly-lessons{padding:8px 10px}
+.weekly-lesson{display:flex;flex-direction:column;gap:4px;padding:11px 3px;border-bottom:1px solid #e8edf5}
+.weekly-lesson:last-child{border-bottom:0}
+.lesson-time{font-size:12px;color:#53647d;font-weight:600}
+.lesson-subject{font-size:14px;color:#172b4d;overflow-wrap:anywhere}
+.weekly-empty{padding:14px 8px;color:#64748b;font-size:13px;text-align:center}
+@media(max-width:1100px){.weekly-timetable{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){.weekly-timetable{grid-template-columns:1fr;gap:10px}.weekly-lesson{flex-direction:row;justify-content:space-between;align-items:center;gap:14px}.lesson-time{white-space:nowrap}}

@@ -34,8 +34,9 @@ export class SidebarComponent {
       icon: 'bi bi-grid-1x2-fill',
       route: '/dashboard',
     },
+    { label: 'Menu de la cantine', icon: 'bi bi-cup-hot', route: '/canteen', permission: 'CANTINE_MENU_CONSULTER' },
     { label: 'Gestion du site web', icon: 'bi bi-globe2', route: '/website-admin', permission: 'SITE_WEB_CONSULTER' },
-    { label: 'Espace parent', icon: 'bi bi-house-heart', route: '/parent-space', permission: 'PORTAIL_PARENT_ACCEDER' },
+    { label: 'Espace parent · Suivi pédagogique', icon: 'bi bi-house-heart', route: '/parent-space', permission: 'PORTAIL_PARENT_ACCEDER' },
     { label: 'Espace élève', icon: 'bi bi-mortarboard', route: '/student-space', permission: 'PORTAIL_ELEVE_ACCEDER' },
     {
       label: 'Espace enseignant',
@@ -43,6 +44,7 @@ export class SidebarComponent {
       permission: 'PORTAIL_ENSEIGNANT_ACCEDER',
       children: [
         { label: 'Tableau de bord', icon: 'bi bi-speedometer2', route: '/my-space', permission: 'PORTAIL_ENSEIGNANT_ACCEDER' },
+        { label: 'Devoirs et examens', icon: 'bi bi-calendar-event', route: '/assessment-planning/teacher', permission: 'PORTAIL_ENSEIGNANT_ACCEDER' },
         { label: 'Mes classes & élèves', icon: 'bi bi-people', route: '/my-space/classes', permission: 'PORTAIL_ENSEIGNANT_CLASSES' },
         { label: 'Mon emploi du temps', icon: 'bi bi-calendar-week', route: '/my-space/timetable', permission: 'PORTAIL_ENSEIGNANT_EMPLOI_DU_TEMPS' },
         { label: 'Mon assiduité', icon: 'bi bi-clipboard-check', route: '/my-space/attendance', permission: 'PORTAIL_ENSEIGNANT_ASSIDUITE' },
@@ -157,6 +159,13 @@ export class SidebarComponent {
         { label: 'Rémunération', icon: 'bi bi-cash-coin', route: '/hr/compensation', permission: 'REMUNERATION_CONSULTER' },
         { label: 'Matières', icon: 'bi bi-journal-text', route: '/hr/subjects', permission: 'MATIERE_CONSULTER' },
         { label: 'Postes & fonctions', icon: 'bi bi-briefcase', route: '/hr/job-positions', permission: 'POSTE_CONSULTER' },
+      ],
+    },
+    {
+      label: 'Pédagogie',
+      icon: 'bi bi-journal-bookmark',
+      children: [
+        { label: 'Planification devoirs et examens', icon: 'bi bi-calendar2-week', route: '/assessment-planning', permission: 'PLANNING_EVALUATION_CONSULTER' },
       ],
     },
     {
@@ -307,7 +316,7 @@ export class SidebarComponent {
    * ancienne permission est encore présente sur son compte.
    */
   get visibleMenuItems(): SidebarItem[] {
-    if (this.auth.hasRole('PARENT')) return this.menuItems.filter(item => item.label === 'Espace parent');
+    if (this.auth.hasRole('PARENT')) return this.menuItems.filter(item => item.label.startsWith('Espace parent'));
     if (this.auth.hasRole('ELEVE')) return this.menuItems.filter(item => item.label === 'Espace élève');
     if (this.auth.hasRole('ENSEIGNANT')) return this.menuItems.filter(item => item.label === 'Espace enseignant');
     return this.menuItems;
@@ -318,7 +327,7 @@ export class SidebarComponent {
     // à la gestion des profils et droits afin d'éviter un verrouillage
     // accidentel de l'administration. Tous les autres menus restent
     // pilotés par les permissions effectives.
-    if (item.route === '/access-management' && this.auth.hasRole('ADMIN')) {
+    if ((item.route === '/access-management' || item.route === '/assessment-planning') && this.auth.hasRole('ADMIN')) {
       return true;
     }
 
@@ -326,6 +335,7 @@ export class SidebarComponent {
       return item.children.some((child) => this.hasAccess(child));
     }
 
+    if (item.route === '/canteen') return this.auth.hasRole('ADMIN') || ['CANTINE_MENU_CONSULTER','CANTINE_MENU_GERER','CANTINE_MENU_PUBLIER'].some(p => this.auth.hasPermission(p));
     return !item.permission || this.auth.hasPermission(item.permission);
   }
 

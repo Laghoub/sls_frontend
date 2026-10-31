@@ -82,7 +82,7 @@ export class AuthService {
       return false;
     }
 
-    return user.permissions.includes(permission);
+    return (user.permissions ?? []).includes(permission);
   }
 
   hasRole(
@@ -97,7 +97,7 @@ export class AuthService {
     }
 
     const wanted = role.replace(/^ROLE_/, '').toUpperCase();
-    return user.roles.some(r => r.replace(/^ROLE_/, '').toUpperCase() === wanted);
+    return (user.roles ?? []).some(r => r.replace(/^ROLE_/, '').toUpperCase() === wanted);
   }
 
   homeRoute(): string {
