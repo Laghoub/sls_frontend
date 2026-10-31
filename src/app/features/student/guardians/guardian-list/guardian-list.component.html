@@ -584,7 +584,7 @@
             <input
               [(ngModel)]="form.lastName"
               maxlength="100"
-              [disabled]="!!editing()"
+              
             />
 
           </div>
@@ -601,7 +601,7 @@
             <input
               [(ngModel)]="form.firstName"
               maxlength="100"
-              [disabled]="!!editing()"
+              
             />
 
           </div>
@@ -618,7 +618,7 @@
             <input
               type="date"
               [(ngModel)]="form.birthDate"
-              [disabled]="!!editing()"
+              
             />
 
           </div>
@@ -635,7 +635,7 @@
             <input
               [(ngModel)]="form.birthPlace"
               maxlength="150"
-              [disabled]="!!editing()"
+              
             />
 
           </div>
@@ -651,7 +651,7 @@
 
             <select
               [(ngModel)]="form.sex"
-              [disabled]="!!editing()">
+              >
 
               <option value="">
                 Non renseigné
@@ -681,7 +681,7 @@
             <input
               [(ngModel)]="form.nationality"
               maxlength="80"
-              [disabled]="!!editing()"
+              
             />
 
           </div>
@@ -698,7 +698,7 @@
             <input
               [(ngModel)]="form.address"
               maxlength="300"
-              [disabled]="!!editing()"
+              
             />
 
           </div>
@@ -715,7 +715,7 @@
             <input
               [(ngModel)]="form.phone"
               maxlength="30"
-              [disabled]="!!editing()"
+              
             />
 
           </div>
@@ -732,7 +732,7 @@
             <input
               [(ngModel)]="form.secondaryPhone"
               maxlength="30"
-              [disabled]="!!editing()"
+              
             />
 
           </div>
@@ -750,7 +750,7 @@
               type="email"
               [(ngModel)]="form.email"
               maxlength="150"
-              [disabled]="!!editing()"
+              
             />
 
           </div>
@@ -786,20 +786,7 @@
         </div>
 
 
-        @if (editing()) {
 
-          <div class="alert">
-
-            Pour cette première version,
-            l'identité de la personne reste
-            en lecture seule.
-
-            Seul le statut du responsable
-            est modifié depuis cet écran.
-
-          </div>
-
-        }
 
       </div>
 

@@ -47,6 +47,7 @@ export class SidebarComponent {
         { label: 'Mon emploi du temps', icon: 'bi bi-calendar-week', route: '/my-space/timetable', permission: 'PORTAIL_ENSEIGNANT_EMPLOI_DU_TEMPS' },
         { label: 'Mon assiduité', icon: 'bi bi-clipboard-check', route: '/my-space/attendance', permission: 'PORTAIL_ENSEIGNANT_ASSIDUITE' },
         { label: 'Mes rémunérations', icon: 'bi bi-cash-coin', route: '/my-space/payroll', permission: 'PORTAIL_ENSEIGNANT_REMUNERATION' },
+        { label: 'Rendez-vous parents', icon: 'bi bi-calendar-check', route: '/my-space/appointments', permission: 'PORTAIL_ENSEIGNANT_ACCEDER' },
         { label: 'Mes exercices', icon: 'bi bi-journal-text', route: '/my-space/exercises', permission: 'PORTAIL_ENSEIGNANT_EXERCICES' },
         { label: 'Mes évaluations', icon: 'bi bi-ui-checks-grid', route: '/my-space/evaluations', permission: 'PORTAIL_ENSEIGNANT_EVALUATIONS' },
         { label: 'Évaluations trimestrielles', icon: 'bi bi-clipboard2-check', route: '/my-space/term-evaluations', permission: 'EVALUATION_TRIMESTRIELLE_SAISIR' },
@@ -170,6 +171,7 @@ export class SidebarComponent {
       children: [
         { label: 'Enseignants', icon: 'bi bi-person-check', route: '/attendance/teachers', permission: 'ASSIDUITE_ENSEIGNANT_CONSULTER' },
         { label: 'Historique enseignants', icon: 'bi bi-clock-history', route: '/attendance/teachers/history', permission: 'ASSIDUITE_ENSEIGNANT_CONSULTER' },
+        { label: 'Rattrapage des présences', icon: 'bi bi-calendar2-check', route: '/attendance/teachers/catchup', permission: 'ASSIDUITE_ENSEIGNANT_CONSULTER' },
         { label: 'Pointage mensuel', icon: 'bi bi-calendar3', route: '/attendance/teachers/monthly', permission: 'POINTAGE_MENSUEL_CONSULTER' },
         { label: 'Élèves', icon: 'bi bi-mortarboard', route: '/attendance/students', permission: 'ASSIDUITE_ELEVE_CONSULTER' },
         { label: 'Historique élèves', icon: 'bi bi-clock-history', route: '/attendance/students/history', permission: 'ASSIDUITE_ELEVE_CONSULTER' },
@@ -188,6 +190,7 @@ export class SidebarComponent {
       children: [
         { label: "Profils & droits d'accès", icon: 'bi bi-person-lock', route: '/access-management', permission: 'ROLE_CONSULTER' },
         { label: 'Évaluations trimestrielles', icon: 'bi bi-journal-check', route: '/term-evaluations', permission: 'EVALUATION_TRIMESTRIELLE_CAMPAGNE_GERER' },
+        { label: 'Réceptions parents–enseignants', icon: 'bi bi-calendar-event', route: '/appointments-admin', permission: 'RENDEZ_VOUS_ADMIN' },
         { label: 'Traçabilité', icon: 'bi bi-clock-history', route: '/audit', permission: 'AUDIT_CONSULTER' },
       ],
     },
@@ -195,6 +198,7 @@ export class SidebarComponent {
       label: 'Finance & Caisse',
       icon: 'bi bi-cash-stack',
       children: [
+        { label: 'Dépenses & fournisseurs', icon: 'bi bi-receipt', route: '/finance/expenses', permission: 'DEPENSES_CONSULTER' },
         {
           label: 'Tableau de bord',
           icon: 'bi bi-speedometer2',

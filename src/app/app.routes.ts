@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { changePasswordGuard } from './core/guards/change-password.guard';
 import { dashboardAccessGuard } from './core/guards/dashboard-access.guard';
+import { privateRoutePermissionGuard } from './core/guards/private-route-permission.guard';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', loadComponent: () => import('./features/website/public-website.component').then(m => m.PublicWebsiteComponent) },
@@ -16,6 +17,15 @@ export const routes: Routes = [
   {
     path: 'activation',
     loadComponent: () => import('./features/auth/activation/activation.component').then(m => m.ActivationComponent),
+  },
+
+  {
+    path: 'forgot-password',
+    loadComponent: () => import('./features/auth/password-reset/password-reset.component').then(m => m.PasswordResetComponent),
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () => import('./features/auth/password-reset/password-reset.component').then(m => m.PasswordResetComponent),
   },
 
   {
@@ -48,6 +58,7 @@ export const routes: Routes = [
     path: '',
 
     canActivate: [authGuard],
+    canActivateChild: [privateRoutePermissionGuard],
 
     loadComponent: () =>
       import('./layout/main-layout/main-layout.component').then(
@@ -55,6 +66,7 @@ export const routes: Routes = [
       ),
 
     children: [
+      { path: 'access-denied', loadComponent: () => import('./features/access-denied/access-denied.component').then(m => m.AccessDeniedComponent) },
       { path: 'website-admin', loadComponent: () => import('./features/website/website-admin.component').then(m => m.WebsiteAdminComponent) },
       /*
        * Dashboard
@@ -171,6 +183,7 @@ export const routes: Routes = [
         path: 'term-evaluations',
         loadComponent: () => import('./features/term-evaluations/term-evaluations.component').then(m => m.TermEvaluationsComponent),
       },
+      {path:'appointments-admin',loadComponent:()=>import('./features/appointments/admin-appointments.component').then(m=>m.AdminAppointmentsComponent)},
       {
         path: 'parent-space',
         loadComponent: () => import('./features/parent-portal/parent-portal.component').then(m => m.ParentPortalComponent),

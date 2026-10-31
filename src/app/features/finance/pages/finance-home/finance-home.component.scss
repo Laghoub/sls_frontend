@@ -96,3 +96,25 @@
 @media (max-width: 1250px) { .filters-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.hero-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.overview-grid{grid-template-columns:1fr 1fr}.cash-summary{grid-column:1/-1}.structure-grid{grid-template-columns:1fr 1fr}.structure-grid article:last-child{grid-column:1/-1}.quick-grid{grid-template-columns:repeat(3,minmax(0,1fr))} }
 @media (max-width: 900px) { .dashboard-head{align-items:flex-start}.head-actions{width:100%}.filters-grid{grid-template-columns:1fr 1fr}.overview-grid,.two-col,.two-col.wide-left,.structure-grid{grid-template-columns:1fr}.structure-grid article:last-child{grid-column:auto}.quick-grid{grid-template-columns:1fr 1fr}.email-stats{grid-template-columns:1fr}.collection-layout{align-items:flex-start}.ranking-row{grid-template-columns:110px 1fr}.ranking-values{grid-column:2;text-align:left}.cash-grid{grid-template-columns:1fr 1fr} }
 @media (max-width: 620px) { .hero-kpis,.filters-grid,.quick-grid{grid-template-columns:1fr}.head-actions .btn{flex:1}.collection-layout{flex-direction:column}.collection-stats{width:100%}.ring{margin:auto}.cash-grid{grid-template-columns:1fr}.debtor-row{grid-template-columns:30px 1fr}.debtor-money{grid-column:2;text-align:left}.trend-col{min-width:48px}.kpi-card strong{font-size:20px} }
+
+.finance-expenses-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; margin-top:16px; }
+.finance-expenses-grid > div { padding:14px; border:1px solid #e1e5eb; border-radius:10px; }
+.finance-expenses-grid p { font-size:1.2rem; font-weight:700; margin:8px 0 0; }
+
+/* V40 — regroupement visuel, sans modifier les calculs backend */
+.v40-overview { margin:1rem 0; padding:22px; }
+.v40-section-label { display:flex; align-items:center; gap:9px; font-weight:800; color:#19345b; font-size:13px; margin:22px 0 10px; }
+.v40-section-label i { color:#2563eb; }
+.v40-metrics { display:grid; gap:12px; }
+.v40-metrics-three { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.v40-metrics-four { grid-template-columns:repeat(4,minmax(0,1fr)); }
+.v40-metric { min-width:0; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:15px; }
+.v40-metric span,.v40-metric small { display:block; color:#64748b; font-size:12px; }
+.v40-metric strong { display:block; font-size:20px; margin-top:9px; overflow-wrap:anywhere; }
+.v40-metric small { margin-top:8px; font-size:11px; line-height:1.45; }
+.v40-highlight { background:#eff6ff; border-color:#bfdbfe; }
+.v40-alert { background:#fff7f7; border-color:#fecaca; }
+.v40-alert strong { color:#b91c1c; }
+.v40-note { margin-top:16px; font-size:11px; }
+@media(max-width:1100px) { .v40-metrics-four { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:760px) { .v40-metrics-three,.v40-metrics-four { grid-template-columns:1fr; } }

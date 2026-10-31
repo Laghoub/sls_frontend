@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 export const FINANCE_ROUTES: Routes = [
+  { path: 'expenses', loadComponent: () => import('../expenses/expenses.component').then(m => m.ExpensesComponent) },
   { path: '', loadComponent: () => import('./pages/finance-home/finance-home.component').then(m => m.FinanceHomeComponent) },
   { path: 'staff-payroll', loadComponent: () => import('../staff-payroll/staff-payroll.component').then(m => m.StaffPayrollComponent) },
   { path: 'situations', loadComponent: () => import('./pages/situations/financial-situations.component').then(m => m.FinancialSituationsComponent) },

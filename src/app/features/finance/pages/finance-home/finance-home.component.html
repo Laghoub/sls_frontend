@@ -17,6 +17,39 @@
     </div>
   </div>
 
+
+  <!-- V40 : lecture distincte des créances, flux de caisse et charges. -->
+  <section class="card v40-overview" aria-label="Synthèse financière">
+    <div class="section-head"><div><div class="eyebrow">Synthèse financière</div><h2>Trésorerie et dépenses</h2>
+      <div class="muted">Flux enregistrés en caisse pour la période sélectionnée. Les créances et remboursements sont présentés séparément des charges.</div></div></div>
+    @if (expensesSummary(); as x) {
+      <div class="v40-section-label"><i class="bi bi-arrow-left-right"></i> Trésorerie · mouvements de caisse</div>
+      <div class="v40-metrics v40-metrics-three">
+        <div class="v40-metric"><span>Entrées de caisse</span><strong class="positive-text">{{x.cashInflows | number:'1.0-0'}} DA</strong></div>
+        <div class="v40-metric"><span>Sorties de caisse</span><strong class="negative-text">{{x.cashOutflows | number:'1.0-0'}} DA</strong></div>
+        <div class="v40-metric v40-highlight"><span>Flux net de caisse</span><strong>{{(x.cashInflows - x.cashOutflows) | number:'1.0-0'}} DA</strong></div>
+      </div>
+      <div class="v40-section-label"><i class="bi bi-receipt"></i> Dépenses de fonctionnement · paiements effectués</div>
+      <div class="v40-metrics v40-metrics-four">
+        <div class="v40-metric"><span>Salaires enseignants</span><strong>{{x.teacherPayroll | number:'1.0-0'}} DA</strong></div>
+        <div class="v40-metric"><span>Salaires du personnel</span><strong>{{x.staffPayroll | number:'1.0-0'}} DA</strong></div>
+        <div class="v40-metric"><span>Autres dépenses payées</span><strong>{{x.otherExpenses | number:'1.0-0'}} DA</strong></div>
+        <div class="v40-metric"><span>Dépenses approuvées non payées</span><strong>{{x.unpaidExpenses | number:'1.0-0'}} DA</strong></div>
+      </div>
+      <div class="v40-section-label"><i class="bi bi-shield-check"></i> Rapprochement et contrôle</div>
+      @if (dashboard(); as overview) {
+        <div class="v40-metrics v40-metrics-three">
+          <div class="v40-metric"><span>Remboursements enregistrés</span><strong>{{money(overview.kpis.refunds) | number:'1.0-0'}} DA</strong><small>Sorties de trésorerie distinctes des charges.</small></div>
+          <div class="v40-metric"><span>Autres sorties à rapprocher</span><strong>{{(x.cashOutflows - x.teacherPayroll - x.staffPayroll - x.otherExpenses - money(overview.kpis.refunds)) | number:'1.0-0'}} DA</strong><small>Écart arithmétique indicatif entre les deux synthèses ; périmètres à vérifier.</small></div>
+          <div class="v40-metric" [class.v40-alert]="money(overview.cash.totalDifference) !== 0"><span>Écart de caisse cumulé</span><strong>{{money(overview.cash.totalDifference) | number:'1.0-0'}} DA</strong><small>Écart déclaré dans le contrôle des sessions.</small></div>
+        </div>
+      } @else {
+        <p class="muted">Le détail des remboursements et le contrôle des sessions seront affichés lorsque l'analyse financière sera chargée.</p>
+      }
+      <p class="muted v40-note">Les montants sont issus des API existantes ; aucune opération n'est créée par cet affichage. Les virements hors caisse ne sont pas inclus. Les filtres de classe et de niveau ne s'appliquent pas aux charges globales.</p>
+    } @else if (expensesError()) { <p role="alert">{{expensesError()}}</p> }
+  </section>
+
   @if(filtersExpanded()) {
     <section class="card filters-card">
       <div class="section-head compact">

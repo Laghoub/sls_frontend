@@ -14,7 +14,7 @@
 
       <h1>
         Bonjour,
-        {{ currentUser()?.username || 'Utilisateur' }}
+        {{ (currentUser()?.firstName && currentUser()?.lastName) ? (currentUser()?.firstName + ' ' + currentUser()?.lastName) : (currentUser()?.username || 'Utilisateur') }}
       </h1>
 
       <p>

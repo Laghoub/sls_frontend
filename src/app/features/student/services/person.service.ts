@@ -38,6 +38,10 @@ export class PersonService {
   }
 
 
+  update(id: number, request: PersonCreateRequest): Observable<Person> {
+    return this.http.put<Person>(`${this.url}/${id}`, request);
+  }
+
   getById(id: number): Observable<Person> {
 
     return this.http.get<Person>(

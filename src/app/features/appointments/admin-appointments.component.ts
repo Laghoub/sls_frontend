@@ -1,0 +1,11 @@
+import {CommonModule} from '@angular/common';import {Component,inject,OnInit} from '@angular/core';import {FormsModule} from '@angular/forms';import {AppointmentsService} from './appointments.service';
+@Component({selector:'app-admin-appointments',standalone:true,imports:[CommonModule,FormsModule],templateUrl:'./admin-appointments.component.html',styleUrl:'./appointments.component.scss'})
+export class AdminAppointmentsComponent implements OnInit {
+ private api=inject(AppointmentsService); rows:any[]=[]; status=''; selected:any=null; mode:'confirm'|'reject'|'reschedule'='confirm';start='';end='';place='';note='';busy=false;error='';success='';mails:any[]=[];
+ ngOnInit(){this.refresh()}refresh(){this.api.adminList(this.status).subscribe({next:r=>this.rows=r,error:e=>this.fail(e)})}
+ open(r:any,mode:'confirm'|'reject'|'reschedule'){this.selected=r;this.mode=mode;this.start=r.starts_at?this.localDate(r.starts_at):'';this.end=r.ends_at?this.localDate(r.ends_at):'';this.place=r.meeting_place||'';this.note='';this.error='';this.mails=[]}
+ private localDate(v:string){const d=new Date(v);const p=(n:number)=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`}
+ submit(){if(!this.selected)return;this.busy=true;this.error='';let request:any;if(this.mode==='reject'){if(!this.note.trim()){this.busy=false;this.error='Motif de refus obligatoire';return}request=this.api.reject(this.selected.id,this.note)}else{if(!this.start||!this.end){this.busy=false;this.error='Date et heure obligatoires';return}const body={startsAt:new Date(this.start).toISOString(),endsAt:new Date(this.end).toISOString(),meetingPlace:this.place,note:this.note};request=this.mode==='confirm'?this.api.confirm(this.selected.id,body):this.api.reschedule(this.selected.id,body)}request.subscribe({next:()=>{this.busy=false;this.selected=null;this.success='Décision enregistrée. Les notifications e-mail ont été mises en file d’envoi.';this.refresh()},error:(e:any)=>{this.busy=false;this.fail(e)}})}
+ showMails(id:number){this.api.notifications(id).subscribe({next:r=>this.mails=r,error:e=>this.fail(e)})}
+ private fail(e:any){this.error=e?.error?.message||e?.error?.detail||'Opération impossible.'}
+}

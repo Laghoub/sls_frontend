@@ -20,7 +20,7 @@ import {
 import { FinanceReferenceService } from '../../services/finance-reference.service';
 import { FeeTypeService } from '../../services/fee-type.service';
 import { PaymentMethodService } from '../../services/payment-method.service';
-import { FinanceDashboardService } from '../../services/finance-dashboard.service';
+import { FinanceExpensesSummary, FinanceDashboardService } from '../../services/finance-dashboard.service';
 
 @Component({
   selector: 'app-finance-home',
@@ -44,6 +44,8 @@ export class FinanceHomeComponent {
   paymentMethods = signal<PaymentMethod[]>([]);
 
   dashboard = signal<AdvancedFinanceDashboard | null>(null);
+  expensesSummary = signal<FinanceExpensesSummary | null>(null);
+  expensesError = signal('');
   loading = signal(false);
   refsLoading = signal(true);
   error = signal('');
@@ -123,6 +125,11 @@ export class FinanceHomeComponent {
   loadDashboard(): void {
     this.loading.set(true);
     this.error.set('');
+    this.expensesError.set('');
+    this.dashboardApi.expensesSummary(this.filters).subscribe({
+      next: data => this.expensesSummary.set(data),
+      error: () => { this.expensesSummary.set(null); this.expensesError.set('Indicateurs de dépenses indisponibles (vérifier les permissions et le backend).'); },
+    });
     this.dashboardApi.analytics(this.filters).subscribe({
       next: (data) => {
         this.dashboard.set(data);

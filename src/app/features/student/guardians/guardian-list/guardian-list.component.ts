@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 
 import {
   catchError,
+  switchMap,
   forkJoin,
   of
 } from 'rxjs';
@@ -790,14 +791,21 @@ export class GuardianListComponent {
     this.saving.set(true);
 
 
-    this.guardianService
-      .update(
-        guardian.id,
-        {
-          status:
-            this.form.status
-        }
-      )
+    this.personService.update(guardian.personId, {
+      lastName: this.form.lastName.trim(),
+      firstName: this.form.firstName.trim(),
+      birthDate: this.form.birthDate || null,
+      birthPlace: this.nullIfBlank(this.form.birthPlace),
+      nationality: this.nullIfBlank(this.form.nationality),
+      sex: this.nullIfBlank(this.form.sex),
+      address: this.nullIfBlank(this.form.address),
+      phone: this.nullIfBlank(this.form.phone),
+      secondaryPhone: this.nullIfBlank(this.form.secondaryPhone),
+      email: this.nullIfBlank(this.form.email),
+      photoReference: guardian.person?.photoReference ?? null
+    }).pipe(
+      switchMap(() => this.guardianService.update(guardian.id, { status: this.form.status }))
+    )
       .subscribe({
 
         next: () => {
