@@ -1,0 +1,17 @@
+node_modules
+dist
+.angular
+.git
+.gitignore
+.vscode
+.idea
+coverage
+*.log
+.env
+.env.*
+*.pem
+*.key
+*.p12
+Dockerfile
+.dockerignore
+README.md
