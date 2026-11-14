@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { Component, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -17,7 +18,7 @@ import { Cycle } from '../../cycles/models/cycle.model';
 @Component({
   selector: 'app-calendar-list',
   standalone: true,
-  imports: [ReactiveFormsModule, DatePipe],
+  imports: [PaginatedTableDirective, ReactiveFormsModule, DatePipe],
   templateUrl: './calendar-list.component.html',
   styleUrl: './calendar-list.component.scss',
 })

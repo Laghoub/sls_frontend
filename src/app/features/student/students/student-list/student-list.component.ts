@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import {
   Component,
@@ -36,7 +37,7 @@ import {
 
   standalone: true,
 
-  imports: [
+  imports: [PaginatedTableDirective, 
     CommonModule,
     FormsModule,
     RouterLink
@@ -77,7 +78,7 @@ export class StudentListComponent {
     signal(0);
 
   readonly pageSize =
-    signal(20);
+    signal(15);
 
   readonly totalElements =
     signal(0);

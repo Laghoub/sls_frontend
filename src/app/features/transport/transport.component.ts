@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, AfterViewChecked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +8,7 @@ import { Assignment, Driver, Route, Stop, TransportService, Vehicle } from './tr
 
 declare const L: any;
 
-@Component({selector:'app-transport',standalone:true,imports:[CommonModule,FormsModule],templateUrl:'./transport.component.html',styleUrl:'./transport.component.scss'})
+@Component({selector:'app-transport',standalone:true,imports: [PaginatedTableDirective, CommonModule,FormsModule],templateUrl:'./transport.component.html',styleUrl:'./transport.component.scss'})
 export class TransportComponent implements OnInit, AfterViewChecked{
  private api=inject(TransportService); private refs=inject(FinanceReferenceService);
  tab='dashboard'; vehicles:Vehicle[]=[];drivers:Driver[]=[];routes:Route[]=[];stops:Stop[]=[];assignments:Assignment[]=[];years:any[]=[];enrollments:any[]=[]; schoolYearId:number|null=null; selectedRouteId:number|null=null; message=''; error=''; modal='';

@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
@@ -7,7 +8,7 @@ import { Campus, CampusRequest } from '../models/campus.model';
 @Component({
   selector: 'app-campus-list',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [PaginatedTableDirective, ReactiveFormsModule],
   templateUrl: './campus-list.component.html',
   styleUrl: './campus-list.component.scss',
 })

@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -15,7 +16,7 @@ import { CashRegisterService } from '../../services/cash-register.service';
 import { FinanceReferenceService } from '../../services/finance-reference.service';
 import { FinanceSessionStateService } from '../../services/finance-session-state.service';
 
-@Component({selector:'app-cash',standalone:true,imports:[CommonModule,FormsModule],templateUrl:'./cash.component.html',styleUrl:'./cash.component.scss'})
+@Component({selector:'app-cash',standalone:true,imports: [PaginatedTableDirective, CommonModule,FormsModule],templateUrl:'./cash.component.html',styleUrl:'./cash.component.scss'})
 export class CashComponent {
   private s=inject(CashRegisterService); private moves=inject(CashMovementService); private refs=inject(FinanceReferenceService); private state=inject(FinanceSessionStateService);
   auth=inject(AuthService);

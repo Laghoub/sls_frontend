@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +11,7 @@ import { GlobalFinancialSituationService } from '../../services/global-financial
 @Component({
   selector: 'app-global-financial-situation',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [PaginatedTableDirective, CommonModule, FormsModule],
   templateUrl: './global-financial-situation.component.html',
   styleUrl: './global-financial-situation.component.scss',
 })

@@ -1,9 +1,10 @@
+import { PaginatedTableDirective } from '../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component, inject, Input, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { AssessmentPlanningService, PortalAssessment } from './assessment-planning.service';
-@Component({selector:'app-assessment-planning-portal',standalone:true,imports:[CommonModule,FormsModule],templateUrl:'./assessment-planning-portal.component.html',styleUrl:'./assessment-planning.component.scss'})
+@Component({selector:'app-assessment-planning-portal',standalone:true,imports: [PaginatedTableDirective, CommonModule,FormsModule],templateUrl:'./assessment-planning-portal.component.html',styleUrl:'./assessment-planning.component.scss'})
 export class AssessmentPlanningPortalComponent implements OnInit {
  audience:'teacher'|'parent'='teacher';route=inject(ActivatedRoute);api=inject(AssessmentPlanningService);items:PortalAssessment[]=[];error='';type='';studentId=0;
  get students(){const m=new Map<number,string>();for(const e of this.items)if(e.student_id)m.set(e.student_id,`${e.student_first_name||''} ${e.student_last_name||''}`.trim());return [...m.entries()].map(([id,name])=>({id,name}))}

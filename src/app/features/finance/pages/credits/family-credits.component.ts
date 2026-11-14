@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -11,7 +12,7 @@ import { FinanceTrackingService } from '../../services/finance-tracking.service'
 @Component({
   selector: 'app-family-credits',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [PaginatedTableDirective, CommonModule, FormsModule],
   templateUrl: './family-credits.component.html',
   styleUrl: './family-credits.component.scss',
 })
@@ -28,7 +29,7 @@ export class FamilyCreditsComponent {
   usages = signal<FamilyCreditUsage[]>([]);
   selectedCredit = signal<FamilyCredit | null>(null);
   applyModal = signal(false);
-  page = signal(0); size = signal(20); total = signal(0); pages = signal(0);
+  page = signal(0); size = signal(15); total = signal(0); pages = signal(0);
   error = signal(''); success = signal(''); search = '';
   schoolYearId: number | null = null;
   chargeId: number | null = null;

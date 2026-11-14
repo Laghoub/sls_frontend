@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -6,7 +7,7 @@ import { HrService } from '../../services/hr.service';
 import { HrDashboard } from '../../models/hr.model';
 import { SchoolYearService } from '../../../school/school-years/services/school-year.service';
 import { SchoolYear } from '../../../school/school-years/models/school-year.model';
-@Component({selector:'app-hr-dashboard',standalone:true,imports:[CommonModule,FormsModule,RouterLink],templateUrl:'./hr-dashboard.component.html',styleUrl:'./hr-dashboard.component.scss'})
+@Component({selector:'app-hr-dashboard',standalone:true,imports: [PaginatedTableDirective, CommonModule,FormsModule,RouterLink],templateUrl:'./hr-dashboard.component.html',styleUrl:'./hr-dashboard.component.scss'})
 export class HrDashboardComponent implements OnInit{
   private api=inject(HrService); private yearsApi=inject(SchoolYearService);
   data=signal<HrDashboard|null>(null); loading=signal(false); error=signal(''); years=signal<SchoolYear[]>([]); schoolYearId:number|null=null;

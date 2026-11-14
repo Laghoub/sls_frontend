@@ -166,6 +166,8 @@ export class SidebarComponent {
       icon: 'bi bi-journal-bookmark',
       children: [
         { label: 'Planification devoirs et examens', icon: 'bi bi-calendar2-week', route: '/assessment-planning', permission: 'PLANNING_EVALUATION_CONSULTER' },
+        { label: 'Liste des élèves', icon: 'bi bi-people', route: '/pedagogy/lists/students', permission: 'ELEVE_CONSULTER' },
+        { label: 'Liste des enseignants', icon: 'bi bi-person-video3', route: '/pedagogy/lists/teachers', permission: 'ENSEIGNANT_CONSULTER' },
       ],
     },
     {

@@ -1,9 +1,10 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component,OnInit,inject,signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HrService } from '../../services/hr.service';
 import { SubjectReference,SubjectRequest } from '../../models/hr.model';
-@Component({selector:'app-subjects',standalone:true,imports:[CommonModule,FormsModule],templateUrl:'./subjects.component.html',styleUrl:'./subjects.component.scss'})
+@Component({selector:'app-subjects',standalone:true,imports: [PaginatedTableDirective, CommonModule,FormsModule],templateUrl:'./subjects.component.html',styleUrl:'./subjects.component.scss'})
 export class SubjectsComponent implements OnInit{
  private api=inject(HrService);rows=signal<SubjectReference[]>([]);loading=signal(false);error=signal('');success=signal('');search='';showInactive=false;modal=false;saving=false;editing:SubjectReference|null=null;archiveTarget:SubjectReference|null=null;form:SubjectRequest={code:'',name:'',active:true,displayOrder:null};
  ngOnInit(){this.load()}

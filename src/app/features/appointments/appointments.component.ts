@@ -1,8 +1,9 @@
+import { PaginatedTableDirective } from '../../shared/directives/paginated-table.directive';
 import {CommonModule} from '@angular/common';
 import {Component,inject,OnInit} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {AppointmentsService} from './appointments.service';
-@Component({selector:'app-appointments',standalone:true,imports:[CommonModule,FormsModule],templateUrl:'./appointments.component.html',styleUrl:'./appointments.component.scss'})
+@Component({selector:'app-appointments',standalone:true,imports: [PaginatedTableDirective, CommonModule,FormsModule],templateUrl:'./appointments.component.html',styleUrl:'./appointments.component.scss'})
 export class AppointmentsComponent implements OnInit {
  private api=inject(AppointmentsService); children:any[]=[]; teachers:any[]=[]; requests:any[]=[];
  childId:number|null=null; teacherKey=''; reason=''; preferredTimes=''; busy=false; error=''; success='';

@@ -1,9 +1,10 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component,OnInit,inject,signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HrService } from '../../services/hr.service';
 import { JobPosition,JobPositionRequest } from '../../models/hr.model';
-@Component({selector:'app-job-positions',standalone:true,imports:[CommonModule,FormsModule],templateUrl:'./job-positions.component.html',styleUrl:'./job-positions.component.scss'})
+@Component({selector:'app-job-positions',standalone:true,imports: [PaginatedTableDirective, CommonModule,FormsModule],templateUrl:'./job-positions.component.html',styleUrl:'./job-positions.component.scss'})
 export class JobPositionsComponent implements OnInit{
  private api=inject(HrService);rows=signal<JobPosition[]>([]);loading=signal(false);error=signal('');success=signal('');search='';category='';showInactive=false;modal=false;saving=false;editing:JobPosition|null=null;archiveTarget:JobPosition|null=null;form:JobPositionRequest={code:'',name:'',category:null,active:true,displayOrder:null};
  ngOnInit(){this.load()}

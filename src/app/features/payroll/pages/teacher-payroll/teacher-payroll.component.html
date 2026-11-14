@@ -92,7 +92,7 @@
         <div class="empty"><i class="bi bi-wallet2"></i>Aucune paie calculée pour cette période.</div>
       } @else {
         <div class="table-wrap">
-          <table class="data-table">
+          <table appPaginatedTable class="data-table">
             <thead><tr><th>Enseignant</th><th>Type</th><th>Base</th><th>Heures</th><th>Part horaire</th><th>Net</th><th>Versé</th><th>Reste</th><th>Statut</th><th></th></tr></thead>
             <tbody>
               @for (p of items; track p.id) {
@@ -160,7 +160,7 @@
   @if (selectedAttendanceLines.length) {
     <section class="card">
       <div class="card-head"><div><h2>Détail des séances rémunérées</h2><div class="muted">Le retard réduit les minutes rémunérées. Une absence vaut 0 minute.</div></div><span class="count">{{ selectedAttendanceLines.length }}</span></div>
-      <div class="table-wrap"><table class="data-table"><thead><tr><th>Date</th><th>Classe</th><th>Matière</th><th>Horaire</th><th>Assiduité</th><th>Retard</th><th>Prévu</th><th>Rémunéré</th><th>Taux</th><th>Montant</th></tr></thead><tbody>
+      <div class="table-wrap"><table appPaginatedTable class="data-table"><thead><tr><th>Date</th><th>Classe</th><th>Matière</th><th>Horaire</th><th>Assiduité</th><th>Retard</th><th>Prévu</th><th>Rémunéré</th><th>Taux</th><th>Montant</th></tr></thead><tbody>
         @for (x of selectedAttendanceLines; track x.attendanceId) {
           <tr><td>{{ formatDate(x.date) }}</td><td>{{ x.className }}</td><td>{{ x.subjectName }}</td><td>{{ x.timeRange }}</td><td>{{ attendanceLabel(x.attendanceStatus) }}</td><td>{{ x.lateMinutes }} min</td><td>{{ x.scheduledMinutes }} min</td><td>{{ x.paidMinutes }} min</td><td class="money">{{ x.appliedHourlyRate | number:'1.2-2' }} DA/h</td><td class="money">{{ x.amount | number:'1.2-2' }} DA</td></tr>
         }

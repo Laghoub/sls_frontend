@@ -1,0 +1,16 @@
+<section class="pedagogy-lists">
+  <header class="page-head"><div><div class="eyebrow">Pédagogie</div><h1>{{title}}</h1><p>Consultation et export PDF des listes officielles de l’établissement.</p></div></header>
+  <div class="panel"><div class="filters">
+    <label>Année scolaire<select [(ngModel)]="schoolYearId" (ngModelChange)="onYearChange()"><option [ngValue]="null">Année active (par défaut)</option>@for(y of years;track y.id){<option [ngValue]="y.id">{{y.label}}</option>}</select></label>
+    <label>Cycle<select [(ngModel)]="cycleId" (ngModelChange)="onCycleChange()"><option [ngValue]="null">Tous les cycles</option>@for(c of cycles;track c.id){<option [ngValue]="c.id">{{c.name}}</option>}</select></label>
+    <label>Classe<select [(ngModel)]="classId" (ngModelChange)="load()"><option [ngValue]="null">Toutes les classes</option>@for(c of filteredClasses;track c.id){<option [ngValue]="c.id">{{c.name}}</option>}</select></label>
+    @if(isTeachers){<label>Matière<select [(ngModel)]="subjectId" (ngModelChange)="load()"><option [ngValue]="null">Toutes les matières</option>@for(s of subjects;track s.id){<option [ngValue]="s.id">{{s.name}}</option>}</select></label>}
+  </div><div class="toolbar"><label class="search-label">Recherche dans le tableau<input type="search" [(ngModel)]="search" placeholder="Nom, prénom, matricule…" /></label><button type="button" class="btn-primary" [disabled]="loading||exporting" (click)="exportPdf()">{{exporting?'Génération…':'Exporter en PDF'}}</button></div></div>
+  @if(error){<div class="notice-error" role="alert">{{error}}</div>}
+  <div class="panel"><div class="table-head"><strong>{{title}}</strong><span>{{visibleRows.length}} ligne(s) affichée(s)</span></div>
+  <div class="table-scroll"><table appPaginatedTable><thead><tr><th>N°</th><th>Matricule</th><th>Nom</th><th>Prénom</th>@if(!isTeachers){<th>Date de naissance</th>}<th>Cycle</th><th>Classe</th>@if(isTeachers){<th>Matière</th>}</tr></thead><tbody>
+    @for(r of visibleRows;track $index){<tr><td>{{$index+1}}</td><td>{{value(r,'matricule')}}</td><td>{{value(r,'nom')}}</td><td>{{value(r,'prenom')}}</td>@if(!isTeachers){<td>{{value(r,'date_naissance')}}</td>}<td>{{value(r,'cycle')}}</td><td>{{value(r,'classe')}}</td>@if(isTeachers){<td>{{value(r,'matiere')}}</td>}</tr>}
+  </tbody></table></div>
+  @if(loading){<p class="empty">Chargement…</p>}@else if(!visibleRows.length){<p class="empty">Aucun résultat pour les filtres sélectionnés.</p>}
+  </div><p class="hint">Le PDF utilise les filtres année, cycle, classe et matière. La recherche textuelle filtre uniquement le tableau affiché.</p>
+</section>

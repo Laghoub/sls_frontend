@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 
 import {
@@ -38,7 +39,7 @@ import { AccountActivationService } from '../../../../core/services/account-acti
 
   standalone: true,
 
-  imports: [
+  imports: [PaginatedTableDirective, 
     CommonModule,
     FormsModule
   ],
@@ -81,7 +82,7 @@ export class GuardianListComponent {
     signal(0);
 
   readonly pageSize =
-    signal(20);
+    signal(15);
 
   readonly totalElements =
     signal(0);

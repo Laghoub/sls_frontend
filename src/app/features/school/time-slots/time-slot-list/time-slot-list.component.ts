@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
@@ -7,7 +8,7 @@ import { TimeSlot, TimeSlotRequest } from '../models/time-slot.model';
 @Component({
   selector: 'app-time-slot-list',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [PaginatedTableDirective, ReactiveFormsModule],
   templateUrl: './time-slot-list.component.html',
   styleUrl: './time-slot-list.component.scss',
 })

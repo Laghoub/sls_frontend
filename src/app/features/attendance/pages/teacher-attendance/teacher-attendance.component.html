@@ -55,7 +55,7 @@
       <div class="empty"><i class="bi bi-calendar2-x"></i><strong>Aucun enseignant attendu</strong><div>Aucun cours actif n'est prévu pour cette date et ce créneau.</div></div>
     } @else {
       <div class="table-wrap">
-        <table class="data-table attendance-entry-table">
+        <table appPaginatedTable class="data-table attendance-entry-table">
           <thead><tr><th>Enseignant</th><th>Cours</th><th>Statut</th><th>Retard</th><th>Motif</th><th>Notes</th></tr></thead>
           <tbody>
             @for(row of rows(); track row.scheduleEntryId){

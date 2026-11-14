@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -13,7 +14,7 @@ import { RegistrationReferenceService } from '../../services/registration-refere
 @Component({
   selector: 'app-registration-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [PaginatedTableDirective, CommonModule, FormsModule, RouterLink],
   templateUrl: './registration-list.component.html',
   styleUrl: './registration-list.component.scss',
 })
@@ -26,7 +27,7 @@ export class RegistrationListComponent {
   loading = signal(false);
   error = signal('');
   page = signal(0);
-  size = signal(20);
+  size = signal(15);
   total = signal(0);
   pages = signal(0);
   search = '';

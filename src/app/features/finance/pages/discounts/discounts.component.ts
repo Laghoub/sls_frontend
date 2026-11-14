@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -28,7 +29,7 @@ import { FinanceReferenceService } from '../../services/finance-reference.servic
 @Component({
   selector: 'app-discounts',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [PaginatedTableDirective, CommonModule, FormsModule],
   templateUrl: './discounts.component.html',
   styleUrl: './discounts.component.scss',
 })
@@ -66,7 +67,7 @@ export class DiscountsComponent {
   page = signal(0);
   pages = signal(0);
   total = signal(0);
-  size = 20;
+  size = 15;
   filterStatus = '';
   schoolYearId: number | null = null;
   enrollmentSearch = '';

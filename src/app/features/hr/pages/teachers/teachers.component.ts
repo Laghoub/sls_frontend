@@ -1,5 +1,6 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';import { Component,OnInit,inject,signal } from '@angular/core';import { FormsModule } from '@angular/forms';import { RouterLink } from '@angular/router';import { AuthService } from '../../../../core/config/auth/services/auth.service';import { HrService } from '../../services/hr.service';import { Employee,Teacher,TeacherStatus } from '../../models/hr.model';
-@Component({selector:'app-teachers',standalone:true,imports:[CommonModule,FormsModule,RouterLink],templateUrl:'./teachers.component.html',styleUrl:'./teachers.component.scss'})
+@Component({selector:'app-teachers',standalone:true,imports: [PaginatedTableDirective, CommonModule,FormsModule,RouterLink],templateUrl:'./teachers.component.html',styleUrl:'./teachers.component.scss'})
 export class TeachersComponent implements OnInit{private api=inject(HrService);auth=inject(AuthService);teachers=signal<Teacher[]>([]);employees=signal<Employee[]>([]);error=signal('');search='';status='';modal=false;employeeId:number|null=null;teacherStatus:TeacherStatus='ACTIVE';activationTarget:Teacher|null=null;activationSending=false;success=signal('');ngOnInit(){this.load()}load(){
   this.error.set('');
   // La liste des enseignants ne dépend jamais de l'accès au référentiel RH des employés.

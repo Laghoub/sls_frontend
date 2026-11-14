@@ -250,7 +250,7 @@
     <section class="card breakdown-card">
       <div class="section-head"><div><div class="eyebrow">Analyse</div><h2>Performance par type de frais</h2></div><a routerLink="/finance/fee-types" class="text-link">Types de frais <i class="bi bi-arrow-right"></i></a></div>
       <div class="table-wrap">
-        <table class="data-table dashboard-table">
+        <table appPaginatedTable class="data-table dashboard-table">
           <thead><tr><th>Type de frais</th><th>Facturé</th><th>Encaissé</th><th>Reste</th><th>Retard</th><th>Créances</th><th>Recouvrement</th></tr></thead>
           <tbody>
             @for (r of d.byFeeType; track r.label) {

@@ -32,6 +32,8 @@ export interface Employee {
   endDate: string | null;
   status: EmploymentStatus;
   hasUserAccount: boolean;
+  socialSecurityNumber: string | null;
+  maritalStatus: string | null;
 }
 
 export interface EmployeeRequest {

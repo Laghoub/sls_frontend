@@ -10,12 +10,15 @@
 
 .main-wrapper {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   margin-left: 76px;
   transition: margin-left 0.25s ease;
 }
 
 .main-content {
-  min-height: calc(100vh - 70px);
+  flex: 1 0 auto;
+  min-height: 0;
 }
 
 .sidebar-overlay {
@@ -40,4 +43,38 @@
 @keyframes overlayFade {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+.app-footer {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.3rem 0.75rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.app-footer strong {
+  color: #475569;
+  font-weight: 600;
+}
+
+.footer-separator {
+  margin: 0 0.15rem;
+}
+
+@media (max-width: 575px) {
+  .app-footer {
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.85rem 0.75rem;
+    font-size: 0.7rem;
+  }
 }

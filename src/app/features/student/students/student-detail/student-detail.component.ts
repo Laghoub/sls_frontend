@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import {
   Component,
@@ -88,7 +89,7 @@ type Tab =
 
   standalone: true,
 
-  imports: [
+  imports: [PaginatedTableDirective, 
     CommonModule,
     FormsModule,
     RouterLink

@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +8,7 @@ import { ClassGroupService } from '../school/class-groups/services/class-group.s
 import { SchoolYearService } from '../school/school-years/services/school-year.service';
 import { HrService } from '../hr/services/hr.service';
 import { AssessmentPlanningService, AssessmentSchedule, AssessmentEntry } from './assessment-planning.service';
-@Component({selector:'app-assessment-planning-admin',standalone:true,imports:[CommonModule,FormsModule],templateUrl:'./assessment-planning-admin.component.html',styleUrl:'./assessment-planning.component.scss'})
+@Component({selector:'app-assessment-planning-admin',standalone:true,imports: [PaginatedTableDirective, CommonModule,FormsModule],templateUrl:'./assessment-planning-admin.component.html',styleUrl:'./assessment-planning.component.scss'})
 export class AssessmentPlanningAdminComponent implements OnInit {
  auth=inject(AuthService); api=inject(AssessmentPlanningService); classesApi=inject(ClassGroupService); yearsApi=inject(SchoolYearService); hr=inject(HrService);
  schedules:AssessmentSchedule[]=[]; classes:{id:number;name:string;schoolYearId:number}[]=[]; years:{id:number;label:string}[]=[]; subjects:{id:number;name:string}[]=[];

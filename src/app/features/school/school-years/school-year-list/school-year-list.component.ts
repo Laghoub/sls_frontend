@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { Component, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -8,7 +9,7 @@ import { SchoolYear, SchoolYearRequest } from '../models/school-year.model';
 @Component({
   selector: 'app-school-year-list',
   standalone: true,
-  imports: [ReactiveFormsModule, DatePipe],
+  imports: [PaginatedTableDirective, ReactiveFormsModule, DatePipe],
   templateUrl: './school-year-list.component.html',
   styleUrl: './school-year-list.component.scss',
 })
