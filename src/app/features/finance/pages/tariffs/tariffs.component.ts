@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -18,7 +19,7 @@ import { TariffService } from '../../services/tariff.service';
 @Component({
   selector: 'app-tariffs',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [PaginatedTableDirective, CommonModule, FormsModule],
   templateUrl: './tariffs.component.html',
   styleUrl: './tariffs.component.scss',
 })
@@ -37,7 +38,7 @@ export class TariffsComponent {
   feeTypes = signal<FeeType[]>([]);
 
   page = signal(0);
-  size = signal(20);
+  size = signal(15);
   total = signal(0);
   pages = signal(0);
   error = signal('');

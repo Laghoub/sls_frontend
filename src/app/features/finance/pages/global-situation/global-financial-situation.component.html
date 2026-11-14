@@ -41,7 +41,7 @@
     <section class="table-card">
       <div class="table-meta"><strong>{{d.summary.familiesCount}} famille(s)</strong><span>Les montants sont consolidés pour les enfants affichés selon les filtres actifs.</span></div>
       <div class="table-scroll">
-        <table>
+        <table appPaginatedTable>
           <thead><tr><th class="sticky parent-col">Parent</th><th class="sticky children-col">Enfant(s)</th><th>Inscription</th><th *ngFor="let m of months">{{m.label}}</th><th>Total à date</th></tr></thead>
           <tbody>
             <tr *ngFor="let f of d.families">

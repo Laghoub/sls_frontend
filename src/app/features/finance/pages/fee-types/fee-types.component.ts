@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +8,7 @@ import { FeeTypeService } from '../../services/fee-type.service';
 @Component({
   selector: 'app-fee-types',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [PaginatedTableDirective, CommonModule, FormsModule],
   templateUrl: './fee-types.component.html',
   styleUrl: './fee-types.component.scss',
 })
@@ -16,7 +17,7 @@ export class FeeTypesComponent {
   auth = inject(AuthService);
   items = signal<FeeType[]>([]);
   page = signal(0);
-  size = signal(20);
+  size = signal(15);
   total = signal(0);
   pages = signal(0);
   loading = signal(false);

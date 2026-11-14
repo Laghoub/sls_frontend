@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -14,7 +15,7 @@ import { TimeSlot } from '../../../school/time-slots/models/time-slot.model';
 import { CatchupLine, CatchupRecord, HistoricPattern, HistoricTemplate, TeacherAttendanceCatchupService } from '../../services/teacher-attendance-catchup.service';
 
 @Component({selector:'app-teacher-attendance-catchup',standalone:true,
- imports:[CommonModule,FormsModule,RouterLink],
+ imports: [PaginatedTableDirective, CommonModule,FormsModule,RouterLink],
  templateUrl:'./teacher-attendance-catchup.component.html',
  styleUrl:'./teacher-attendance-catchup.component.scss'})
 export class TeacherAttendanceCatchupComponent implements OnInit {

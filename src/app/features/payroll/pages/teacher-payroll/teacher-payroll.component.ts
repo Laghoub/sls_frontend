@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -15,7 +16,7 @@ import { PayrollService } from '../../services/payroll.service';
 @Component({
   selector: 'app-teacher-payroll',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [PaginatedTableDirective, CommonModule, FormsModule],
   templateUrl: './teacher-payroll.component.html',
   styleUrl: './teacher-payroll.component.scss',
 })

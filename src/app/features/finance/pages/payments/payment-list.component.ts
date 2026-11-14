@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +11,7 @@ import { PaymentService } from '../../services/payment.service';
 @Component({
   selector: 'app-payment-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [PaginatedTableDirective, CommonModule, FormsModule, RouterLink],
   templateUrl: './payment-list.component.html',
   styleUrl: './payment-list.component.scss',
 })
@@ -22,7 +23,7 @@ export class PaymentListComponent {
   guardians = signal<GuardianChoice[]>([]);
   selectedGuardian = signal<GuardianChoice | null>(null);
   page = signal(0);
-  size = signal(20);
+  size = signal(15);
   total = signal(0);
   pages = signal(0);
   error = signal('');

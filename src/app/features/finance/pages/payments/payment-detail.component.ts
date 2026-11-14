@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -19,7 +20,7 @@ import { RefundService } from '../../services/refund.service';
 @Component({
   selector: 'app-payment-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [PaginatedTableDirective, CommonModule, FormsModule, RouterLink],
   templateUrl: './payment-detail.component.html',
   styleUrl: './payment-detail.component.scss',
 })

@@ -54,7 +54,7 @@
       </div>
       @if(!eligible.length){<div class="notice warn"><i class="bi bi-info-circle"></i>Aucune affectation pédagogique active pour cette classe. Créez d'abord les affectations enseignant / matière.</div>}
       <div class="grid-wrap">
-        <table class="schedule">
+        <table appPaginatedTable class="schedule">
           <thead><tr><th class="time-head">Créneau</th>@for(d of days;track d.key){<th>{{d.label}}</th>}</tr></thead>
           <tbody>
             @for(s of slots;track s.id){

@@ -44,7 +44,7 @@
     <div class="card">
       <h2 class="section-title">Ventilations d'origine</h2>
       <div class="table-wrap">
-        <table class="data-table">
+        <table appPaginatedTable class="data-table">
           <thead><tr><th>Créance</th><th>Montant initialement ventilé</th><th>Date</th></tr></thead>
           <tbody>
             @for (a of d.allocations; track a.id) {
@@ -145,7 +145,7 @@
         <div class="refund-note"><i class="bi bi-arrow-counterclockwise"></i><div><strong>{{ r.refundedAmount | number:'1.2-2' }} DA remboursés</strong><span>Montant net encaissé après remboursement : {{ r.netReceivedAmount | number:'1.2-2' }} DA.</span></div></div>
       }
 
-      <div class="table-wrap" style="margin-top:16px"><table class="data-table">
+      <div class="table-wrap" style="margin-top:16px"><table appPaginatedTable class="data-table">
         <thead><tr><th>Élève</th><th>Créance</th><th>Affecté</th><th>Remboursé</th><th>Net</th></tr></thead>
         <tbody>
           @for (a of r.allocations; track a.chargeId) {

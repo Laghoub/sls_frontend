@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +11,7 @@ import { Campus } from '../../../school/campuses/models/campus.model';
 import { PersonService } from '../../../student/services/person.service';
 import { Person } from '../../../student/models/person.model';
 
-@Component({selector:'app-employees',standalone:true,imports:[CommonModule,FormsModule,RouterLink],templateUrl:'./employees.component.html',styleUrl:'./employees.component.scss'})
+@Component({selector:'app-employees',standalone:true,imports: [PaginatedTableDirective, CommonModule,FormsModule,RouterLink],templateUrl:'./employees.component.html',styleUrl:'./employees.component.scss'})
 export class EmployeesComponent implements OnInit{
   private api=inject(HrService); private campusesApi=inject(CampusService); private peopleApi=inject(PersonService);
   employees=signal<Employee[]>([]); campuses=signal<Campus[]>([]); positions=signal<JobPosition[]>([]); people=signal<Person[]>([]); loading=signal(false); error=signal(''); success=signal('');

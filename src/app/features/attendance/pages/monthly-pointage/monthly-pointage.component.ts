@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +8,7 @@ import { AuthService } from '../../../../core/config/auth/services/auth.service'
 
 @Component({
  selector: 'app-monthly-pointage', standalone: true,
- imports: [CommonModule, FormsModule],
+ imports: [PaginatedTableDirective, CommonModule, FormsModule],
  templateUrl: './monthly-pointage.component.html',
  styleUrl: './monthly-pointage.component.scss'
 })

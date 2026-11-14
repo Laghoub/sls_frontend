@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +11,7 @@ import { PaymentMethodService } from '../../services/payment-method.service';
 @Component({
   selector: 'app-finance-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [PaginatedTableDirective, CommonModule, FormsModule],
   templateUrl: './finance-settings.component.html',
   styleUrl: './finance-settings.component.scss',
 })

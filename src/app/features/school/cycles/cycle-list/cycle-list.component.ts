@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
@@ -7,7 +8,7 @@ import { Cycle, CycleRequest } from '../models/cycle.model';
 @Component({
   selector: 'app-cycle-list',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [PaginatedTableDirective, ReactiveFormsModule],
   templateUrl: './cycle-list.component.html',
   styleUrl: './cycle-list.component.scss',
 })

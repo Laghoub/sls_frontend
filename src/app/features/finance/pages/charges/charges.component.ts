@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -18,7 +19,7 @@ import { StudentChargeService } from '../../services/student-charge.service';
 @Component({
   selector: 'app-charges',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [PaginatedTableDirective, CommonModule, FormsModule, RouterLink],
   templateUrl: './charges.component.html',
   styleUrl: './charges.component.scss',
 })
@@ -33,7 +34,7 @@ export class ChargesComponent {
   years = signal<SchoolYearRef[]>([]);
   selectedRegistration = signal<RegistrationChoice | null>(null);
   page = signal(0);
-  size = signal(20);
+  size = signal(15);
   total = signal(0);
   pages = signal(0);
   error = signal('');

@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -25,7 +26,7 @@ import { FinanceExpensesSummary, FinanceDashboardService } from '../../services/
 @Component({
   selector: 'app-finance-home',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [PaginatedTableDirective, CommonModule, FormsModule, RouterLink],
   templateUrl: './finance-home.component.html',
   styleUrl: './finance-home.component.scss',
 })

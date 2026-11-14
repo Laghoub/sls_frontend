@@ -1,10 +1,11 @@
+import { PaginatedTableDirective } from '../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuditLog, AuditService } from './audit.service';
 
 @Component({
-  selector: 'app-audit', standalone: true, imports: [CommonModule, FormsModule],
+  selector: 'app-audit', standalone: true, imports: [PaginatedTableDirective, CommonModule, FormsModule],
   templateUrl: './audit.component.html', styleUrl: './audit.component.scss'
 })
 export class AuditComponent implements OnInit {

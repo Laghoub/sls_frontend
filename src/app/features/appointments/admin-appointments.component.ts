@@ -1,5 +1,6 @@
+import { PaginatedTableDirective } from '../../shared/directives/paginated-table.directive';
 import {CommonModule} from '@angular/common';import {Component,inject,OnInit} from '@angular/core';import {FormsModule} from '@angular/forms';import {AppointmentsService} from './appointments.service';
-@Component({selector:'app-admin-appointments',standalone:true,imports:[CommonModule,FormsModule],templateUrl:'./admin-appointments.component.html',styleUrl:'./appointments.component.scss'})
+@Component({selector:'app-admin-appointments',standalone:true,imports: [PaginatedTableDirective, CommonModule,FormsModule],templateUrl:'./admin-appointments.component.html',styleUrl:'./appointments.component.scss'})
 export class AdminAppointmentsComponent implements OnInit {
  private api=inject(AppointmentsService); rows:any[]=[]; status=''; selected:any=null; mode:'confirm'|'reject'|'reschedule'='confirm';start='';end='';place='';note='';busy=false;error='';success='';mails:any[]=[];
  ngOnInit(){this.refresh()}refresh(){this.api.adminList(this.status).subscribe({next:r=>this.rows=r,error:e=>this.fail(e)})}

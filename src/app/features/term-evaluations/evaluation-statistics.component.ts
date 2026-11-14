@@ -1,14 +1,16 @@
+import { PaginatedTableDirective } from '../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
-import { Campaign, TermEvaluationsService } from './term-evaluations.service';
+import { Campaign, PublicationClass, TermEvaluationsService } from './term-evaluations.service';
 type Row = Record<string,any>;
-@Component({selector:'app-evaluation-statistics',standalone:true,imports:[CommonModule,FormsModule,RouterLink],templateUrl:'./evaluation-statistics.component.html',styleUrl:'./evaluation-statistics.component.scss'})
+@Component({selector:'app-evaluation-statistics',standalone:true,imports: [PaginatedTableDirective, CommonModule,FormsModule,RouterLink],templateUrl:'./evaluation-statistics.component.html',styleUrl:'./evaluation-statistics.component.scss'})
 export class EvaluationStatisticsComponent implements OnInit {
  private api=inject(TermEvaluationsService);
  campaigns:Campaign[]=[]; campaignId=0; loading=false; error='';
+ publicationClasses:PublicationClass[]=[]; publicationLoading=false; publishingClassId=0; publicationMessage=""; publicationError="";
  summary:Row={}; teachers:Row[]=[]; assignments:Row[]=[]; students:Row[]=[];
  teacherId=0;classGroupId=0;subjectId=0;levelId=0;status='';search='';view:'teachers'|'assignments'|'students'='teachers';
  readonly statuses=[['','Tous les statuts'],['PENDING','En attente'],['NOT_STARTED','Non commencées'],['DRAFT','Brouillons'],['RETURNED','Retournées'],['SUBMITTED','Soumises'],['APPROVED','Approuvées'],['COMPLETED','Terminées']];
@@ -21,8 +23,10 @@ export class EvaluationStatisticsComponent implements OnInit {
  allTeachers:Row[]=[];allAssignments:Row[]=[];
  unique(rows:Row[],id:string,name:string){return [...new Map(rows.filter(r=>r[id]!=null).map(r=>[Number(r[id]),String(r[name]||r[id])])).entries()].sort((a,b)=>a[1].localeCompare(b[1]));}
  load(){if(!this.campaignId)return;this.loading=true;this.error='';const p=this.params;forkJoin({summary:this.api.stats(this.campaignId,'summary',p),teachers:this.api.stats(this.campaignId,'teachers',p),assignments:this.api.stats(this.campaignId,'assignments',p),students:this.api.stats(this.campaignId,'students',p)}).subscribe({next:r=>{this.summary=r.summary;this.teachers=r.teachers;this.assignments=r.assignments;this.students=r.students;this.loading=false;},error:e=>{this.loading=false;this.error=e?.error?.detail||e?.error?.message||'Chargement des statistiques impossible';}});}
- changeCampaign(){this.teacherId=0;this.classGroupId=0;this.subjectId=0;this.levelId=0;this.status='';this.loadOptions();}
- loadOptions(){if(!this.campaignId)return;forkJoin({teachers:this.api.stats(this.campaignId,'teachers'),assignments:this.api.stats(this.campaignId,'assignments')}).subscribe({next:r=>{this.allTeachers=r.teachers;this.allAssignments=r.assignments;this.load();},error:()=>this.load()});}
+ loadPublicationClasses(){if(!this.campaignId)return;this.publicationLoading=true;this.publicationError="";this.api.publicationClasses(this.campaignId).subscribe({next:r=>{this.publicationClasses=r;this.publicationLoading=false;},error:e=>{this.publicationLoading=false;this.publicationError=e?.error?.detail||e?.error?.message||"Impossible de charger les publications par classe";}});}
+ publishClass(c:PublicationClass){if(!this.campaignId||!c.can_publish||this.publishingClassId)return;if(!window.confirm(`Publier les rapports trimestriels des ${c.student_count} élèves de la classe ${c.class_name} ? Cette opération rendra les rapports accessibles aux parents.`))return;this.publishingClassId=c.class_group_id;this.publicationError="";this.publicationMessage="";this.api.publishClass(this.campaignId,c.class_group_id).subscribe({next:r=>{this.publishingClassId=0;this.publicationMessage=`${r.publishedCount} rapport(s) publiés pour la classe ${c.class_name}.`;this.loadPublicationClasses();this.load();},error:e=>{this.publishingClassId=0;this.publicationError=e?.error?.detail||e?.error?.message||"Publication impossible : vérifiez les évaluations approuvées.";this.loadPublicationClasses();}});}
+ changeCampaign(){this.teacherId=0;this.classGroupId=0;this.subjectId=0;this.levelId=0;this.status='';this.publicationClasses=[];this.publicationMessage="";this.loadOptions();}
+ loadOptions(){if(!this.campaignId)return;forkJoin({teachers:this.api.stats(this.campaignId,'teachers'),assignments:this.api.stats(this.campaignId,'assignments')}).subscribe({next:r=>{this.allTeachers=r.teachers;this.allAssignments=r.assignments;this.load();this.loadPublicationClasses();},error:()=>{this.load();this.loadPublicationClasses();}});}
  selectTeacher(id:number){this.teacherId=id;this.view='assignments';this.load();}
  selectAssignment(r:Row){this.teacherId=Number(r['teacher_id']);this.classGroupId=Number(r['class_group_id']);this.subjectId=Number(r['subject_id']);this.view='students';this.load();}
  reset(){this.teacherId=0;this.classGroupId=0;this.subjectId=0;this.levelId=0;this.status='';this.search='';this.load();}

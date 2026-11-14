@@ -1,8 +1,9 @@
+import { PaginatedTableDirective } from '../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ExpensesService, Expense, Item } from './expenses.service';
-@Component({selector:'app-expenses',standalone:true,imports:[CommonModule,FormsModule],templateUrl:'./expenses.component.html',styleUrls:['./expenses.component.scss']})
+@Component({selector:'app-expenses',standalone:true,imports: [PaginatedTableDirective, CommonModule,FormsModule],templateUrl:'./expenses.component.html',styleUrls:['./expenses.component.scss']})
 export class ExpensesComponent implements OnInit {
  api=inject(ExpensesService); tab:'expenses'|'suppliers'|'categories'|'budgets'|'reports'='expenses';busy=false;error='';notice='';expenses:Expense[]=[];categories:Item[]=[];suppliers:Item[]=[];payments:any[]=[];reports:any[]=[];reportType:'budget'|'categories'|'cashflow'|'salary-cashflow'='categories';
  today=new Date().toISOString().slice(0,10); month=Number(this.today.slice(5,7));year=Number(this.today.slice(0,4));from=this.today.slice(0,8)+'01';to=this.today;status='';categoryId='';selected:Expense|null=null;editing=false;

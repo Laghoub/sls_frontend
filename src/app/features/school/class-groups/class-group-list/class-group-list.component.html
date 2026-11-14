@@ -10,7 +10,7 @@
             <div><strong>Liste des classes</strong><small>{{items().length}} classe(s)</small></div><button
                 class="btn light" (click)="load()">Actualiser</button>
         </div>@if(loading()){<div class="state">Chargement...</div>}@else{<div class="table">
-            <table>
+            <table appPaginatedTable>
                 <thead>
                     <tr>
                         <th>Classe</th>

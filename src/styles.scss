@@ -67,3 +67,10 @@ a {
   color: inherit;
   text-decoration: none;
 }
+/* Pagination partagée des tableaux (15 lignes par défaut). */
+.app-table-pagination{display:flex;align-items:center;justify-content:flex-end;gap:1rem;flex-wrap:wrap;padding:.85rem 1rem;font-size:.85rem;color:var(--text-muted,#64748b)}
+.app-table-pagination label{display:flex;align-items:center;gap:.5rem}
+.app-table-pagination select{border:1px solid #cbd5e1;border-radius:6px;padding:.3rem .5rem;background:transparent;color:inherit}
+.app-table-pagination-buttons{display:flex;gap:.3rem}
+.app-table-pagination-buttons button{min-width:2rem;padding:.3rem .5rem;border:1px solid #cbd5e1;border-radius:6px;background:transparent;color:inherit;cursor:pointer}
+.app-table-pagination-buttons button:disabled{opacity:.35;cursor:not-allowed}

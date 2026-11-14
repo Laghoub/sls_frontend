@@ -1,3 +1,4 @@
+import { PaginatedTableDirective } from '../../../../shared/directives/paginated-table.directive';
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -16,7 +17,7 @@ import { TeacherAttendanceService } from '../../services/teacher-attendance.serv
 @Component({
   selector: 'app-teacher-attendance-history',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [PaginatedTableDirective, CommonModule, FormsModule, RouterLink],
   templateUrl: './teacher-attendance-history.component.html',
   styleUrl: './teacher-attendance-history.component.scss',
 })
@@ -37,7 +38,7 @@ export class TeacherAttendanceHistoryComponent implements OnInit {
   teacherId: number | null = null;
   status: TeacherAttendanceStatus | null = null;
   page = 0;
-  size = 20;
+  size = 15;
   totalElements = 0;
   totalPages = 0;
 

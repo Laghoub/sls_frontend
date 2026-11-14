@@ -4,6 +4,8 @@ import { AuthService } from '../config/auth/services/auth.service';
 
 /** Correspondance des routes privées avec les permissions déjà utilisées par le menu. */
 const RULES: ReadonlyArray<{pattern: RegExp; permission: string}> = [
+  { pattern: /^\/pedagogy\/lists\/students\/?$/, permission: 'ELEVE_CONSULTER' },
+  { pattern: /^\/pedagogy\/lists\/teachers\/?$/, permission: 'ENSEIGNANT_CONSULTER' },
   { pattern: /^\/canteen\/?$/, permission: 'CANTINE_MENU_CONSULTER' },
   { pattern: /^\/attendance\/teachers\/catchup\/?$/, permission: 'ASSIDUITE_ENSEIGNANT_CONSULTER' },
   { pattern: new RegExp('^/attendance/teachers/history/?$'), permission: 'ASSIDUITE_ENSEIGNANT_CONSULTER' },

@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { API_CONFIG } from '../../core/api.config';
 export interface Campaign { id:number; title:string; trimester:number; status:string; opens_at:string; closes_at:string; }
+export interface PublicationClass {class_group_id:number;class_name:string;student_count:number;assignment_count:number;publication_count:number;expected_count:number;approved_count:number;approval_percent:number;publication_status:'NOT_PUBLISHED'|'PUBLISHED'|'PARTIALLY_PUBLISHED';can_publish:boolean;}
 @Injectable({providedIn:'root'})
 export class TermEvaluationsService {
  private http=inject(HttpClient); private base=`${API_CONFIG.baseUrl}/term-evaluations`;
@@ -21,7 +22,8 @@ export class TermEvaluationsService {
  criteria(cycle?:string){return this.http.get<Record<string,unknown>[]>(`${this.base}/criteria`,{params:cycle?{cycle}:{}});}
  saveDraft(data:unknown){return this.http.post(`${this.base}/teacher/draft`,data);}
  submit(id:number){return this.http.post(`${this.base}/teacher/${id}/submit`,{});}
- publishStudent(campaignId:number,studentId:number){return this.http.post(`${this.base}/publications/campaigns/${campaignId}/students/${studentId}`,{});}
+ publicationClasses(campaignId:number){return this.http.get<PublicationClass[]>(`${this.base}/publications/campaigns/${campaignId}/classes`);}
+ publishClass(campaignId:number,classId:number){return this.http.post<{publishedCount:number;status:string}>(`${this.base}/publications/campaigns/${campaignId}/classes/${classId}`,{});}
  parentReports(studentId:number){return this.http.get<Record<string,unknown>[]>(`${this.base}/parent/students/${studentId}/reports`);}
  parentAvailability(studentId:number){return this.http.get<Record<string,any>[]>(`${this.base}/parent/students/${studentId}/availability`);}
  parentReportPdf(id:number){return this.http.get(`${this.base}/parent/reports/${id}/pdf`,{responseType:'blob'});}
