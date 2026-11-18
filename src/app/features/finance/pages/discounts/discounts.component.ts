@@ -2,7 +2,7 @@ import { PaginatedTableDirective } from '../../../../shared/directives/paginated
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { EMPTY, forkJoin, expand, reduce } from 'rxjs';
 import { AuthService } from '../../../../core/config/auth/services/auth.service';
 import {
   DiscountRule,
@@ -154,14 +154,31 @@ export class DiscountsComponent {
       this.enrollments.set([]);
       return;
     }
-    forkJoin({
-      enrollments: this.refs.enrollments(this.schoolYearId, 0, 200),
-      registrations: this.refs.registrations('', this.schoolYearId, null, 0, 200),
-    }).subscribe({
+    const yearId = this.schoolYearId;
+    // Charger toutes les pages : la liste des réductions ne doit pas être limitée
+    // aux 200 premiers élèves ou dossiers d'inscription.
+    const allEnrollments = this.refs.enrollments(yearId, 0, 200).pipe(
+      expand((response, index) =>
+        index + 1 < response.totalPages
+          ? this.refs.enrollments(yearId, index + 1, 200)
+          : EMPTY
+      ),
+      reduce((all, response) => [...all, ...response.content], [] as EnrollmentChoice[])
+    );
+    const allRegistrations = this.refs.registrations('', yearId, null, 0, 200).pipe(
+      expand((response, index) =>
+        index + 1 < response.totalPages
+          ? this.refs.registrations('', yearId, null, index + 1, 200)
+          : EMPTY
+      ),
+      reduce((all, response) => [...all, ...response.content], [] as RegistrationChoice[])
+    );
+    forkJoin({ enrollments: allEnrollments, registrations: allRegistrations }).subscribe({
       next: (r) => {
-        this.enrollments.set(r.enrollments.content);
-        // On conserve aussi les dossiers de préinscription qui n'ont pas encore de scolarisation.
-        this.registrations.set(r.registrations.content);
+        // Ignorer une réponse ancienne si l'utilisateur a changé d'année entre-temps.
+        if (this.schoolYearId !== yearId) return;
+        this.enrollments.set(r.enrollments);
+        this.registrations.set(r.registrations);
       },
       error: (e) => this.error.set(this.msg(e)),
     });
