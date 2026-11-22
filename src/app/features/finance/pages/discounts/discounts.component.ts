@@ -2,7 +2,7 @@ import { PaginatedTableDirective } from '../../../../shared/directives/paginated
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { EMPTY, expand, forkJoin, reduce } from 'rxjs';
 import { AuthService } from '../../../../core/config/auth/services/auth.service';
 import {
   DiscountRule,
@@ -149,21 +149,48 @@ export class DiscountsComponent {
     this.loadRules();
   }
 
+  /** Charge toutes les pages, sans limite arbitraire à 200 dossiers. */
+  private allEnrollments(yearId: number) {
+    return this.refs.enrollments(yearId, 0, 100).pipe(
+      expand(page => page.page + 1 < page.totalPages
+        ? this.refs.enrollments(yearId, page.page + 1, 100)
+        : EMPTY),
+      reduce((all, page) => [...all, ...page.content], [] as EnrollmentChoice[]),
+    );
+  }
+
+  private allRegistrations(yearId: number) {
+    return this.refs.registrations('', yearId, null, 0, 100).pipe(
+      expand(page => page.page + 1 < page.totalPages
+        ? this.refs.registrations('', yearId, null, page.page + 1, 100)
+        : EMPTY),
+      reduce((all, page) => [...all, ...page.content], [] as RegistrationChoice[]),
+    );
+  }
+
   loadEnrollments() {
-    if (!this.schoolYearId) {
+    const yearId = this.schoolYearId;
+    if (!yearId) {
       this.enrollments.set([]);
+      this.registrations.set([]);
       return;
     }
+    // Vider les anciennes données pendant le chargement de l'année choisie.
+    this.enrollments.set([]);
+    this.registrations.set([]);
     forkJoin({
-      enrollments: this.refs.enrollments(this.schoolYearId, 0, 200),
-      registrations: this.refs.registrations('', this.schoolYearId, null, 0, 200),
+      enrollments: this.allEnrollments(yearId),
+      registrations: this.allRegistrations(yearId),
     }).subscribe({
       next: (r) => {
-        this.enrollments.set(r.enrollments.content);
-        // On conserve aussi les dossiers de préinscription qui n'ont pas encore de scolarisation.
-        this.registrations.set(r.registrations.content);
+        // Une réponse tardive ne doit pas écraser les données d'une autre année.
+        if (this.schoolYearId !== yearId) return;
+        this.enrollments.set(r.enrollments);
+        this.registrations.set(r.registrations);
       },
-      error: (e) => this.error.set(this.msg(e)),
+      error: (e) => {
+        if (this.schoolYearId === yearId) this.error.set(this.msg(e));
+      },
     });
   }
 
@@ -392,18 +419,18 @@ export class DiscountsComponent {
   }
 
   filteredTargets() {
-    const enrolledStudentIds = new Set(this.enrollments().map(e => e.studentId));
     const enrollmentTargets = this.enrollments().map(e => ({
       key: `E:${e.id}`, type: 'ENROLLMENT' as const, id: e.id,
       name: `${e.studentLastName ?? ''} ${e.studentFirstName ?? ''}`.trim(),
       number: e.studentNumber ?? '', meta: e.classGroupName ?? 'Scolarisé',
     }));
+    // Un élève déjà scolarisé peut encore avoir besoin d'une réduction
+    // sur son dossier d'inscription : ne pas supprimer cette option.
     const registrationTargets = this.registrations()
-      .filter(r => !enrolledStudentIds.has(r.studentId))
       .map(r => ({
         key: `R:${r.id}`, type: 'REGISTRATION' as const, id: r.id,
         name: `${r.studentLastName ?? ''} ${r.studentFirstName ?? ''}`.trim(),
-        number: r.studentNumber ?? '', meta: `Préinscription · ${r.status}`,
+        number: r.studentNumber ?? '', meta: `Dossier inscription · ${r.status}`,
       }));
     const all = [...registrationTargets, ...enrollmentTargets];
     const q = this.enrollmentSearch.trim().toLowerCase();
