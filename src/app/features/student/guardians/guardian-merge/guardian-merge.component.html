@@ -1,0 +1,48 @@
+<section class="merge-page">
+  <header><p class="eyebrow">Gestion des responsables</p><h1>Fusion des dossiers parents</h1>
+    <p>Conserver un dossier principal et archiver le doublon. Les opérations sont contrôlées par le backend.</p></header>
+  <div class="alert error" *ngIf="error">{{ error }}</div>
+  <div class="alert success" *ngIf="success">{{ success }}</div>
+  <div class="panel">
+    <div class="fields">
+      <label>Dossier principal à conserver
+        <input type="search" [(ngModel)]="primarySearch" placeholder="Rechercher par nom, prénom, téléphone ou ID" aria-label="Rechercher le parent principal" />
+        <select [(ngModel)]="primaryId" (ngModelChange)="resetPreview()" [disabled]="loading || saving">
+          <option [ngValue]="null">Sélectionner un responsable</option>
+          <option *ngFor="let g of primaryOptions" [ngValue]="g.id">{{ label(g) }}</option>
+        </select>
+      </label>
+      <label>Dossier doublon à archiver
+        <input type="search" [(ngModel)]="duplicateSearch" placeholder="Rechercher par nom, prénom, téléphone ou ID" aria-label="Rechercher le parent doublon" />
+        <select [(ngModel)]="duplicateId" (ngModelChange)="resetPreview()" [disabled]="loading || saving">
+          <option [ngValue]="null">Sélectionner un responsable</option>
+          <option *ngFor="let g of duplicateOptions" [ngValue]="g.id">{{ label(g) }}</option>
+        </select>
+      </label>
+    </div>
+    <button class="btn btn-primary" type="button" (click)="check()" [disabled]="loading || saving || !primaryId || !duplicateId || primaryId === duplicateId">
+      {{ loading ? 'Chargement…' : 'Prévisualiser la fusion' }}
+    </button>
+  </div>
+  <div class="panel" *ngIf="preview as p">
+    <h2>Résultat de la prévisualisation</h2>
+    <p><strong>À conserver :</strong> {{ p.primaryName }} (#{{ p.primaryId }})</p>
+    <p><strong>À archiver :</strong> {{ p.duplicateName }} (#{{ p.duplicateId }})</p>
+    <p><strong>Comptes du doublon à désactiver :</strong> {{ p.duplicateAccountsToDisable }}</p>
+    <h3>Références du dossier doublon</h3>
+    <table><thead><tr><th>Relation</th><th>Nombre</th></tr></thead><tbody>
+      <tr *ngFor="let item of p.references | keyvalue"><td>{{ item.key }}</td><td>{{ item.value }}</td></tr>
+    </tbody></table>
+    <div class="alert error" *ngIf="!p.canMerge">
+      <strong>Fusion bloquée :</strong>
+      <ul><li *ngFor="let b of p.blockers">{{ b }}</li></ul>
+    </div>
+    <div *ngIf="p.canMerge" class="confirmation">
+      <p>Le backend n'a détecté aucun conflit bloquant. Vérifiez les deux dossiers avant de poursuivre.</p>
+      <label class="check"><input type="checkbox" [(ngModel)]="confirmed" /> Je confirme avoir vérifié les dossiers et souhaite effectuer cette fusion irréversible depuis cet écran.</label>
+      <button class="btn btn-danger" type="button" (click)="merge()" [disabled]="!confirmed || saving">
+        {{ saving ? 'Fusion en cours…' : 'Confirmer la fusion' }}
+      </button>
+    </div>
+  </div>
+</section>

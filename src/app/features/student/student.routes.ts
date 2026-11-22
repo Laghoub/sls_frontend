@@ -21,5 +21,6 @@ export const STUDENT_ROUTES: Routes = [
         (m) => m.GuardianListComponent,
       ),
   },
+  { path: 'guardians/merge', loadComponent: () => import('./guardians/guardian-merge/guardian-merge.component').then(m => m.GuardianMergeComponent) },
   { path: '', pathMatch: 'full', redirectTo: 'students' },
 ];

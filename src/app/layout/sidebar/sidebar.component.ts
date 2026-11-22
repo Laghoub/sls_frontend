@@ -125,6 +125,12 @@ export class SidebarComponent {
           route: '/student/guardians',
           permission: 'RESPONSABLE_CONSULTER',
         },
+        {
+          label: 'Fusion des parents',
+          icon: 'bi bi-intersect',
+          route: '/student/guardians/merge',
+          permission: 'RESPONSABLE_FUSIONNER',
+        },
       ],
     },
 
